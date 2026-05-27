@@ -1,3 +1,9 @@
+## [1.4.0](https://github.com/pavp/storywright/compare/v1.3.0...v1.4.0) (2026-05-27)
+
+### ✨ Features
+
+* **skills:** extend multi-source inputs to story-refine and story-split ([db74284](https://github.com/pavp/storywright/commit/db74284da9e11d38ed8b2a4700ef0981d3e01fe8))
+
 ## [1.3.0](https://github.com/pavp/storywright/compare/v1.2.0...v1.3.0) (2026-05-27)
 
 ### ✨ Features
