@@ -1,3 +1,9 @@
+## [1.3.0](https://github.com/pavp/storywright/compare/v1.2.0...v1.3.0) (2026-05-27)
+
+### ✨ Features
+
+* **commands:** add slash-command entrypoints to top-level skills ([6095c34](https://github.com/pavp/storywright/commit/6095c34bbe79d3bf677b0b1c5eca013ab73c31b5))
+
 ## [1.2.0](https://github.com/pavp/storywright/compare/v1.1.0...v1.2.0) (2026-05-27)
 
 ### ✨ Features
