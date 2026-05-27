@@ -1,0 +1,62 @@
+{
+  "name": "@pavp/storywright",
+  "version": "0.0.0-development",
+  "description": "PM Skills pack for Claude Code — turn ambiguous inputs (prompts, screenshots, Figma links) into Jira-ready user stories.",
+  "keywords": [
+    "claude",
+    "claude-code",
+    "skills",
+    "product-management",
+    "user-stories",
+    "jira",
+    "agile",
+    "invest",
+    "ai-agent"
+  ],
+  "license": "MIT",
+  "author": "pavp <pedrovillarreal@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pavp/storywright.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pavp/storywright/issues"
+  },
+  "homepage": "https://github.com/pavp/storywright#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "storywright": "./bin/storywright.mjs"
+  },
+  "files": [
+    "bin/",
+    "scripts/",
+    "skills/",
+    ".claude-plugin/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "validate": "node scripts/validate-skills.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "postinstall": "node scripts/postinstall-hint.mjs",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^11.0.0",
+    "@semantic-release/npm": "^12.0.1",
+    "@semantic-release/release-notes-generator": "^14.0.1",
+    "conventional-changelog-conventionalcommits": "^8.0.0",
+    "husky": "^9.1.6",
+    "semantic-release": "^24.1.2"
+  }
+}

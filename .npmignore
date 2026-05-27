@@ -1,0 +1,11 @@
+tests/
+examples/
+docs/
+.github/
+.husky/
+.changeset/
+commitlint.config.mjs
+.releaserc.json
+RELEASING.md
+CONTRIBUTING.md
+CLAUDE.md
