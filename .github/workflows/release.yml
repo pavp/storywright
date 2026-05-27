@@ -24,7 +24,8 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          registry-url: https://registry.npmjs.org
+      - name: Upgrade npm to latest (OIDC requires npm >= 11.5.1)
+        run: npm install -g npm@latest
       - run: npm ci
       - run: npm run validate
       - run: npm test
