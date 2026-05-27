@@ -1,45 +1,121 @@
 name: Release
 
+# Push to main → semantic-release computes the next version from Conventional
+# Commits, tags + creates a GitHub Release + updates CHANGELOG.md, then a second
+# job publishes to npm via Trusted Publishing (OIDC, no stored token).
+
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
-permissions:
-  contents: write
-  issues: write
-  pull-requests: write
-  id-token: write
+# Serialize releases — two quick pushes to main must not race on tag/publish.
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
   release:
-    name: Release
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+      released: ${{ steps.release.outputs.released }}
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-          persist-credentials: false
-      - uses: actions/setup-node@v4
+          persist-credentials: true
+
+      - uses: actions/setup-node@v5
         with:
-          node-version: 20
-          cache: npm
-      - name: Upgrade npm to latest (OIDC requires npm >= 11.5.1)
-        run: npm install -g npm@latest
-      - run: npm ci
-      - run: npm run validate
-      - run: npm test
-      - name: Run semantic-release (compute version, changelog, tag, GitHub release)
-        run: npx semantic-release
+          node-version: 22
+
+      - name: Install deps
+        run: npm ci --no-audit --no-fund
+
+      # Pre-release gates: a broken skill must never ship.
+      - name: Validate skills
+        run: npm run validate
+
+      - name: Test
+        run: npm test
+
+      - name: semantic-release
+        id: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Publish to npm via Trusted Publishing (OIDC)
-        if: success()
         run: |
-          VERSION=$(node -p "require('./package.json').version")
-          if [ "$VERSION" = "0.0.0-development" ]; then
-            echo "No release produced by semantic-release. Skipping publish."
-            exit 0
+          BEFORE=$(node -p "require('./package.json').version")
+          npx semantic-release
+          AFTER=$(node -p "require('./package.json').version")
+          # @semantic-release/npm bumps package.json in-place; a changed version
+          # means a release was cut. Robust to semantic-release log-format changes.
+          if [ "$BEFORE" != "$AFTER" ]; then
+            echo "version=$AFTER" >> "$GITHUB_OUTPUT"
+            echo "released=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "released=false" >> "$GITHUB_OUTPUT"
           fi
-          echo "Publishing @pavp/storywright@$VERSION"
-          npm publish --provenance --access public
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: release
+    if: needs.release.outputs.released == 'true'
+    permissions:
+      id-token: write   # required for npm Trusted Publishing (OIDC)
+      contents: read
+    steps:
+      # Check out main, NOT the tag. semantic-release pushed the version bump to
+      # main as `chore(release): X [skip ci]`, so main == the released code.
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      # Guard: main's package.json must already be at the released version (the
+      # release job's bump commit). If not, main moved on / the bump didn't land —
+      # stop rather than publish the wrong tree.
+      - name: Verify checkout is at the released version
+        run: |
+          EXPECTED="${{ needs.release.outputs.version }}"
+          ACTUAL="$(node -p "require('./package.json').version")"
+          if [ "$ACTUAL" != "$EXPECTED" ]; then
+            echo "::error::main is at $ACTUAL but the release is $EXPECTED — refusing to publish a mismatched tree. Re-run after main settles."
+            exit 1
+          fi
+
+      - name: Install deps
+        run: npm ci --no-audit --no-fund
+
+      # Trusted Publishing needs npm >= 11.5.1; the runner ships an older npm.
+      - name: Upgrade npm
+        run: npm install -g npm@latest
+
+      # access:public + provenance:true come from package.json publishConfig.
+      - name: Publish to npm
+        run: npm publish
+
+      # Atomicity check: the release job already created the tag + GitHub Release.
+      # If publish silently no-ops or the registry doesn't reflect it, we'd be left
+      # with a "phantom" release. Confirm the exact version is live on the registry.
+      - name: Verify version is live on npm
+        run: |
+          VERSION="${{ needs.release.outputs.version }}"
+          for i in 1 2 3 4 5; do
+            if [ "$(npm view "@pavp/storywright@${VERSION}" version 2>/dev/null)" = "$VERSION" ]; then
+              echo "✅ @pavp/storywright@${VERSION} is live on npm."
+              exit 0
+            fi
+            echo "… not visible yet (attempt $i), retrying in 10s"
+            sleep 10
+          done
+          echo "::error::INCONSISTENT RELEASE — tag v${VERSION} + GitHub Release exist, but @pavp/storywright@${VERSION} is NOT on npm. Re-run the publish job or publish manually."
+          exit 1

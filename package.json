@@ -24,7 +24,8 @@
   },
   "homepage": "https://github.com/pavp/storywright#readme",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "type": "module",
   "engines": {
