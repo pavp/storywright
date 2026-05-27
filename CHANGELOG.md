@@ -1,3 +1,9 @@
+## [1.1.0](https://github.com/pavp/storywright/compare/v1.0.3...v1.1.0) (2026-05-27)
+
+### ✨ Features
+
+* **skills:** add slash-command triggers to top-level skills ([42c95f6](https://github.com/pavp/storywright/commit/42c95f6f636e8812f77d5755d38882da4e6df6e4))
+
 ## [1.0.3](https://github.com/pavp/storywright/compare/v1.0.2...v1.0.3) (2026-05-27)
 
 ### 🐛 Bug Fixes
