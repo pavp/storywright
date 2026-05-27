@@ -1,7 +1,7 @@
 ---
 name: story-from-figma
 description: Generate user stories from a Figma file or frame URL. Uses an MCP Figma server to enumerate frames, components, navigation, and states; falls back to asking for screenshots if MCP is unavailable.
-trigger: "story from figma | generate from figma | analizar figma | https://www.figma.com/"
+trigger: "/story-from-figma | story from figma | generate from figma | analizar figma | https://www.figma.com/"
 intent: Multimodal entrypoint skill. Inspects a Figma design, infers user flows and screens, and produces one or more stories via story-generate.
 version: 1.0.0
 inputs:

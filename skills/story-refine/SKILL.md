@@ -1,7 +1,7 @@
 ---
 name: story-refine
 description: Audit an existing user story for gaps and fill them in place. Surfaces missing AC, DoD, edge cases, risks; asks clarifications only for blocking unknowns. Returns dual-format refined story.
-trigger: "refine this story | improve this story | refinar historia | this story is incomplete"
+trigger: "/story-refine | refine this story | improve this story | refinar historia | this story is incomplete"
 intent: Refinement skill for stories that already exist but are incomplete or weakly specified. Composes the same component skills as story-generate but skips the drafting step.
 version: 1.0.0
 inputs:

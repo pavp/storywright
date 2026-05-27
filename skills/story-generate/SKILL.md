@@ -1,7 +1,7 @@
 ---
 name: story-generate
 description: Transform an ambiguous prompt, half-baked story, screenshot, or Figma link into a Jira-ready user story with acceptance criteria, DoD, edge cases, and risks. Ask only critical clarifying questions.
-trigger: "generate a user story | write a user story | turn this into a story | crear historia de usuario"
+trigger: "/story-generate | generate a user story | write a user story | turn this into a story | crear historia de usuario"
 intent: Top-level orchestrator skill that drives the full story generation flow by composing component skills.
 version: 1.0.0
 inputs:

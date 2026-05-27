@@ -1,7 +1,7 @@
 ---
 name: story-split
 description: Detect when a story is too big to ship in one sprint and propose an INVEST-driven split into an epic with sub-stories. Never auto-splits — always proposes, then waits for user confirmation.
-trigger: "split this story | divide this story | dividir historia | this is too big"
+trigger: "/story-split | split this story | divide this story | dividir historia | this is too big"
 intent: Splitting skill that uses the INVEST failure reasons (from invest-checklist) as the rationale for decomposition. Produces an epic skeleton plus N child story stubs, ready to feed back into story-generate.
 version: 1.0.0
 inputs:
