@@ -6,6 +6,8 @@ intent: Refinement skill for stories that already exist but are incomplete or we
 version: 1.0.0
 inputs:
   - text
+  - image
+  - figma-link
 outputs:
   - story.jira-wiki.md
   - story.standard.md
@@ -37,9 +39,19 @@ For oversized stories that fail `Independent / Estimable / Small`, hand off to `
 ## Inputs & interpretation
 
 - **text** — existing story. Detect which sections are present, which are missing, which are weak.
+- **image (optional)** — companion screenshot/mockup the story references. Use to validate UI claims and surface missing edge cases / states.
+- **figma-link (optional)** — companion design. Use to enrich Technical Considerations, Edge Cases (states shown but not in story), and to detect scope mismatches.
+
+### Mixed inputs
+
+When the user pastes a story plus an image / Figma link, apply the source-priority matrix from `[[story-generate]]` "Mixed inputs" section:
+- Story text remains canonical for `User Story / Scope / Business Goal`.
+- Image/Figma is canonical for `Components / States / Edge Cases / UX flow`.
+- Surface conflicts as BLOCKING clarifications (e.g., story says "single provider" but Figma shows multiple). Never silently rewrite the story to match the design without asking.
 
 ## Application (step-by-step)
 
+0. **Detect companion sources** (image, figma-link). If present, run conflict detection against the story text BEFORE filling sections. Add detected conflicts to the gap-check output.
 1. **Parse the existing story.** Map content into the 15-section taxonomy. Note: present / missing / weak.
 2. **Gap-check the weak sections** via `[[clarification-questions]]`. If gaps are inferrable, mark `⚠️ Assumed` and proceed. Only ask BLOCKING questions.
 3. **Detect language** of the existing story; preserve it in the output.

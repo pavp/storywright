@@ -6,6 +6,8 @@ intent: Splitting skill that uses the INVEST failure reasons (from invest-checkl
 version: 1.0.0
 inputs:
   - text
+  - image
+  - figma-link
 outputs:
   - split-plan.md
   - epic.md
@@ -28,6 +30,16 @@ When a story is an epic in disguise, splitting badly is worse than not splitting
 ## Inputs & interpretation
 
 - **text** — the oversize story (or a one-line goal that's clearly epic-scoped).
+- **image (optional)** — companion mockup. Use to validate scope and reveal hidden sub-flows the text doesn't mention.
+- **figma-link (optional)** — companion design. Often makes splitting easier: prototype links and frame structure reveal natural flow boundaries that map to children.
+
+### Mixed inputs
+
+When the user provides text + image / Figma alongside the story:
+- **Text is canonical for User Story / Scope / Business Goal** of the epic.
+- **Figma / image is canonical for flow structure** — use prototype links to enumerate candidate sub-flows. Each flow is a candidate child story.
+- **Conflict handling:** if Figma shows N flows but text only mentions K (K < N), surface this in the gap-check via `[[clarification-questions]]` BEFORE drafting the split plan. Ask: "Figma includes flows for X, Y, Z — include in this epic, or scope out?" Never silently expand or shrink scope.
+- See `[[story-generate]]` "Mixed inputs" for the full source-priority matrix.
 
 ## Application (step-by-step)
 

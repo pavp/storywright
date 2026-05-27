@@ -1,6 +1,6 @@
 ---
 description: Split an oversize story into an epic + child stories using INVEST + Humanizing Work patterns
-argument-hint: <paste oversize story>
+argument-hint: <paste oversize story> [+ optional image / Figma URL for flow inventory]
 ---
 
 Invoke the `story-split` skill from the storywright pack to split this story:
@@ -9,6 +9,7 @@ $ARGUMENTS
 
 Follow the skill's procedure:
 
+0. Detect companion sources (image, figma-link). If present, use them to inventory candidate sub-flows (prototype links, frame structure). If Figma shows N flows but text mentions K (K < N), surface as BLOCKING clarification before drafting the split plan. Text is canonical for scope of the epic; design is canonical for flow structure.
 1. Run `invest-checklist` and apply the pre-split gates:
    - If Valuable FAILS → NOT A STORY. Don't split. Stop.
    - If Testable / Negotiable FAILS → fix in place, don't split. Stop.
