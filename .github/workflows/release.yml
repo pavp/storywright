@@ -28,7 +28,17 @@ jobs:
       - run: npm ci
       - run: npm run validate
       - run: npm test
-      - run: npx semantic-release
+      - name: Run semantic-release (compute version, changelog, tag, GitHub release)
+        run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_CONFIG_PROVENANCE: "true"
+      - name: Publish to npm via Trusted Publishing (OIDC)
+        if: success()
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if [ "$VERSION" = "0.0.0-development" ]; then
+            echo "No release produced by semantic-release. Skipping publish."
+            exit 0
+          fi
+          echo "Publishing @pavp/storywright@$VERSION"
+          npm publish --provenance --access public
