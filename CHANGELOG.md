@@ -1,3 +1,9 @@
+## [1.0.2](https://github.com/pavp/storywright/compare/v1.0.1...v1.0.2) (2026-05-27)
+
+### 🐛 Bug Fixes
+
+* **release:** remove registry-url from setup-node to enable OIDC ([2ff9e1d](https://github.com/pavp/storywright/commit/2ff9e1d71218ccdbca0ae447a07eb63d6aab5733))
+
 ## [1.0.1](https://github.com/pavp/storywright/compare/v1.0.0...v1.0.1) (2026-05-27)
 
 ### 🐛 Bug Fixes
