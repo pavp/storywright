@@ -1,5 +1,9 @@
 # storywright
 
+[![npm](https://img.shields.io/npm/v/@pavp/storywright.svg)](https://www.npmjs.com/package/@pavp/storywright)
+[![CI](https://github.com/pavp/storywright/actions/workflows/ci.yml/badge.svg)](https://github.com/pavp/storywright/actions/workflows/ci.yml)
+[![License](https://img.shields.io/npm/l/@pavp/storywright.svg)](./LICENSE)
+
 PM skills for Claude Code that turn ambiguous inputs — vague prompts, half-baked stories, screenshots, Figma links — into **Jira-ready user stories** with acceptance criteria, edge cases, risks, analytics, and Definition of Done.
 
 > Inspired by [`deanpeters/Product-Manager-Skills`](https://github.com/deanpeters/Product-Manager-Skills) (CC BY-NC-SA 4.0). Clean-room MIT rewrite — no copied content. Frontmatter shape, body skeleton, and splitting-pattern selection draw on patterns from that repo; prose, component taxonomy, dual-format output, and risk model are this repo's own. Release pipeline modeled on [`pavp/wavefront`](https://github.com/pavp/wavefront). Methodological credit: Bill Wake (INVEST, 2003), Mike Cohn (*User Stories Applied*, 2004), Dan North (BDD / Given-When-Then), Richard Lawrence & Peter Green (*Humanizing Work* splitting patterns).
