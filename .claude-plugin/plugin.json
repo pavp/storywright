@@ -21,5 +21,11 @@
     "skills/_components/risks-and-dependencies",
     "skills/_components/jira-wiki-formatter"
   ],
+  "commands": [
+    "commands/story-generate.md",
+    "commands/story-refine.md",
+    "commands/story-split.md",
+    "commands/story-from-figma.md"
+  ],
   "tags": ["product-management", "user-stories", "jira", "agile", "invest"]
 }
