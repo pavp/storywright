@@ -49,9 +49,37 @@ Use vision. Extract:
 ### Figma links
 If MCP Figma is available (see `[[story-from-figma]]`), use it to enumerate frames, components, navigation. If not, fall back to asking the user to drop screenshots.
 
+### Mixed inputs (text + image + Figma)
+
+The skill is designed to **fuse multiple sources** in a single invocation. Common pairings:
+
+- **Text + screenshot** — text states the goal, image shows the proposed UI. Use text for `User Story / Goal / Scope`, image for `Components / States / Edge cases / UX flow`.
+- **Text + Figma link** — text gives intent, Figma gives implementation surface. Use text for `User Story / Business goal`, Figma for `Technical considerations / Edge cases / Components / Multi-screen flows`.
+- **Text + image + Figma** — full triangulation. Highest fidelity; also highest chance of conflict.
+
+**Source priority (when sources disagree):**
+
+| Section | Primary | Secondary | Tertiary |
+|---|---|---|---|
+| User Story / Goal | Text | Figma (frame titles, callouts) | Image |
+| Business Rules / Scope | Text | Figma | Image |
+| UI Components / States | Figma | Image | Text |
+| Edge Cases | Figma + Image (states shown) | Text | — |
+| Technical Considerations | Figma (component naming, design system refs) | Text | Image |
+| Acceptance Criteria | Triangulate all three | — | — |
+
+**Conflict handling:**
+
+1. **Detect the conflict explicitly.** Example: text says "Google only" but Figma shows Google + Facebook buttons.
+2. **Do NOT silently pick a winner.** Surface the conflict in `clarifications.md` as a BLOCKING question: *"Text says X but design shows Y — which is canonical?"*
+3. **If the user is in-session, ask immediately** before drafting. If running batch, mark the story `DRAFT` and write both options in scope/out-of-scope with `> ⚠️ Conflict:` annotation.
+4. **Scope coverage check:** if Figma shows N flows but text describes 1, ask whether to (a) generate 1 story bounded to text, (b) generate N stories from Figma, or (c) generate 1 story + flag remaining flows as roadmap.
+
 ## Application (step-by-step)
 
-1. **Detect input type** (text | image | figma-link | mixed). Branch accordingly.
+1. **Detect input types present** — text, image, figma-link, or any combination. Branch accordingly:
+   - **Single source** → process as before.
+   - **Mixed sources** → run the "Mixed inputs" protocol above, including source-priority lookup and explicit conflict detection BEFORE drafting.
 2. **Intake gap check** — invoke `[[clarification-questions]]`. If it returns BLOCKING questions, **ask first** before drafting.
 3. **Detect language** of input (es | en | other). Output in the input language.
 4. **Draft skeleton** of the structured story (all 15 sections from the template).

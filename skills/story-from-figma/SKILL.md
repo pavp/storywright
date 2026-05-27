@@ -47,6 +47,14 @@ A Figma file usually represents N screens / N flows. This skill maps that visual
    - Ask the user to either (a) install an MCP Figma server, (b) export the relevant frames as PNGs and drop them in chat, or (c) paste a textual description of the flows.
    - Continue under the chosen fallback. The rest of the skill works with screenshots via Claude vision.
 
+### Phase 0.5 — Detect companion inputs
+
+Before extracting from Figma, check whether the user attached:
+- **Accompanying text** (goal, story draft, constraints) — treat as canonical for `User Story / Scope / Business Goal`. Figma is canonical for `Components / States / Flows`.
+- **Reference screenshots** — usually redundant when Figma is available; use only if Figma frames are missing states the screenshots show.
+
+If text + Figma both describe the same flow but disagree (e.g., text says "single page form", Figma shows multi-step wizard), **surface the conflict** in clarifications and ask before drafting. Do NOT silently pick a winner. See `[[story-generate]]` "Mixed inputs" section for source priority.
+
 ### Phase 1 — Inventory
 
 1. List pages in the file (if MCP allows).
