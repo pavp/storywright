@@ -1,3 +1,9 @@
+## [1.2.0](https://github.com/pavp/storywright/compare/v1.1.0...v1.2.0) (2026-05-27)
+
+### ✨ Features
+
+* **skills:** support fused multi-source inputs (text + image + figma) ([874a470](https://github.com/pavp/storywright/commit/874a470a3791b3c7ac76f12b002c2d6814b88fa1))
+
 ## [1.1.0](https://github.com/pavp/storywright/compare/v1.0.3...v1.1.0) (2026-05-27)
 
 ### ✨ Features
