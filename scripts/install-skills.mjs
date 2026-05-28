@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import { homedir } from "node:os";
-import { cp, mkdir, readdir, rm, unlink } from "node:fs/promises";
+import { cp, mkdir, readdir, readFile, rm, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { execSync } from "node:child_process";
 import { REPO_ROOT, SKILLS_DIR, pathExists } from "./lib/skills.mjs";
 
 const skillsTarget = join(homedir(), ".claude", "skills", "storywright");
@@ -40,7 +41,33 @@ async function installCommands() {
   console.log(`✓ Installed slash commands to ${commandsDir} (prefix: ${COMMAND_PREFIX})`);
 }
 
+async function ensureGlobalGitignore() {
+  let globalIgnorePath;
+  try {
+    globalIgnorePath = execSync("git config --global core.excludesFile", { encoding: "utf8" }).trim();
+  } catch {
+    globalIgnorePath = join(homedir(), ".gitignore_global");
+    execSync(`git config --global core.excludesFile "${globalIgnorePath}"`);
+  }
+  if (globalIgnorePath.startsWith("~")) {
+    globalIgnorePath = join(homedir(), globalIgnorePath.slice(2));
+  }
+
+  let content = "";
+  try { content = await readFile(globalIgnorePath, "utf8"); } catch { /* doesn't exist yet */ }
+
+  const entry = "docs/storywright/";
+  if (content.includes(entry)) {
+    console.log(`• Global gitignore already has ${entry}`);
+    return;
+  }
+
+  await writeFile(globalIgnorePath, content + `\n# storywright output\n${entry}\n`, "utf8");
+  console.log(`✓ Added ${entry} to ${globalIgnorePath}`);
+}
+
 async function main() {
+  await ensureGlobalGitignore();
   await installSkills();
   await installCommands();
   console.log(`  Restart Claude Code for changes to be picked up.`);
