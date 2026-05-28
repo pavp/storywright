@@ -1,3 +1,9 @@
+## [1.8.3](https://github.com/pavp/storywright/compare/v1.8.2...v1.8.3) (2026-05-28)
+
+### 🐛 Bug Fixes
+
+* **base:** move Write tool instruction to base step 10 where execution model can act on it ([b56ff04](https://github.com/pavp/storywright/commit/b56ff048dd4abfb0af52f0e0fafdc3a4ef2739c1))
+
 ## [1.8.2](https://github.com/pavp/storywright/compare/v1.8.1...v1.8.2) (2026-05-28)
 
 ### 🐛 Bug Fixes
