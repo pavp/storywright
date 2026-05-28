@@ -26,7 +26,8 @@ Alternatives:
 - **Git clone + symlink** for contributors:
   ```bash
   git clone git@github.com:pavp/storywright.git
-  ln -s "$(pwd)/storywright/skills" ~/.claude/skills/storywright
+  cd storywright
+  ln -s "$(pwd)/skills" ~/.claude/skills/storywright
   ```
 - **ZIP upload to claude.ai**:
   ```bash
