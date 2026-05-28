@@ -43,7 +43,7 @@ Invoked by `story-generate`, `story-refine`, `story-split`, and `story-from-figm
 4. For `BLOCKING`, draft questions. Limit to **3 questions max per round**. Prefer multiple-choice or yes/no.
 5. Order by impact: scope > behavior > data > UX detail.
 6. Emit as a Markdown block titled `### Clarifying Questions` with numbered list.
-7. If no questions remain, emit nothing.
+7. If no questions remain, emit nothing — no summary, no "Clarification resolved", no offer to save. Proceed directly to the next step.
 
 ## Examples
 

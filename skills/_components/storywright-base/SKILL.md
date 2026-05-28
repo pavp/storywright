@@ -24,7 +24,7 @@ If you are reading this through a top-level skill, treat every rule below as non
 
 ## Hard rules (v2.2 — apply to all top-level storywright skills)
 
-1. **Terminal-only clarifications.** Never write any sidecar question file (no `clarifications.md`, no `questions.md`, nothing). All gap questions go through `AskUserQuestion`, batched ≤4 per call. Non-blocking gaps → mark `⚠️ Assumed: <text>` inline in the story body — do not ask.
+1. **Terminal-only clarifications.** Never write any sidecar question file (no `clarifications.md`, no `questions.md`, nothing). All gap questions go through `AskUserQuestion`, batched ≤4 per call. Non-blocking gaps → mark `⚠️ Assumed: <text>` inline in the story body — do not ask. Do NOT announce the absence of a clarifications file ("Clarification resolved", "no clarifications.md needed", or any equivalent). Silence = no questions. Proceed directly.
 
 2. **Cohn + Gherkin canonical.** Every story (or child story) has:
    - ONE Use Case block (`As a / I want to / so that`).
@@ -246,6 +246,8 @@ Everything else is identical and lives in this base.
 ## Common Pitfalls (all skills)
 
 - Writing any sidecar question file (clarifications.md, questions.md, etc).
+- Announcing "Clarification resolved" or "no clarifications.md needed" instead of proceeding silently.
+- Offering to save a clarifications file to disk after resolving gaps.
 - Skipping rule 1 (terminal-only) "because the user is async".
 - Eyeballing outcome counts instead of running the mechanical table.
 - Renumbering ACs the team may already reference externally.
