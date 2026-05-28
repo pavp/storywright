@@ -1,3 +1,9 @@
+## [1.12.0](https://github.com/pavp/storywright/compare/v1.11.1...v1.12.0) (2026-05-28)
+
+### ✨ Features
+
+* **skills:** three-file output — story.dev.md separates technical detail from PM files ([b3bc24f](https://github.com/pavp/storywright/commit/b3bc24f7601a34d563963b3a55f9a3de84870914))
+
 ## [1.11.1](https://github.com/pavp/storywright/compare/v1.11.0...v1.11.1) (2026-05-28)
 
 ### 🐛 Bug Fixes
