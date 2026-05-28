@@ -1,3 +1,9 @@
+## [1.10.1](https://github.com/pavp/storywright/compare/v1.10.0...v1.10.1) (2026-05-28)
+
+### 🐛 Bug Fixes
+
+* **commands:** explicit Write tool + output path in step 7 of both commands ([f6920c9](https://github.com/pavp/storywright/commit/f6920c96220113ebb696fc61b43a13e6c8558e04))
+
 ## [1.10.0](https://github.com/pavp/storywright/compare/v1.9.0...v1.10.0) (2026-05-28)
 
 ### ✨ Features
