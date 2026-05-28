@@ -1,3 +1,9 @@
+## [1.12.1](https://github.com/pavp/storywright/compare/v1.12.0...v1.12.1) (2026-05-28)
+
+### 🐛 Bug Fixes
+
+* **plugin:** align manifest to 1.12.0 and guard PR-title convention ([#2](https://github.com/pavp/storywright/issues/2)) ([fc3e399](https://github.com/pavp/storywright/commit/fc3e399d98511cfa45db4c3178f437559a956bbe)), closes [#1](https://github.com/pavp/storywright/issues/1)
+
 ## [1.12.0](https://github.com/pavp/storywright/compare/v1.11.1...v1.12.0) (2026-05-28)
 
 ### ✨ Features
