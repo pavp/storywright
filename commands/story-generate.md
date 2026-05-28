@@ -14,7 +14,7 @@ Follow the skill's full procedure:
 3. Run gap check via `clarification-questions` component. Ask at most 3 critical questions if anything is blocking.
 4. Fill the CORE sections (Title, Summary, User Story, Acceptance Criteria, Definition of Done).
 5. Fill optional sections only if they have real content (drop empty ones).
-6. Run INVEST self-check. If NOT A STORY / NEEDS REFINEMENT / RUN A SPIKE / SPLIT RECOMMENDED — STOP and hand off accordingly.
+6. Run INVEST pre-split test. If count ≥2, show candidate children + ask via `AskUserQuestion` with options: "Yes, split" / "Continue without split" / "No, keep as-is". Never auto-split silently. For other verdicts (NOT A STORY / NEEDS REFINEMENT / RUN A SPIKE) — STOP and hand off accordingly.
 7. Render dual outputs: `story.jira-wiki.md` (Jira wiki markup) and `story.standard.md` (CommonMark).
 8. If clarifications remain, emit `clarifications.md` and mark the story DRAFT.
 

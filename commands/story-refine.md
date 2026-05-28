@@ -15,6 +15,6 @@ Follow the skill's procedure:
 3. Detect language and preserve it in output.
 4. Fill missing/weak sections via component skills. Preserve original wording where good.
 5. Append a "Refinement log" at the end listing what changed.
-6. Run INVEST. If verdict is `SPLIT RECOMMENDED`, stop and recommend `/story-split` instead.
+6. Run INVEST pre-split test. If count ≥2, show candidate children + ask via `AskUserQuestion` with options: "Yes, split" / "Continue without split" / "No, keep as-is". Never auto-split silently.
 7. Render dual outputs via `jira-wiki-formatter`.
 8. Emit `clarifications.md` if assumptions remain unresolved.
