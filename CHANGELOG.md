@@ -1,3 +1,10 @@
+## [1.5.0](https://github.com/pavp/storywright/compare/v1.4.0...v1.5.0) (2026-05-28)
+
+### ✨ Features
+
+* **skills:** refine story-refine to Cohn+Gherkin canonical with deterministic split ([dafc093](https://github.com/pavp/storywright/commit/dafc0931ffa8435f8e78ea245775fe238d36e810))
+* **skills:** tighten story-refine v2.2.0 with mechanical deps and V audit ([6b81113](https://github.com/pavp/storywright/commit/6b81113f0bdec172ffb1f3d79f88987f627cd667))
+
 ## [1.4.0](https://github.com/pavp/storywright/compare/v1.3.0...v1.4.0) (2026-05-27)
 
 ### ✨ Features
