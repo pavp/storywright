@@ -1,3 +1,9 @@
+## [1.6.3](https://github.com/pavp/storywright/compare/v1.6.2...v1.6.3) (2026-05-28)
+
+### 🐛 Bug Fixes
+
+* **skills:** silence clarification-resolved filler; always write story md files ([4a90e42](https://github.com/pavp/storywright/commit/4a90e4200288bbaef83b1556a5c35efeb358ec12))
+
 ## [1.6.2](https://github.com/pavp/storywright/compare/v1.6.1...v1.6.2) (2026-05-28)
 
 ### 🐛 Bug Fixes
