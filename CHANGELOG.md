@@ -1,3 +1,9 @@
+## [1.8.0](https://github.com/pavp/storywright/compare/v1.7.0...v1.8.0) (2026-05-28)
+
+### ✨ Features
+
+* **skills:** add "Continue without split" option to split confirmation prompt ([5495ae6](https://github.com/pavp/storywright/commit/5495ae69e29707185ec2b1d1cbc3cbb4816f2177))
+
 ## [1.7.0](https://github.com/pavp/storywright/compare/v1.6.3...v1.7.0) (2026-05-28)
 
 ### ✨ Features
