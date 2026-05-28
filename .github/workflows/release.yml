@@ -28,6 +28,10 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: true
+          # PAT (not GITHUB_TOKEN) so the release commit/tag push bypasses the
+          # main branch ruleset. GITHUB_TOKEN cannot be a bypass actor on a
+          # personal repo, and pushes from it as the bot trip GH006.
+          token: ${{ secrets.RELEASE_TOKEN }}
 
       - uses: actions/setup-node@v5
         with:
@@ -46,7 +50,7 @@ jobs:
       - name: semantic-release
         id: release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
           BEFORE=$(node -p "require('./package.json').version")
           npx semantic-release
