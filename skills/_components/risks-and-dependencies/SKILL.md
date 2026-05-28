@@ -3,13 +3,13 @@ name: risks-and-dependencies
 description: Surface technical, product, and organizational risks plus blocking dependencies for a story. Each item has owner, likelihood, mitigation. Returns only the risks+deps block.
 trigger: "internal use by story-* skills"
 intent: Component skill that turns hidden assumptions into tracked risks and dependencies so PMs and tech leads can act on them.
-version: 1.0.0
+version: 2.0.0
 inputs:
   - story-context
   - business-rules
   - technical-considerations
 outputs:
-  - risks-and-dependencies-block
+  - risks-and-dependencies-block (dev.md only)
 ---
 
 ## Purpose
@@ -18,7 +18,7 @@ Risks and dependencies that aren't written down end up as outages or missed laun
 
 ## When to use
 
-Late in `story-generate`, after business rules and technical considerations are drafted — those inform what's risky.
+**Dev-file only.** Invoked while rendering `story.dev.md`, after business rules and technical considerations are drafted — those inform what's risky. Risks and dependencies reference infra, SDKs, env vars, and ownership — technical/delivery detail that belongs in `story.dev.md`, not the PM-facing files (`[[storywright-base]]` rule 3 bans Dependencies-as-prose in the PM body; PM files link Jira tickets only).
 
 ## Inputs & interpretation
 
@@ -41,7 +41,7 @@ Late in `story-generate`, after business rules and technical considerations are 
    - **Operational** (oncall toil, monitoring gap)
 4. For each risk: `<risk> · likelihood (L/M/H) · impact (L/M/H) · mitigation`
 5. If a risk is high-impact AND high-likelihood, flag it `🚨` so it gets attention in review.
-6. Emit under two subheadings: `### Dependencias` and `### Riesgos` (or English).
+6. Emit under two subheadings: `### Dependencias` and `### Riesgos` (or English) **inside `story.dev.md`**.
 
 Example:
 

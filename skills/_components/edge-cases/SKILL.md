@@ -3,11 +3,11 @@ name: edge-cases
 description: Enumerate edge cases for a story. Covers boundary, concurrency, network, data, permission, and UX-state failures. Returns only the edge-cases block.
 trigger: "internal use by story-* skills"
 intent: Component skill that systematically generates edge cases across known failure axes so acceptance criteria can cover them.
-version: 1.0.0
+version: 2.0.0
 inputs:
   - story-context
 outputs:
-  - edge-cases-block
+  - edge-cases-block (dev.md only)
 ---
 
 ## Purpose
@@ -16,7 +16,7 @@ Edge cases are how engineers find latent risk. Generate them **before** acceptan
 
 ## When to use
 
-Invoked by `story-generate` after the story body and business rules are drafted; output feeds `[[acceptance-criteria]]`.
+**Dev-file only.** Invoked while rendering `story.dev.md` (the dev-facing file), never the PM-facing `story.standard.md` / `story.jira-wiki.md`. `[[storywright-base]]` rule 3 forbids an Edge Cases section in the PM story body — this output lands exclusively in `story.dev.md`. It still informs AC failure paths (`[[acceptance-criteria]]`): the AC covers the observable behavior in the PM files; the enumerated technical edge detail lives in dev.md.
 
 ## Inputs & interpretation
 
@@ -37,7 +37,7 @@ Walk these axes and pick the ones that apply:
 
 For each applicable axis, write 1–2 concrete cases. Keep each ≤1 sentence.
 
-Emit under `### Edge Cases`:
+Emit under `### Edge Cases` **inside `story.dev.md`** (never the PM files):
 
 ```
 ### Edge Cases

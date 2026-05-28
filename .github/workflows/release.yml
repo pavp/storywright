@@ -109,13 +109,18 @@ jobs:
       - name: Verify version is live on npm
         run: |
           VERSION="${{ needs.release.outputs.version }}"
+          # Exponential backoff (5/10/20/40/60s) tolerates registry propagation
+          # lag without hammering npm on a fixed interval.
+          delay=5
           for i in 1 2 3 4 5; do
             if [ "$(npm view "@pavp/storywright@${VERSION}" version 2>/dev/null)" = "$VERSION" ]; then
               echo "✅ @pavp/storywright@${VERSION} is live on npm."
               exit 0
             fi
-            echo "… not visible yet (attempt $i), retrying in 10s"
-            sleep 10
+            echo "… not visible yet (attempt $i), retrying in ${delay}s"
+            sleep "$delay"
+            delay=$(( delay * 2 ))
+            [ "$delay" -gt 60 ] && delay=60
           done
           echo "::error::INCONSISTENT RELEASE — tag v${VERSION} + GitHub Release exist, but @pavp/storywright@${VERSION} is NOT on npm. Re-run the publish job or publish manually."
           exit 1

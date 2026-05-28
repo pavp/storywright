@@ -3,7 +3,7 @@ name: business-rules
 description: Extract and articulate business rules a story must honor. Distinguish rules (always true) from acceptance criteria (testable on this story). Returns only the rules block.
 trigger: "internal use by story-* skills"
 intent: Component skill that surfaces invariants, policies, and constraints that bound a story without being acceptance criteria themselves.
-version: 1.0.0
+version: 2.0.0
 inputs:
   - story-context
   - domain-hints
@@ -17,7 +17,7 @@ Business rules are **policy invariants** the story must respect. They survive ac
 
 ## When to use
 
-After the story body is drafted, before ACs are finalized — so ACs can reference relevant rules.
+After the story body is drafted, before ACs are finalized — so ACs can reference relevant rules. Business Rules are an **optional PM section** (see `[[jira-wiki-formatter]]` — emit in `story.standard.md` / `story.jira-wiki.md` only when non-empty) AND are mirrored in `story.dev.md`. They are policy invariants, not technical detail, so unlike edge-cases they are not dev-only.
 
 ## Inputs & interpretation
 

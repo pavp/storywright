@@ -11,16 +11,34 @@ if (!skillName) {
   process.exit(1);
 }
 
+function hasZip() {
+  const probe = spawnSync("zip", ["-v"], { stdio: "ignore" });
+  return !probe.error;
+}
+
+async function resolveSourceDir() {
+  const topDir = join(SKILLS_DIR, skillName);
+  if (await pathExists(topDir)) return topDir;
+  const compDir = join(SKILLS_DIR, "_components", skillName);
+  if (await pathExists(compDir)) return compDir;
+  return null;
+}
+
 async function main() {
-  const skillDir = join(SKILLS_DIR, skillName);
-  if (!(await pathExists(skillDir))) {
-    const compDir = join(SKILLS_DIR, "_components", skillName);
-    if (!(await pathExists(compDir))) {
-      console.error(`✗ Skill not found: ${skillName}`);
-      process.exit(1);
-    }
+  const sourceDir = await resolveSourceDir();
+  if (!sourceDir) {
+    console.error(`✗ Skill not found: ${skillName}`);
+    process.exit(1);
   }
-  const sourceDir = (await pathExists(skillDir)) ? skillDir : join(SKILLS_DIR, "_components", skillName);
+  if (!(await pathExists(join(sourceDir, "SKILL.md")))) {
+    console.error(`✗ ${skillName} has no SKILL.md — refusing to zip an invalid skill`);
+    process.exit(1);
+  }
+  if (!hasZip()) {
+    console.error("✗ `zip` not found on PATH. Install it (e.g. `brew install zip` / `apt-get install zip`) and retry.");
+    process.exit(127);
+  }
+
   const outDir = join(REPO_ROOT, "dist");
   if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true });
 
