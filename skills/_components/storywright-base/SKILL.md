@@ -228,10 +228,13 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
 
 10. **Render** via `[[jira-wiki-formatter]]`.
     - Derive the output folder: `docs/storywright/YYYY-MM-DD-HHmm-<title-slug>/` where `YYYY-MM-DD-HHmm` is the current local date+time and `<title-slug>` is the story title in kebab-case (max 5 words, drop articles/prepositions).
-    - Use the `Write` tool to persist `story.standard.md` and `story.jira-wiki.md` to that folder (create it if it does not exist).
-    - Also emit both as fenced code blocks in chat.
+    - Use the `Write` tool to persist three files to that folder (create it if it does not exist):
+      - `story.standard.md` — PM-facing CommonMark, no technical detail
+      - `story.jira-wiki.md` — PM-facing Jira wiki markup, no technical detail
+      - `story.dev.md` — dev-facing CommonMark, full technical detail (file paths, imports, technical edge cases, full DoD with commands)
+    - Emit `story.standard.md` and `story.jira-wiki.md` as fenced code blocks in chat. Do NOT emit `story.dev.md` in chat.
     - Write `.storywright-context.json` to the same folder.
-    - No other files. Never ask whether to save — always write.
+    - Never ask whether to save — always write all four files.
 
 11. **Log** ≤3 bullets (≤5 if SPLIT) appended at story end. Log type label is host-specific (Generation / Refinement / Split).
 

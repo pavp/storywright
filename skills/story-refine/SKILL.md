@@ -11,6 +11,7 @@ inputs:
 outputs:
   - story.standard.md
   - story.jira-wiki.md
+  - story.dev.md
   - .storywright-context.json
 composes:
   - _components/storywright-base

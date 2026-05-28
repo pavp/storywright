@@ -1,14 +1,15 @@
 ---
 name: jira-wiki-formatter
-description: Render a story into both Jira wiki markup and standard CommonMark Markdown. Outputs two artifacts so the same story is copy-pasteable into Jira and into any MD-aware tool.
+description: Render a story into three files: story.standard.md and story.jira-wiki.md (PM-facing, no technical detail) plus story.dev.md (dev-facing, full technical detail).
 trigger: "internal use by story-* skills"
-intent: Component skill that takes a structured story (all sections drafted) and produces two output files following the templates in story-generate/templates.
-version: 1.0.0
+intent: Component skill that takes a structured story and produces three output files following the templates in story-generate/templates.
+version: 2.0.0
 inputs:
   - structured-story
 outputs:
-  - story.jira-wiki.md
   - story.standard.md
+  - story.jira-wiki.md
+  - story.dev.md
 ---
 
 ## Purpose
@@ -25,7 +26,21 @@ Final step in `story-generate` and `story-refine`. Always last.
 
 ## Application (step-by-step)
 
-1. Render `story.jira-wiki.md` using Jira's wiki markup:
+## Audience separation — THREE files
+
+| File | Audience | Technical detail |
+|---|---|---|
+| `story.standard.md` | PM, stakeholders | ❌ None — no file paths, no imports, no component names, no `npm run X` in DoD |
+| `story.jira-wiki.md` | PM → Jira paste | ❌ None — same content as standard, Jira markup |
+| `story.dev.md` | Developer | ✅ Full — file paths, imports, Technical Considerations, technical edge cases, full DoD with commands |
+
+**What is "technical":** file paths, import statements, component/hook names, API method names, CLI commands (`npm run test`), null/undefined checks, browser API constraints (HTTPS, permissions), specific library flags.
+
+**ACs in PM files must describe observable behavior only.** "A copy icon appears next to the email field and clicking it copies the value" — not "ContentCopyOutlinedIcon is rendered next to the email Typography block and calls navigator.clipboard.writeText()".
+
+---
+
+1. Render `story.jira-wiki.md` (PM-facing) using Jira's wiki markup:
    - Headings: `h1. `, `h2. `, `h3. `
    - Bold: `*text*`
    - Italic: `_text_`
@@ -33,7 +48,8 @@ Final step in `story-generate` and `story-refine`. Always last.
    - Lists: `* item`, `# item` (numbered)
    - Tables: `||header||header||` then `|cell|cell|`
    - Panels for callouts: `{panel:title=⚠️ Assumed}…{panel}`
-2. Render `story.standard.md` using CommonMark:
+   - Strip all technical detail (see audience table above)
+2. Render `story.standard.md` (PM-facing) using CommonMark:
    - Headings: `##`, `###`
    - Bold: `**text**`
    - Italic: `*text*`
@@ -41,29 +57,28 @@ Final step in `story-generate` and `story-refine`. Always last.
    - Lists: `- item`, `1. item`
    - Tables: standard pipe tables
    - Callouts: `> ⚠️ **Assumed:** …`
-3. Section model = **core + optional**.
+   - Strip all technical detail (see audience table above)
+3. Render `story.dev.md` (dev-facing) using CommonMark:
+   - Same structure as `story.standard.md` PLUS:
+   - Technical Considerations section (file paths, imports, API calls)
+   - Edge Cases section (null checks, error states, browser constraints)
+   - DoD includes CLI commands and file-level criteria
+   - Refinement log includes technical changes
+4. Section model for PM files = **core + optional (non-technical)**.
 
    **Core (always emit, in this order):**
    1. Title
-   2. Summary
-   3. User Story (As a / I want to / so that)
-   4. Acceptance Criteria
-   5. Definition of Done
+   2. User Story (As a / I want to / so that)
+   3. Acceptance Criteria (observable behavior only)
+   4. Definition of Done (acceptance criteria only, no commands)
 
-   **Optional (emit only if non-empty, in this order, after a separator):**
-   6. Contexto
-   7. Business Goal
-   8. Scope
-   9. Out of Scope
-   10. Business Rules
-   11. Technical Considerations
-   12. Dependencies
-   13. Risks
-   14. Analytics
-   15. Edge Cases
+   **Optional PM sections (emit only if non-empty):**
+   5. Business Goal
+   6. Scope / Out of Scope
+   7. Business Rules
 
-4. **Drop any section with no real content.** An empty heading is noise. A story with only the 5 core sections is a valid output.
-5. Emit both as fenced code blocks in the chat so the user can copy them. File persistence is handled by the calling skill via the `Write` tool.
+5. **Drop any section with no real content.** An empty heading is noise.
+6. Emit `story.standard.md` and `story.jira-wiki.md` as fenced code blocks in chat (PM-facing). Do NOT emit `story.dev.md` in chat — write to disk only. File persistence is handled by the calling skill via the `Write` tool.
 
 ## Examples
 
