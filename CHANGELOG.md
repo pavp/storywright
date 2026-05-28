@@ -1,3 +1,9 @@
+## [1.6.2](https://github.com/pavp/storywright/compare/v1.6.1...v1.6.2) (2026-05-28)
+
+### 🐛 Bug Fixes
+
+* **base:** clarify canonical block is taxonomy not markup; remove INVEST section from output ([89dfd58](https://github.com/pavp/storywright/commit/89dfd58fcda3e95fc1a066afc7d08cd74e4c8a35))
+
 ## [1.6.1](https://github.com/pavp/storywright/compare/v1.6.0...v1.6.1) (2026-05-28)
 
 ### ♻️ Refactors
