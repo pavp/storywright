@@ -226,7 +226,12 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
    - `NEEDS REFINEMENT` → iterate failing dimension, max 1 cycle, then STOP.
    - `NOT A STORY` → tell user it's a tech task and stop.
 
-10. **Render** via `[[jira-wiki-formatter]]`. Use the `Write` tool to persist `story.standard.md` and `story.jira-wiki.md` to `docs/stories/` under the current working directory (create the folder if it does not exist). Also emit both as fenced code blocks in chat. Plus write `.storywright-context.json` to `docs/stories/`. No other files. Never ask whether to save — always write.
+10. **Render** via `[[jira-wiki-formatter]]`.
+    - Derive the output folder: `docs/storywright/YYYY-MM-DD-HHmm-<title-slug>/` where `YYYY-MM-DD-HHmm` is the current local date+time and `<title-slug>` is the story title in kebab-case (max 5 words, drop articles/prepositions).
+    - Use the `Write` tool to persist `story.standard.md` and `story.jira-wiki.md` to that folder (create it if it does not exist).
+    - Also emit both as fenced code blocks in chat.
+    - Write `.storywright-context.json` to the same folder.
+    - No other files. Never ask whether to save — always write.
 
 11. **Log** ≤3 bullets (≤5 if SPLIT) appended at story end. Log type label is host-specific (Generation / Refinement / Split).
 
