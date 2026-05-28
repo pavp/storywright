@@ -226,7 +226,7 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
    - `NEEDS REFINEMENT` → iterate failing dimension, max 1 cycle, then STOP.
    - `NOT A STORY` → tell user it's a tech task and stop.
 
-10. **Render** via `[[jira-wiki-formatter]]`. Files: `story.standard.md` + `story.jira-wiki.md`. Plus `.storywright-context.json`. No other files.
+10. **Render** via `[[jira-wiki-formatter]]`. Use the `Write` tool to persist `story.standard.md` and `story.jira-wiki.md` to the current working directory. Also emit both as fenced code blocks in chat. Plus write `.storywright-context.json`. No other files. Never ask whether to save — always write.
 
 11. **Log** ≤3 bullets (≤5 if SPLIT) appended at story end. Log type label is host-specific (Generation / Refinement / Split).
 
