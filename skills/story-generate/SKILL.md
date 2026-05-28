@@ -48,9 +48,10 @@ If the base **deterministic pre-split test** returns count ≥2:
 - **STOP drafting.**
 - Output a terminal message listing candidate children + per-pair dep notes (base rule 10) + V audit (base rule 11).
 - Show candidate children + dep notes + V audit.
-- Ask via `AskUserQuestion`: "This story has [N] independent flows. Run split now?" with options "Yes, split" / "No, keep as-is".
-- If user approves → execute `[[story-split]]` inline (epic + children + .storywright-context.json).
-- If user declines → stop. No output written.
+- Ask via `AskUserQuestion`: "This story has [N] independent flows. Run split now?" with options:
+  - "Yes, split" → execute `[[story-split]]` inline (epic + children + .storywright-context.json).
+  - "Continue without split" → proceed with single-story path (fill canonical block → INVEST → render dual outputs).
+  - "No, keep as-is" → stop. No output written.
 - Do NOT silently auto-split without the AskUserQuestion confirmation.
 
 If count ≤1:
