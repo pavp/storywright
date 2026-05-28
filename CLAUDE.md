@@ -31,7 +31,7 @@ storywright/
 2. **Adding / editing a slash command**
    Create or edit `commands/<name>.md` with frontmatter `description` + `argument-hint`, body calling out to the corresponding skill. The CLI installs each as `storywright-<name>.md` under `~/.claude/commands/` (prefix avoids collisions).
 
-3. **Composition is enforced.** Validator (`scripts/validate-skills.mjs`) fails if `composes:` references a non-existent component.
+3. **Composition is enforced.** Validator (`scripts/validate-skills.mjs`) fails if `composes:` references a non-existent component **or if any component is orphaned** (referenced by no skill via `composes:` or a body `[[link]]`). All four top-level skills compose the same 10 components. The five enrichment components (`business-rules`, `edge-cases`, `analytics-events`, `risks-and-dependencies`, `definition-of-done`) feed `story.dev.md` per `storywright-base` rule 3a — never the PM body (except Business Rules, an optional PM section).
 
 4. **Output language.** Skills must respond in the input language. Don't force English. Detect Spanish / English / other from the user message.
 
@@ -101,4 +101,4 @@ When iterating on a skill, invoke it against fixtures:
 - `tests/fixtures/half-baked-story.md` — refine target
 - `tests/fixtures/oversized-story.md` — split target
 
-If you change a skill's behavior, also update its example outputs and the matching slash command body in `commands/<name>.md`.
+Committed golden outputs live under `examples/outputs/<slug>/` (the full trio: `story.standard.md` + `story.jira-wiki.md` + `story.dev.md`). `tests/skills-shape.test.mjs` asserts the PM files carry no technical leakage. If you change a skill's behavior, also update its golden outputs and the matching slash command body in `commands/<name>.md`.
