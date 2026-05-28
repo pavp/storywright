@@ -16,5 +16,5 @@ Follow the skill's procedure:
 4. Fill missing/weak sections via component skills. Preserve original wording where good.
 5. Append a "Refinement log" at the end listing what changed.
 6. Run INVEST pre-split test. If count ≥2, show candidate children + ask via `AskUserQuestion` with options: "Yes, split" / "Continue without split" / "No, keep as-is". Never auto-split silently.
-7. Render dual outputs via `jira-wiki-formatter`.
-8. Emit `clarifications.md` if assumptions remain unresolved.
+7. Render dual outputs via `jira-wiki-formatter`. Use the `Write` tool to write `story.standard.md` and `story.jira-wiki.md` to `docs/storywright/YYYY-MM-DD-HHmm-<title-slug>/` (current local time, title in kebab-case max 5 words). Also emit both as fenced code blocks in chat. Never ask — always write.
+8. Non-blocking assumptions remain? Mark inline with `⚠️ Assumed:`. Do NOT emit clarifications.md.
