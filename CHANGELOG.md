@@ -1,3 +1,9 @@
+## [1.8.2](https://github.com/pavp/storywright/compare/v1.8.1...v1.8.2) (2026-05-28)
+
+### 🐛 Bug Fixes
+
+* **commands:** align split step with AskUserQuestion behavior in skills ([30ffc07](https://github.com/pavp/storywright/commit/30ffc07d169bc43610a985d8720faaaf5c8c01f2))
+
 ## [1.8.1](https://github.com/pavp/storywright/compare/v1.8.0...v1.8.1) (2026-05-28)
 
 ### 🐛 Bug Fixes
