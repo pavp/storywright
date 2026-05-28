@@ -44,12 +44,15 @@ For each dimension, mark PASS / FAIL and write one sentence of evidence.
    FAIL if unknowns dominate (spike-shaped) or the surface is too broad.
 
 5. **S — Small**
-   PASS if it fits one sprint and one developer-week is plausible.
-   FAIL if it visibly mixes ≥2 distinct flows or touches ≥3 unrelated surfaces.
+   PASS if it fits one sprint AND has exactly one Gherkin `When`/`Then` pair AND touches ≤2 related surfaces.
+   FAIL if it visibly mixes ≥2 distinct flows, OR has >1 `When`/`Then` pair (multi-outcome = scope creep, Cohn anti-pattern), OR touches ≥3 unrelated surfaces.
 
 6. **T — Testable**
    PASS if every AC has an observable outcome.
    FAIL if ACs hand-wave behavior or rely on subjective judgment.
+
+7. **Anti-PRD sanity (storywright-specific)**
+   If the rendered story body exceeds ~60 lines excluding user-supplied Preconditions/Out-of-Scope blocks, treat as a spec, not a story. FAIL `Small`. Force `SPLIT RECOMMENDED`.
 
 7. Emit the report block:
    ```
