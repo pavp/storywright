@@ -119,6 +119,8 @@ Permitir a usuarios autenticarse mediante OAuth con Google.
 - Forgetting that Jira's `{code}` block doesn't support all languages — fall back to `{noformat}` for plain text.
 - Emoji in Jira: works in cloud, often mangled in older self-hosted. Keep emojis to non-critical decoration.
 - Empty headings. Drop.
+- Wrong heading levels: CommonMark output uses `#` (H1) for title, `##` (H2) for sections. Jira uses `h2.` for title, `h3.` for sections. The canonical block in `[[storywright-base]]` uses `###`/`####` as taxonomy shorthand only — do not copy those levels into the rendered artifact.
+- Emitting INVEST as a section: INVEST is a process step. Its verdict belongs in the log line only (`INVEST Verdict: READY`), never as a standalone section in the output file.
 
 ## References
 

@@ -161,6 +161,8 @@ Mechanical counter. Apply the table — do NOT eyeball:
 
 ## Canonical output shape (this is the WHOLE story — no exceptions)
 
+> **Note:** This block shows the *section taxonomy and rules* — not heading levels or exact markup. The rendered artifact must follow the `story-generate/templates/` files exactly: `#` for title, `##` for sections (CommonMark) or `h2.`/`h3.` (Jira wiki). INVEST is a **process step** — it informs the Verdict line in the log but is NOT emitted as a section in the output artifact.
+
 ```markdown
 ### [Title]
 
@@ -187,16 +189,12 @@ Mechanical counter. Apply the table — do NOT eyeball:
 - [link or path]
 - visual notes: [...]
 
-#### INVEST
-- I — <PASS | PARTIAL · depends on <Ci>>
-- N/V/E/S/T — one line each, evidence-based.
-- **Verdict:** READY | READY (after <Ci> builds) | SPLIT RECOMMENDED | NEEDS REFINEMENT | NOT A STORY | WEAK·merge-upstream-candidate
-
 #### <Generation | Refinement | Split> log (≤3 lines; ≤5 if SPLIT verdict)
-- ...
+- INVEST Verdict: <READY | SPLIT RECOMMENDED | NEEDS REFINEMENT | NOT A STORY>
+- [other changes]
 ```
 
-NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No Assumptions block (assumptions get `⚠️ Assumed` inline or are resolved via `AskUserQuestion`).
+NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No Assumptions block (assumptions get `⚠️ Assumed` inline or are resolved via `AskUserQuestion`). No standalone INVEST section — verdict belongs in the log only.
 
 ## Application (step-by-step — every skill follows this skeleton)
 
