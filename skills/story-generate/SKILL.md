@@ -1,17 +1,17 @@
 ---
 name: story-generate
-description: Transform an ambiguous prompt, half-baked story, screenshot, or Figma link into a Jira-ready user story with acceptance criteria, DoD, edge cases, and risks. Ask only critical clarifying questions.
+description: Transform an ambiguous prompt, half-baked story, screenshot, or Figma link into a Jira-ready user story. Cohn+Gherkin canonical. Asks clarifications ONLY in terminal.
 trigger: "/story-generate | generate a user story | write a user story | turn this into a story | crear historia de usuario"
-intent: Top-level orchestrator skill that drives the full story generation flow by composing component skills.
-version: 1.0.0
+intent: Top-level orchestrator that drafts a fresh story from any input. Follows the same hard rules as story-refine v2.2 (Cohn philosophy, terminal-only Q, no mini-PRD, deterministic split gate).
+version: 2.2.0
 inputs:
   - text
   - image
   - figma-link
 outputs:
-  - story.jira-wiki.md
   - story.standard.md
-  - clarifications.md
+  - story.jira-wiki.md
+  - .storywright-context.json
 composes:
   - _components/clarification-questions
   - _components/acceptance-criteria
@@ -26,7 +26,82 @@ composes:
 
 ## Purpose
 
-Take whatever the PM has — a one-liner, a half-baked story, a screenshot, a Figma link — and produce a story that an engineer can pick up and ship without follow-up questions. Always output two artifacts (Jira wiki + CommonMark).
+Take whatever the PM has — a one-liner, a half-baked story, a screenshot, a Figma link — and produce a Cohn+Gherkin story an engineer can pick up and ship without follow-up questions. If the input is too broad, recommend `/story-split` instead of producing a mini-PRD.
+
+## Hard rules (no exceptions)
+
+1. **Terminal-only clarifications.** Never write any sidecar question file (no `clarifications.md`). All gap questions go through `AskUserQuestion` (batch in groups of ≤4). Non-blocking gaps → mark `⚠️ Assumed` inline.
+
+2. **Cohn + Gherkin canonical.** One Use Case block. One AC scenario per story (one Given chain, one `When`, one `Then`). If the input naturally needs >1 `When`/`Then` → STOP drafting, recommend `/story-split`.
+
+3. **No mini-PRDs.** Prohibited in story output:
+   - NFR blocks (a11y/i18n/perf/tokens) — these live in the team's DoD
+   - Edge Cases enumerations as a section — surface inside AC failure paths only
+   - Dependencies as prose — Jira links only
+   - Per-claim visual specs — use single banner (rule 5)
+   - Refinement logs >3 lines (>5 if SPLIT)
+
+4. **Output language matches the user's chat language**, not the input's. Auto-detect first (see rule 4a); only ask via `AskUserQuestion` if signals split.
+
+5. **Visual inference confidence — single banner only.** ONE banner at the top of the Design Reference block declares the source type. Claims under it inherit confidence:
+   - Raster source (PNG/JPG) → `**Source: raster mockup → all visual specs are pixel-derived, not token-confirmed.**`
+   - Figma source → `**Source: Figma → values can be tokenized at implementation.**`
+   - Design-token source → `**Source: design tokens → values are authoritative.**`
+   - Never assert hex / px / spacing from raster without the raster banner.
+
+6. **Sibling task IDs.** If the draft references "next task / future task / another story" → check `<output-folder>/.storywright-context.json` first. If unresolved, ask. Tentative slugs follow rule F.
+
+7. **Mockup chrome detection — closed list.** Chrome = `left nav rail / sidebar`, `top bar`, `footer`, `persistent toast/snackbar slot`, `persistent modal scrim`, `app-level tabs`. If image shows any AND the input does not mention them, ask via `AskUserQuestion` whether each is in-scope, sibling-scope, or out-of-scope. Anything not on the list is NOT chrome.
+
+8. **Anti-PRD is part of INVEST `Small`.** See `[[invest-checklist]]` Small criterion (line-count ceiling lives there).
+
+9. **Cross-skill context persistence.** When the skill resolves clarifications, write answers to `<output-folder>/.storywright-context.json`. Read only from the exact output folder of the current invocation; never search siblings or parents. Schema:
+   ```json
+   {
+     "version": 1,
+     "decided_at": "<ISO date>",
+     "decided_by_skill": "story-generate",
+     "language": "EN | ES | ...",
+     "chrome_scope": "in-scope | in-scope-placeholder | sibling | out-of-scope",
+     "siblings": "TODO | <list of IDs> | not-applicable",
+     "design_source": "raster | figma | tokens",
+     "naming_pattern": "<see rule F>",
+     "extra": {}
+   }
+   ```
+
+10. **Mixed input conflict detection.** When text + image + Figma disagree, surface as BLOCKING `AskUserQuestion`. Never silently pick a winner. (See source priority below.)
+
+11. **Passive-goal downstream prompt (G).** If `I want to` verb is observational (`view, see, read, browse, look at, inspect, monitor`) and `so that` lacks a follow-up user action → ask once via `AskUserQuestion`: "What does the user do with this?". Strengthen the `so that` accordingly.
+
+### 4a. Language auto-detect — expanded signals (E)
+
+| Signal | Where | Weight |
+|---|---|---|
+| Gherkin keywords ("Given/When/Then") | AC block | high |
+| Persona phrasing ("As a user" vs "Como un usuario") | Use Case | high |
+| Column / field names ("Phone - primary", "Teléfono - principal") | AC bullets | medium |
+| Domain verbs ("clicking" vs "hacer clic") | AC bullets | medium |
+| Title language | header | low |
+
+**Decision:**
+- High+medium signals agree on M → adopt M silently. Mark inline `⚠️ Assumed: output language = <M> (auto-detected from <signals>)`.
+- Signals split → ask once.
+- Persist via rule 9.
+
+### Rule F. Naming pattern — ask once, persist
+
+When the skill needs to invent a tentative ticket slug AND `.storywright-context.json` has no `naming_pattern`, ask once:
+- kebab-case feature-action (`customer-search-bar-wire`)
+- verb-noun (`wire-search-bar`)
+- domain-action (`search.customer.wire-input`)
+- Jira prefix + numeric (`CSB-001`)
+
+Persist in `.storywright-context.json`. Reuse for all sibling slugs.
+
+### Rule D. Surface vs styling (deterministic)
+
+A "named UI surface" counts as a separate outcome ONLY if it has its own user goal (verb where the user *does something with it*). If a noun is mentioned only in a styling context (color, padding, background) or as a sub-component of a parent surface (column inside a grid) → it is NOT a surface, it is styling. Count = 0.
 
 ## When to use
 
@@ -34,139 +109,155 @@ Take whatever the PM has — a one-liner, a half-baked story, a screenshot, a Fi
 - The user pastes a vague story and wants it production-ready.
 - The user drops an image/Figma link and asks for stories.
 
+For inputs that clearly cover multiple outcomes → run the deterministic split gate (step 6 below) and recommend `/story-split` instead of drafting.
+
 ## Inputs & how to interpret each
 
 ### Text prompts
-Anything from a single phrase to a paragraph. If the prompt names only a feature, infer the implicit user goal.
+Anything from a phrase to a paragraph. If only a feature is named, infer the implicit user goal and confirm via rule G if passive.
 
 ### Local images (PNG/JPG)
-Use vision. Extract:
-- UI elements (buttons, fields, navigation)
-- Visible states (loading, error, success)
-- Inferred flow (what does each element trigger?)
-- Confidence per inference (high / medium / low). Anything below high → add `> ⚠️ Assumed:` blockquote in the output and surface in clarifications.
+Use vision. Extract UI elements, visible states, inferred flow, confidence per inference. Anything below high confidence → mark inline `⚠️ Assumed`. NEVER assert pixel-precise visual specs inline with each claim — use the single banner (rule 5).
 
 ### Figma links
-If MCP Figma is available (see `[[story-from-figma]]`), use it to enumerate frames, components, navigation. If not, fall back to asking the user to drop screenshots.
+If MCP Figma is available (see `[[story-from-figma]]`), use it. If not, fall back to asking the user for screenshots.
 
-### Mixed inputs (text + image + Figma)
-
-The skill is designed to **fuse multiple sources** in a single invocation. Common pairings:
-
-- **Text + screenshot** — text states the goal, image shows the proposed UI. Use text for `User Story / Goal / Scope`, image for `Components / States / Edge cases / UX flow`.
-- **Text + Figma link** — text gives intent, Figma gives implementation surface. Use text for `User Story / Business goal`, Figma for `Technical considerations / Edge cases / Components / Multi-screen flows`.
-- **Text + image + Figma** — full triangulation. Highest fidelity; also highest chance of conflict.
-
-**Source priority (when sources disagree):**
+### Mixed inputs (text + image + Figma) — source priority
 
 | Section | Primary | Secondary | Tertiary |
 |---|---|---|---|
-| User Story / Goal | Text | Figma (frame titles, callouts) | Image |
-| Business Rules / Scope | Text | Figma | Image |
+| User Story / Goal | Text | Figma frame titles | Image |
+| Scope | Text | Figma | Image |
 | UI Components / States | Figma | Image | Text |
-| Edge Cases | Figma + Image (states shown) | Text | — |
-| Technical Considerations | Figma (component naming, design system refs) | Text | Image |
-| Acceptance Criteria | Triangulate all three | — | — |
+| AC observable outcomes | Triangulate | — | — |
 
-**Conflict handling:**
+**Conflicts → BLOCKING `AskUserQuestion`.** Never silently pick a winner.
 
-1. **Detect the conflict explicitly.** Example: text says "Google only" but Figma shows Google + Facebook buttons.
-2. **Do NOT silently pick a winner.** Surface the conflict in `clarifications.md` as a BLOCKING question: *"Text says X but design shows Y — which is canonical?"*
-3. **If the user is in-session, ask immediately** before drafting. If running batch, mark the story `DRAFT` and write both options in scope/out-of-scope with `> ⚠️ Conflict:` annotation.
-4. **Scope coverage check:** if Figma shows N flows but text describes 1, ask whether to (a) generate 1 story bounded to text, (b) generate N stories from Figma, or (c) generate 1 story + flag remaining flows as roadmap.
+## Canonical output shape
+
+```markdown
+### [Title]
+
+#### Use Case
+- **As a** [persona — never just "user"]
+- **I want to** [action]
+- **so that** [outcome with downstream action — rule G]
+
+#### Preconditions (optional)
+- ...
+
+#### Out of Scope (optional)
+- ...
+
+#### Acceptance Criteria
+- **Scenario:** [single-outcome scenario name]
+- **Given:** [context — surface nouns drive downstream dep matrix]
+- **and Given:** [context]
+- **When:** [single trigger]
+- **Then:** [single observable outcome]
+
+#### Design Reference (optional)
+**Source: <raster | figma | tokens> → <banner from rule 5>**
+- [link or path]
+- visual notes: [...]
+
+#### INVEST
+- I/N/V/E/S/T — one line each.
+- **Verdict:** READY | SPLIT RECOMMENDED | NEEDS REFINEMENT | NOT A STORY
+
+#### Generation log (≤3 lines; ≤5 if SPLIT)
+- ...
+```
+
+Nothing else. No NFR. No edge-cases enumeration. No deps prose. No Assumptions block.
 
 ## Application (step-by-step)
 
-1. **Detect input types present** — text, image, figma-link, or any combination. Branch accordingly:
-   - **Single source** → process as before.
-   - **Mixed sources** → run the "Mixed inputs" protocol above, including source-priority lookup and explicit conflict detection BEFORE drafting.
-2. **Intake gap check** — invoke `[[clarification-questions]]`. If it returns BLOCKING questions, **ask first** before drafting.
-3. **Detect language** of input (es | en | other). Output in the input language.
-4. **Draft skeleton** of the structured story (all 15 sections from the template).
-5. **Fill the CORE first** (always required, in order):
-   1. **Title** — concise, ≤8 words.
-   2. **Summary** — single value-focused sentence ("Enable Google login for trial users to reduce signup friction"), NOT a feature label ("Add Google button"). Elevator pitch.
-   3. **User Story** (As a / I want to / so that).
-      - **Persona check:** if role is "user" or "customer", push for sharper ("trial user", "Workspace admin"). Generic personas hide motivation.
-      - **"So that" check:** outcome must be distinct from action. "So I can save my work" = restating; "So I don't lose progress if tab crashes" = real motivation.
-   4. **Acceptance Criteria** via `[[acceptance-criteria]]` — at minimum the happy path + one failure mode.
-   5. **Definition of Done** via `[[definition-of-done]]`.
+0. **Detect input types** — text / image / figma-link / combination. Run conflict detection (rule 10) BEFORE drafting. Run chrome detection (rule 7).
 
-6. **Fill OPTIONAL sections only if they have real content.** Drop any that would be empty or boilerplate:
-   - Contexto / Business goal — include when there's a stated trigger or KPI
-   - Scope / Out of scope — include when boundaries are non-obvious
-   - `[[business-rules]]` — include when invariants exist beyond the ACs
-   - Technical considerations — include when surface/SDK/flag matters
-   - `[[edge-cases]]` — include when ≥3 high-impact edges exist
-   - `[[analytics-events]]` — include when story has measurable funnel
-   - `[[risks-and-dependencies]]` — include when there are real blockers or unknowns
+1. **Read prior context.** If `<output-folder>/.storywright-context.json` exists (exact folder only), load it.
 
-   The bias is **less is more**. A clean 4-section story beats a 15-section one full of `N/A`.
-6. **Run INVEST self-check** via `[[invest-checklist]]`:
-   - `READY` → continue.
-   - `NOT A STORY` (V failed) → STOP. Tell the user this is a tech task, not a user story. Suggest reframing or combining with user-facing work.
-   - `NEEDS REFINEMENT` (T or N failed) → revise the failing sections in place.
-   - `RUN A SPIKE` (E failed on unknowns) → recommend a 1–2 day investigation; do not split or generate yet.
-   - `SPLIT RECOMMENDED` (I, E, or S failed) → STOP. Hand off to `[[story-split]]`. **Never auto-split.**
-7. **Render outputs** via `[[jira-wiki-formatter]]`:
-   - `story.jira-wiki.md` — Jira wiki markup
-   - `story.standard.md` — CommonMark
-8. **If clarifications remain unresolved** (user skipped them, or low-confidence visual inferences exist):
-   - Emit `clarifications.md` with the outstanding questions
-   - Mark the story output with a `DRAFT` banner at the top
-   - Tell the user explicitly what would unblock promoting from DRAFT to READY
-9. **Present both artifacts** as fenced code blocks. Ask the user whether to save to disk (offer paths under `./stories/<slug>/`).
+2. **Language resolution** (rule 4 + 4a). Auto-detect using expanded signals; ask only on split.
+
+3. **Persona sharpening.** If persona is "user" / "customer" / "person", ask via `AskUserQuestion` for the specific role (e.g., "Sales person", "Workspace admin"). Generic personas hide motivation.
+
+4. **Passive-goal check (rule G).** If `I want to` verb is observational + `so that` lacks downstream action → ask once.
+
+5. **Gap-check** via `[[clarification-questions]]`. BLOCKING gaps → `AskUserQuestion` batched ≤4. Non-blocking → fill inline `⚠️ Assumed`.
+
+6. **Deterministic pre-split test.** Count outcomes using the same rule as `[[story-refine]]`:
+   - +1 per AC bullet with action verb at user level
+   - +1 per distinct `When [event]`
+   - +1 per named UI surface with its own user goal (rule D)
+   - 0 for styling, sub-components, passive layout assertions
+   - Count ≥2 → STOP. Recommend `/story-split`. List candidate children + per-pair dep notes (rule A) + V audit (rule C from refine).
+
+7. **Draft the canonical block** (Use Case + AC + Design Ref + INVEST). Preserve user wording where good.
+
+8. **Run INVEST** via `[[invest-checklist]]`.
+   - `READY` → render.
+   - `SPLIT RECOMMENDED` → STOP, recommend split.
+   - `NEEDS REFINEMENT` → iterate failing dimension, max 1 cycle, then STOP.
+   - `NOT A STORY` → tell user it's a tech task and stop.
+
+9. **Render** both outputs via `[[jira-wiki-formatter]]`. Files: `story.standard.md` + `story.jira-wiki.md`. Plus `.storywright-context.json`. No other files.
+
+10. **Generation log** ≤3 bullets (≤5 if SPLIT) at end of story.
 
 ## Examples
 
 ### Good — text prompt
 Input: *"Permitir login con Google"*
-
-Flow:
-1. Run gap check → 3 BLOCKING questions: scope of accounts, account linking, surface (web/mobile/both).
-2. Ask the 3 questions, wait for answers.
-3. Draft + fill all 15 sections.
-4. INVEST → `READY`.
-5. Render both outputs.
-6. Done.
+1. Language auto-detect → ES (persona "usuario", verbs "permitir").
+2. Persona sharpening → ask: trial user? admin? signed-out visitor?
+3. Pre-split count = 1 (one auth flow). Continue.
+4. Draft Use Case + 1 AC (happy path, failure as `and Given`).
+5. INVEST → READY.
+6. Render.
 
 ### Good — image input
-Input: screenshot of a dashboard with a filter sidebar.
+Input: dashboard screenshot with filter sidebar.
+1. Vision extracts filters; one inference at MEDIUM confidence → mark `⚠️ Assumed` inline.
+2. Pre-split count = 1 (one filter interaction surface).
+3. Draft + INVEST → READY.
 
-Flow:
-1. Vision: extract filter categories, infer apply/reset actions.
-2. Confidence on "filters persist across navigation" → MEDIUM → mark as `⚠️ Assumed` and surface in clarifications.
-3. Run gap check → 1 BLOCKING (does this replace or augment current filters?).
-4. Ask, draft, fill, INVEST, render.
+### Good — passive-goal prompt fires
+Input: "As a user, I want to view list of customers, so that I find details."
+- Detected: `view` (passive) + thin `so that`.
+- Ask: "What does the user do with the customer they find?"
+- User: "Call them."
+- Refined `so that`: "so that I can find and call a customer to schedule a service."
 
-### Bad
-
+### Bad — broad input drafted as one story
 Input: *"Build the new dashboard"*
+- Pre-split count ≥2 → STOP. Recommend `/story-split`. Do NOT draft a 15-section story.
 
-Don't draft. The scope is too broad. Run gap check → propose splitting into smaller stories at the **clarification step**, before the story is drafted. (Effectively delegates to `[[story-split]]` upfront.)
+### Bad — clarifications.md
+Writing any sidecar question file. Violates rule 1.
+
+### Bad — per-claim visual tag
+`[mockup-pixel-derived]` on every line instead of the single banner. Violates rule 5.
 
 ## Common Pitfalls
 
-- Drafting before asking the critical questions. Always run intake first.
-- Ignoring confidence in image inferences. If you guessed, say so.
-- Auto-splitting. Never. Propose, wait, then split.
-- Mixing English and Spanish in the output. Pick the input language.
-- Skipping the `clarifications.md` file when assumptions remain.
+- Drafting before running the deterministic split gate (step 6).
+- Auto-splitting. Never. Propose, wait for `/story-split`.
+- Mixing languages. Pick one via rule 4 + 4a.
+- Re-asking questions already resolved in `.storywright-context.json`.
+- Letting per-claim `[mockup-pixel-derived]` tags litter the output.
+- Treating image visual specs as authoritative without the rule-5 banner.
 
 ## References
 
-- [[story-refine]] (use when input is an existing story to improve)
-- [[story-split]] (use when INVEST fails on Independent/Estimable/Small)
-- [[story-from-figma]] (use when input is a Figma link)
+- [[story-refine]] (when input is an existing story)
+- [[story-split]] (when INVEST fails on I/E/S)
+- [[story-from-figma]] (when input is Figma URL)
 - [[clarification-questions]]
 
-## Output templates
-
-See `templates/story.jira-wiki.md` and `templates/story.standard.md` in this skill's folder for the canonical section ordering and formatting.
-
 <claude-specific>
-- Use extended thinking for INVEST check and for vision confidence scoring.
-- Cache the 15-section taxonomy and component invocation order across calls.
-- When input includes images, attach them to the same message as the prompt to use Claude's native vision (do not describe-then-reason in two steps).
-- Use prompt caching on the component skill bodies (they're long and reused).
+- Use extended thinking for INVEST + pre-split counting.
+- Attach images in the same message for native vision; don't describe-then-reason in two steps.
+- Read `.storywright-context.json` ONLY from the exact target output folder.
+- Never call Write for any sidecar question file. Use `AskUserQuestion`.
+- Treat step 6 (deterministic pre-split test) as a hard gate; do not skip even when the user wants a single story.
 </claude-specific>
