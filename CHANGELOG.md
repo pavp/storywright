@@ -1,3 +1,9 @@
+## [1.9.0](https://github.com/pavp/storywright/compare/v1.8.3...v1.9.0) (2026-05-28)
+
+### ✨ Features
+
+* **base:** write story outputs to docs/stories/, git-ignored via folder .gitignore ([0326340](https://github.com/pavp/storywright/commit/0326340c51d3ee8802eeb399c5cded3e25236840))
+
 ## [1.8.3](https://github.com/pavp/storywright/compare/v1.8.2...v1.8.3) (2026-05-28)
 
 ### 🐛 Bug Fixes
