@@ -1,3 +1,9 @@
+## [1.11.0](https://github.com/pavp/storywright/compare/v1.10.1...v1.11.0) (2026-05-28)
+
+### ✨ Features
+
+* **install:** auto-add docs/storywright/ to ~/.gitignore_global on install ([29533ef](https://github.com/pavp/storywright/commit/29533ef435ee90a30fef0176a11478a736930fa6))
+
 ## [1.10.1](https://github.com/pavp/storywright/compare/v1.10.0...v1.10.1) (2026-05-28)
 
 ### 🐛 Bug Fixes
