@@ -1,3 +1,9 @@
+## [1.8.1](https://github.com/pavp/storywright/compare/v1.8.0...v1.8.1) (2026-05-28)
+
+### 🐛 Bug Fixes
+
+* **formatter:** explicitly call Write tool to persist story .md files to disk ([a9cc185](https://github.com/pavp/storywright/commit/a9cc185d0d59db6dcf977393c1cee70dbd976bea))
+
 ## [1.8.0](https://github.com/pavp/storywright/compare/v1.7.0...v1.8.0) (2026-05-28)
 
 ### ✨ Features
