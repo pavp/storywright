@@ -20,6 +20,10 @@ h3. Definition of Done
 
 ----
 
+{panel:title=PM-facing — no technical detail}
+Technical Considerations, Edge Cases, Analytics, Risks & Dependencies live in story.dev.md (rule 3). Optional sections below — keep only those with content.
+{panel}
+
 h3. Contexto
 {{trigger: feedback / OKR / incident / competitor}}
 
@@ -34,21 +38,3 @@ h3. Out of Scope
 
 h3. Business Rules
 # {{rule 1}}
-
-h3. Technical Considerations
-* {{api / sdk / flag / data model}}
-
-h3. Dependencies
-||What||Owner||Status||Blocks?||
-|{{dep}}|{{owner}}|{{READY/IN-PROGRESS}}|{{Yes/No}}|
-
-h3. Risks
-||Risk||L||I||Mitigation||
-|{{risk}}|{{L/M/H}}|{{L/M/H}}|{{action}}|
-
-h3. Analytics
-||Event||Trigger||Payload||
-|{{event_name}}|{{when}}|{{fields}}|
-
-h3. Edge Cases
-* *{{axis}}:* {{behavior}}

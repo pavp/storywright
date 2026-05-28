@@ -57,13 +57,30 @@ async function main() {
     }
   }
 
+  const referencedComponents = new Set();
   for (const f of files) {
     const skill = await loadSkill(f);
     const composes = Array.isArray(skill.frontmatter.composes) ? skill.frontmatter.composes : [];
     for (const dep of composes) {
       if (!componentPaths.has(dep)) {
         errors.push(`${skill.relPath}: composes references missing component '${dep}'`);
+      } else {
+        referencedComponents.add(dep);
       }
+    }
+    // Body [[name]] links also count as a reference, so a component used only via
+    // prose cross-link (not composed) is not flagged as orphaned.
+    for (const m of skill.body.matchAll(/\[\[([a-z0-9-]+)\]\]/g)) {
+      referencedComponents.add(`_components/${m[1]}`);
+    }
+  }
+
+  // Orphan check: every component must be referenced by at least one skill
+  // (via composes or a body [[link]]). Catches dead/stale components that
+  // pass the existence check but are wired to nothing.
+  for (const comp of componentPaths) {
+    if (!referencedComponents.has(comp)) {
+      errors.push(`${comp}: orphaned component — referenced by no skill (composes or [[link]])`);
     }
   }
 

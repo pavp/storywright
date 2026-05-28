@@ -17,6 +17,10 @@ async function installSkills() {
   }
   await mkdir(skillsTarget, { recursive: true });
   await cp(SKILLS_DIR, skillsTarget, { recursive: true });
+  // Verify the copy landed — cp can silently no-op on permission quirks.
+  if (!(await pathExists(join(skillsTarget, "_components")))) {
+    throw new Error(`copy verification failed: ${skillsTarget}/_components missing after install`);
+  }
   console.log(`✓ Installed skills to ${skillsTarget}`);
 }
 
@@ -49,7 +53,9 @@ async function ensureGlobalGitignore() {
     globalIgnorePath = join(homedir(), ".gitignore_global");
     execSync(`git config --global core.excludesFile "${globalIgnorePath}"`);
   }
-  if (globalIgnorePath.startsWith("~")) {
+  if (globalIgnorePath === "~") {
+    globalIgnorePath = homedir();
+  } else if (globalIgnorePath.startsWith("~/")) {
     globalIgnorePath = join(homedir(), globalIgnorePath.slice(2));
   }
 

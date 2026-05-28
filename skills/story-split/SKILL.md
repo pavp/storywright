@@ -10,14 +10,23 @@ inputs:
   - figma-link
 outputs:
   - epic.md
-  - story-1.md
-  - story-2.md
+  - story-1.standard.md
+  - story-1.jira-wiki.md
+  - story-1.dev.md
+  - story-2.standard.md
+  - story-2.jira-wiki.md
+  - story-2.dev.md
   - .storywright-context.json
 composes:
   - _components/storywright-base
   - _components/invest-checklist
   - _components/clarification-questions
+  - _components/business-rules
   - _components/acceptance-criteria
+  - _components/edge-cases
+  - _components/analytics-events
+  - _components/risks-and-dependencies
+  - _components/definition-of-done
   - _components/jira-wiki-formatter
 ---
 
@@ -35,8 +44,8 @@ When a story is an epic in disguise, splitting badly is worse than not splitting
 ## Split behavior differential
 
 This skill IS the split behavior. It always emits multiple files:
-- `epic.md` — title, why-split, INVEST failure reasons, mechanical NxN matrix, build order, V audit per child, list of children.
-- `story-1.md`, `story-2.md`, … — one canonical story per child (per base shape).
+- `epic.md` — title, why-split, INVEST failure reasons, mechanical NxN matrix, build order, V audit per child, list of children. Single file (epic metadata, not a user story).
+- Per child: the full 3-file trio `story-<N>.standard.md` + `story-<N>.jira-wiki.md` + `story-<N>.dev.md`, rendered via `[[jira-wiki-formatter]]` — same contract as every other story-producing skill. Each child is a canonical user story (per base shape).
 - `.storywright-context.json` — persisted answers.
 
 NO `split-plan.md`. The plan lives inside `epic.md`.
@@ -107,7 +116,7 @@ Follow the **base Application** skeleton for the front-end behaviors (context lo
 
 5. **STOP and ask the user to approve via `AskUserQuestion`.**
 
-6. **For each approved child, write the base canonical block.** Each child is its own file (`story-<N>.md`).
+6. **For each approved child, write the base canonical block, then render via `[[jira-wiki-formatter]]` to the 3-file trio** (`story-<N>.standard.md` + `story-<N>.jira-wiki.md` + `story-<N>.dev.md`). The child's enrichment (edge cases, risks, analytics) populates its `story-<N>.dev.md` per base step 8b.
 
 7. **Build dependency matrix mechanically (base rule 10).** Render in `epic.md`.
 
