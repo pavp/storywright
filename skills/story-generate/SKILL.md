@@ -47,8 +47,11 @@ Conflicts → BLOCKING `AskUserQuestion` per base rule 1.
 If the base **deterministic pre-split test** returns count ≥2:
 - **STOP drafting.**
 - Output a terminal message listing candidate children + per-pair dep notes (base rule 10) + V audit (base rule 11).
-- Recommend `/story-split` to the user.
-- Do NOT auto-split, do NOT produce a 15-section story.
+- Show candidate children + dep notes + V audit.
+- Ask via `AskUserQuestion`: "This story has [N] independent flows. Run split now?" with options "Yes, split" / "No, keep as-is".
+- If user approves → execute `[[story-split]]` inline (epic + children + .storywright-context.json).
+- If user declines → stop. No output written.
+- Do NOT silently auto-split without the AskUserQuestion confirmation.
 
 If count ≤1:
 - Proceed with the base step-by-step Application skeleton (read context → language → persona → passive-goal → gap-check → siblings → fill canonical block → INVEST → render).

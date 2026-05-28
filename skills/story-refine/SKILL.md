@@ -39,9 +39,11 @@ Bring an existing user story up to standard *without* turning it into a feature 
 
 If the base **deterministic pre-split test** returns count ≥2:
 - **STOP refining.**
-- Output a terminal message listing candidate children + per-pair dep notes (base rule 10) + V audit (base rule 11).
-- Recommend `/story-split` to the user.
-- Do NOT produce an oversized refined story.
+- Show candidate children + per-pair dep notes (base rule 10) + V audit (base rule 11).
+- Ask via `AskUserQuestion`: "This story has [N] independent flows. Run split now?" with options "Yes, split" / "No, keep as-is".
+- If user approves → execute `[[story-split]]` inline (epic + children + .storywright-context.json).
+- If user declines → stop. No output written.
+- Do NOT silently auto-split without the AskUserQuestion confirmation.
 
 If count ≤1:
 - Proceed with the base step-by-step Application skeleton, applying the source-specific preservation rules above.
