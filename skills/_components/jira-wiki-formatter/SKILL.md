@@ -63,7 +63,7 @@ Final step in `story-generate` and `story-refine`. Always last.
    15. Edge Cases
 
 4. **Drop any section with no real content.** An empty heading is noise. A story with only the 5 core sections is a valid output.
-5. Always write `story.standard.md` and `story.jira-wiki.md` to disk. Also emit both as fenced code blocks in the chat so the user can copy them. Never ask whether to save — always save.
+5. Always write `story.standard.md` and `story.jira-wiki.md` to disk using the `Write` tool (Claude Code). Also emit both as fenced code blocks in the chat so the user can copy them. Never ask whether to save — always save. If `Write` tool is unavailable, emit in chat only and note the limitation.
 
 ## Examples
 
