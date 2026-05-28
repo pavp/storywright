@@ -1,3 +1,9 @@
+## [1.6.1](https://github.com/pavp/storywright/compare/v1.6.0...v1.6.1) (2026-05-28)
+
+### ♻️ Refactors
+
+* **skills:** extract storywright-base component for shared v2.2 behavior ([4555fcb](https://github.com/pavp/storywright/commit/4555fcb5559a2178cc1a4e5485bdf42c1f7757cb))
+
 ## [1.6.0](https://github.com/pavp/storywright/compare/v1.5.0...v1.6.0) (2026-05-28)
 
 ### ✨ Features
