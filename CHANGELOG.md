@@ -1,3 +1,9 @@
+## [1.7.0](https://github.com/pavp/storywright/compare/v1.6.3...v1.7.0) (2026-05-28)
+
+### ✨ Features
+
+* **skills:** inline split confirmation via AskUserQuestion on count ≥2 ([95469ad](https://github.com/pavp/storywright/commit/95469ad55ac5b473e62e85865a30a9410e7d70be))
+
 ## [1.6.3](https://github.com/pavp/storywright/compare/v1.6.2...v1.6.3) (2026-05-28)
 
 ### 🐛 Bug Fixes
