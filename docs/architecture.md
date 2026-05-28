@@ -28,20 +28,27 @@
 
 ## Composition
 
-Top-level skills name their components in `composes:` frontmatter. The validator confirms every referenced component exists. Composition is enforced at lint time, not at runtime — Claude reads the skill body and follows the references naturally.
+Top-level skills name their components in `composes:` frontmatter. The validator confirms every referenced component exists **and that no component is orphaned** (referenced by zero skills). Composition is enforced at lint time, not at runtime — Claude reads the skill body and follows the references naturally.
+
+All four top-level skills (`story-generate`, `story-refine`, `story-split`, `story-from-figma`) compose the **same 10 components**:
 
 ```
-story-generate
+story-generate / story-refine / story-split / story-from-figma
+├─ storywright-base          ← shared rulebook (inherited by all)
 ├─ clarification-questions
-├─ business-rules
-├─ edge-cases
+├─ business-rules            ← optional PM section + dev.md
 ├─ acceptance-criteria
-├─ analytics-events
-├─ risks-and-dependencies
-├─ definition-of-done
+├─ edge-cases                ← dev.md only (rule 3a)
+├─ analytics-events          ← dev.md only
+├─ risks-and-dependencies    ← dev.md only
+├─ definition-of-done        ← acceptance-only in PM, full in dev.md
 ├─ invest-checklist
-└─ jira-wiki-formatter
+└─ jira-wiki-formatter       ← renders the 3-file trio
 ```
+
+### PM ↔ dev split
+
+The PM-facing files (`story.standard.md`, `story.jira-wiki.md`) carry only what a PM needs — no file paths, imports, or commands (`storywright-base` rule 3). Technical detail produced by the enrichment components (edge cases, analytics events, risks/dependencies, command-level DoD) is **not discarded** — it is rendered into `story.dev.md` (rule 3a). This is why the five enrichment components are composed but never emit sections into the PM body.
 
 ## Multi-provider stance
 
