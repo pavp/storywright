@@ -15,7 +15,7 @@ storywright/
 │   ├── story-refine/
 │   ├── story-split/
 │   ├── story-from-figma/
-│   └── _components/          ← 9 components composed by top-level skills
+│   └── _components/          ← 10 components composed by top-level skills
 ├── commands/                 ← slash-command entrypoints for ~/.claude/commands/
 ├── bin/storywright.mjs       ← CLI
 ├── scripts/                  ← install / uninstall / validate / zip / list
@@ -52,16 +52,17 @@ The 4 top-level skills:
 | `story-split` | Oversize story → INVEST-driven epic + children | `/storywright-story-split` |
 | `story-from-figma` | Figma URL → one story per flow | `/storywright-story-from-figma` |
 
-The 9 components (composed by top-level skills):
+The 10 components (composed by top-level skills). All 4 top-level skills compose all 10:
+- `storywright-base` — shared rulebook (hard rules, canonical shape, PM↔dev split, mechanical pre-split/deps, language detect). Every top-level skill inherits this.
 - `clarification-questions` — minimum critical questions across 9 axes (including multi-source conflicts)
 - `acceptance-criteria` — Given/When/Then ACs; splitting signal on multiple When/Then
 - `invest-checklist` — INVEST self-check with verdict mapping to next action
-- `definition-of-done` — DoD checkbox baseline, trimmable per surface
-- `business-rules` — policy invariants (eligibility / limits / permissions / data validity / compliance / lifecycle)
-- `edge-cases` — 8 axes (boundary / network / concurrency / permission / data / state / external / UX)
-- `analytics-events` — funnel events + payload taxonomy with PII boundary
-- `risks-and-dependencies` — risks (technical / product / security / ops) + deps with owner+status
-- `jira-wiki-formatter` — renders core (always) + optional (only when non-empty), dual format
+- `definition-of-done` — DoD baseline; acceptance-only projection in PM files, full command-level DoD in `story.dev.md`
+- `business-rules` — policy invariants; optional PM section + mirrored in `story.dev.md`
+- `edge-cases` — 8 technical failure axes → `story.dev.md` only (rule 3a; never the PM body)
+- `analytics-events` — funnel events + payload taxonomy with PII boundary → `story.dev.md` only
+- `risks-and-dependencies` — risks + deps with owner+status → `story.dev.md` only
+- `jira-wiki-formatter` — renders the 3-file trio (PM standard + PM jira-wiki + dev)
 
 ## Repo conventions
 
@@ -70,7 +71,7 @@ The 9 components (composed by top-level skills):
 - **Pure ESM** (`"type": "module"` + `.mjs`). No CommonJS.
 - **No build step.** Scripts are runnable directly via `node`.
 - **No LLM in code.** All AI behavior lives in the Markdown skills.
-- **Dual output mandatory.** Every story-producing skill emits `story.jira-wiki.md` + `story.standard.md`. Core sections always; optional sections only when populated.
+- **Triple output mandatory.** Every story-producing skill emits three files per story: `story.standard.md` + `story.jira-wiki.md` (PM-facing, no technical detail) + `story.dev.md` (dev-facing, full technical detail). This includes children produced by `story-split` (one trio per child; `epic.md` is the single exception — epic metadata, not a story). Core PM sections always; optional PM sections only when populated; technical detail (edge cases, risks, analytics, command-level DoD) lives in `story.dev.md` only.
 
 ## Validation
 

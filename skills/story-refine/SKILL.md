@@ -16,7 +16,12 @@ outputs:
 composes:
   - _components/storywright-base
   - _components/clarification-questions
+  - _components/business-rules
   - _components/acceptance-criteria
+  - _components/edge-cases
+  - _components/analytics-events
+  - _components/risks-and-dependencies
+  - _components/definition-of-done
   - _components/invest-checklist
   - _components/jira-wiki-formatter
 ---

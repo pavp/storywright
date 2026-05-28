@@ -20,7 +20,12 @@
 
 ---
 
-<!-- Optional sections — keep only those with content. Delete the rest. -->
+<!--
+  PM-facing file. NO technical detail (rule 3): no file paths, imports, commands,
+  edge-case sections, NFR blocks, or dependency prose. Technical Considerations,
+  Edge Cases, Analytics, Risks & Dependencies live in story.dev.md.
+  Optional sections below — keep only those with content. Delete the rest.
+-->
 
 ## Contexto
 {{trigger: feedback / OKR / incident / competitor}}
@@ -36,24 +41,3 @@
 
 ## Business Rules
 1. {{rule 1}}
-
-## Technical Considerations
-- {{api / sdk / flag / data model}}
-
-## Dependencies
-| What | Owner | Status | Blocks? |
-|---|---|---|---|
-| {{dep}} | {{owner}} | {{READY/IN-PROGRESS}} | {{Yes/No}} |
-
-## Risks
-| Risk | L | I | Mitigation |
-|---|---|---|---|
-| {{risk}} | {{L/M/H}} | {{L/M/H}} | {{action}} |
-
-## Analytics
-| Event | Trigger | Payload |
-|---|---|---|
-| `{{event_name}}` | {{when}} | {{fields}} |
-
-## Edge Cases
-- **{{axis}}:** {{behavior}}

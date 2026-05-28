@@ -3,7 +3,7 @@ name: definition-of-done
 description: Produce a Definition of Done block for a user story. Covers code, tests, analytics, docs, accessibility, and release gates. Returns only the DoD block.
 trigger: "internal use by story-* skills"
 intent: Component skill that emits a baseline DoD aligned to common product/eng standards. Customizable via project-level overrides documented in the story.
-version: 1.0.0
+version: 2.0.0
 inputs:
   - story-context
   - technical-considerations
@@ -17,7 +17,7 @@ A Definition of Done is the contract for "shippable". It must be **checkable, ob
 
 ## When to use
 
-Invoked by `story-generate` after acceptance criteria and technical considerations are drafted.
+Invoked after acceptance criteria and technical considerations are drafted. DoD is **dual-rendered** (see `[[jira-wiki-formatter]]`): the PM-facing files (`story.standard.md` / `story.jira-wiki.md`) carry the **acceptance-only** DoD (no CLI commands, no file-level criteria); `story.dev.md` carries the **full** DoD including CLI commands (`npm run test`) and file-level lines. Produce both projections from the baseline below: PM projection = drop command/file lines; dev projection = keep everything.
 
 ## Inputs & interpretation
 

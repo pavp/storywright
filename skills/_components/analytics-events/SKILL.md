@@ -3,12 +3,12 @@ name: analytics-events
 description: Propose analytics/event tracking for a story. Names events, payloads, and trigger points. Returns only the analytics block, ready for ProductOps to map.
 trigger: "internal use by story-* skills"
 intent: Component skill that drafts a small, opinionated set of analytics events using a consistent naming convention.
-version: 1.0.0
+version: 2.0.0
 inputs:
   - story-context
   - acceptance-criteria
 outputs:
-  - analytics-events-block
+  - analytics-events-block (dev.md only)
 ---
 
 ## Purpose
@@ -17,7 +17,7 @@ Stories without analytics are stories without feedback. Propose the minimum set 
 
 ## When to use
 
-After acceptance criteria are drafted; events should align to observable AC outcomes.
+**Dev-file only.** Invoked while rendering `story.dev.md`, after acceptance criteria are drafted; events align to observable AC outcomes. Event names, payloads, and PII boundaries are technical detail — they belong in `story.dev.md`, never the PM-facing files (`[[storywright-base]]` rule 3).
 
 ## Inputs & interpretation
 
@@ -42,7 +42,7 @@ After acceptance criteria are drafted; events should align to observable AC outc
    - `🔧 ops` — feeds error monitoring
    - `💰 revenue` — feeds growth metrics
 5. Note retention/PII boundaries explicitly when sensitive (e.g., emails hashed).
-6. Emit under `### Analytics / Eventos`.
+6. Emit under `### Analytics / Eventos` **inside `story.dev.md`**.
 
 Example block:
 

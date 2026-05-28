@@ -9,12 +9,18 @@ inputs:
 outputs:
   - story-1.standard.md
   - story-1.jira-wiki.md
+  - story-1.dev.md
   - flow-summary.md
   - .storywright-context.json
 composes:
   - _components/storywright-base
   - _components/clarification-questions
+  - _components/business-rules
   - _components/acceptance-criteria
+  - _components/edge-cases
+  - _components/analytics-events
+  - _components/risks-and-dependencies
+  - _components/definition-of-done
   - _components/invest-checklist
   - _components/jira-wiki-formatter
 ---
@@ -85,15 +91,15 @@ Use the base canonical output shape. Design Reference banner per source-specific
 
 ### Phase 5 — Output
 
-Per drafted flow:
-- `story-<N>.standard.md` + `story-<N>.jira-wiki.md`.
+Per drafted flow, render the full trio via `[[jira-wiki-formatter]]` (same 3-file contract as `story-generate` / `story-refine`):
+- `story-<N>.standard.md` + `story-<N>.jira-wiki.md` (PM-facing) + `story-<N>.dev.md` (dev-facing).
 
 If N>1 OR any flow was routed to split:
 - `flow-summary.md` with the matrix, V audit, build order, and SPLIT-RECOMMENDED markers.
 
 Plus `.storywright-context.json` updated (`extra.figma_url`, `extra.figma_scope`, `extra.mcp_available`).
 
-NO `clarifications.md`. NO Edge Cases sections. NO NFR blocks. NO per-claim visual tags.
+NO `clarifications.md`. NO Edge Cases / NFR sections **in the PM files** (they live in `story-<N>.dev.md` per base rule 3a). NO per-claim visual tags.
 
 ## Examples
 
@@ -124,7 +130,7 @@ Skipping the mechanical matrix in `flow-summary.md` when N>1.
 
 - Treating each frame as a story.
 - Skipping prototype-link analysis — without flow structure, user goals are guesses.
-- Ignoring empty/error/loading states. Fold into AC failure paths, not edge-case sections.
+- Ignoring empty/error/loading states. In the PM files fold them into AC failure paths (no edge-case section); the technical detail goes to `story-<N>.dev.md`.
 - Trusting MEDIUM/LOW inferences silently — mark `⚠️ Assumed`.
 - Skipping per-story V audit when N>1 (figma flows over-split easily).
 - All other pitfalls in `[[storywright-base]]` apply equally.

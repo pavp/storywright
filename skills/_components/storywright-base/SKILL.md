@@ -3,7 +3,7 @@ name: storywright-base
 description: Shared base behavior for all storywright top-level skills. Hard rules, canonical output, terminal-only Q, context schema, mechanical deps, V audit, language detect.
 trigger: "internal use by story-* skills"
 intent: Component skill that holds the v2.2 baseline. Top-level skills (story-generate, story-refine, story-split, story-from-figma) compose this and add only their source-specific behavior on top.
-version: 2.2.0
+version: 2.3.0
 inputs:
   - none
 outputs:
@@ -31,12 +31,14 @@ If you are reading this through a top-level skill, treat every rule below as non
    - ONE AC Scenario (one Given chain + one `When` + one `Then`).
    If the input naturally needs >1 `When`/`Then`, the skill MUST stop the single-story path and route to `[[story-split]]`.
 
-3. **No mini-PRDs.** PROHIBITED sections in any story output:
+3. **No mini-PRDs in the PM story body.** PROHIBITED in `story.standard.md` / `story.jira-wiki.md`:
    - Non-Functional Requirements blocks (a11y/i18n/perf/tokens) — DoD only.
    - Edge Cases enumerated as their own section — fold into AC failure paths.
    - Dependencies as prose — Jira ticket links only.
    - Per-claim visual specs (pixel measurements, hex inferences) inline — use single banner (rule 5).
    - Logs >3 lines (>5 if SPLIT verdict).
+
+3a. **Technical detail lives in `story.dev.md`.** The content rule 3 bans from the PM body is NOT discarded — it is rendered in the dev-facing file. Edge cases, analytics events, risks/dependencies, technical considerations, and the command-level DoD belong in `story.dev.md`, populated by the enrichment components (Application step 8b). The PM↔dev split is the home for this content; rule 3 governs the PM files, `story.dev.md` carries the technical detail. See `[[jira-wiki-formatter]]` for the audience table.
 
 4. **Output language matches the user's chat language**, not the input's. Auto-detect first via rule 4a; only ask via `AskUserQuestion` if signals split.
 
@@ -218,7 +220,15 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
    - Count ≤1 → continue to step 8 (single-story path).
    - Count ≥2 → execute the **host skill's split behavior** (see Source-specific differential in each top-level skill).
 
-8. **Fill the canonical block** (Use Case + AC + Design Ref + INVEST). Preserve original wording where it was already good. NEVER invent NFR/edge-case/deps sections.
+8. **Fill the canonical block** (Use Case + AC + Design Ref + INVEST). Preserve original wording where it was already good. NEVER invent NFR/edge-case/deps sections **in the PM story body** — rule 3 still holds for `story.standard.md` / `story.jira-wiki.md`.
+
+8b. **Gather dev-file enrichment** (feeds `story.dev.md` only — see rule 3a). Invoke the enrichment components to populate the technical sections of the dev file:
+   - `[[edge-cases]]` → `### Edge Cases` (technical failure axes)
+   - `[[risks-and-dependencies]]` → `### Dependencias` + `### Riesgos`
+   - `[[analytics-events]]` → `### Analytics / Eventos`
+   - `[[definition-of-done]]` → full DoD with CLI commands (PM files get the acceptance-only projection)
+   - `[[business-rules]]` → policy invariants (also an *optional* PM section per `[[jira-wiki-formatter]]` when non-empty)
+   None of these may appear in the PM story body except the optional Business Rules section. Skip any component whose output is empty (drop empty sections — rule 3 / jira-wiki-formatter).
 
 9. **Run INVEST** via `[[invest-checklist]]`.
    - `READY` → render.
