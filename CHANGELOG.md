@@ -1,3 +1,9 @@
+## [1.10.0](https://github.com/pavp/storywright/compare/v1.9.0...v1.10.0) (2026-05-28)
+
+### ✨ Features
+
+* **base:** output to docs/storywright/YYYY-MM-DD-HHmm-slug/ per execution ([f3b0f06](https://github.com/pavp/storywright/commit/f3b0f0668f77a9729429a1414f7fcf6c29712342))
+
 ## [1.9.0](https://github.com/pavp/storywright/compare/v1.8.3...v1.9.0) (2026-05-28)
 
 ### ✨ Features
