@@ -1,3 +1,9 @@
+## [1.6.0](https://github.com/pavp/storywright/compare/v1.5.0...v1.6.0) (2026-05-28)
+
+### ✨ Features
+
+* **skills:** bring story-generate, story-split, story-from-figma to v2.2 parity ([e93c6c9](https://github.com/pavp/storywright/commit/e93c6c9a58d8a6eb3d13e87e0007b42faa54e4b8))
+
 ## [1.5.0](https://github.com/pavp/storywright/compare/v1.4.0...v1.5.0) (2026-05-28)
 
 ### ✨ Features
