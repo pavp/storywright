@@ -1,3 +1,9 @@
+## [1.11.1](https://github.com/pavp/storywright/compare/v1.11.0...v1.11.1) (2026-05-28)
+
+### 🐛 Bug Fixes
+
+* **commands:** write .storywright-context.json as third file in step 7 ([7fa951b](https://github.com/pavp/storywright/commit/7fa951bb63c3c30d92f68604e374303924ac981f))
+
 ## [1.11.0](https://github.com/pavp/storywright/compare/v1.10.1...v1.11.0) (2026-05-28)
 
 ### ✨ Features
