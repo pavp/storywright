@@ -3,7 +3,7 @@ name: storywright-base
 description: Shared base behavior for all storywright top-level skills. Hard rules, canonical output, terminal-only Q, context schema, mechanical deps, V audit, language detect.
 trigger: "internal use by story-* skills"
 intent: Component skill that holds the v2.2 baseline. Top-level skills (story-generate, story-refine, story-split, story-from-figma) compose this and add only their source-specific behavior on top.
-version: 2.3.0
+version: 2.4.0
 inputs:
   - none
 outputs:
@@ -95,6 +95,14 @@ If you are reading this through a top-level skill, treat every rule below as non
     Do not let stylistic/UI-fragment children survive a split.
 
 12. **Passive-goal downstream prompt (rule G).** If the story's `I want to` verb is observational (`view, see, read, browse, look at, inspect, monitor`) AND the `so that` does not name a follow-up user action — ask once via `AskUserQuestion`: "What does the user do with this?". Strengthen the `so that` accordingly. Skip if `so that` already names a downstream action.
+
+13. **PM section whitelist (rule H).** Only these section names may appear in `story.standard.md` and `story.jira-wiki.md`:
+
+    **ALLOWED:** User Story, Acceptance Criteria, Definition of Done, Contexto, Business Goal, Scope, Out of Scope, Business Rules. (`**Summary:**` is inline text, not a section heading — it is not subject to this list.)
+
+    **BANNED** (move content to `story.dev.md`, never emit in PM files): Edge Cases, Non-Functional Requirements, NFR, Performance, Security, Accessibility, Technical Considerations, Analytics, Risks, Dependencies, Dependencias, Riesgos — and any section whose name does not appear in the ALLOWED list above.
+
+    If you find yourself writing a banned section into a PM file, stop. Move its content to `story.dev.md` instead (use `## Technical Considerations` as the target heading for Accessibility, Performance, and Security content). Do not silently drop it.
 
 ### 4a. Language auto-detect — expanded signals (rule E)
 
@@ -222,13 +230,22 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
 
 8. **Fill the canonical block** (Use Case + AC + Design Ref + INVEST). Preserve original wording where it was already good. NEVER invent NFR/edge-case/deps sections **in the PM story body** — rule 3 still holds for `story.standard.md` / `story.jira-wiki.md`.
 
+   **Summary line (mandatory).** Generate `**Summary:**` immediately after the title — one sentence, value-focused, no heading. This line is MANDATORY in all three output files. Format: `**Summary:** <sentence>` in CommonMark files, `*Summary:* <sentence>` in the Jira wiki file. Never omit it.
+
+8.5. **PM section self-audit (rule H).** Before calling [[jira-wiki-formatter]], enumerate every section drafted for the PM files. For each section name:
+     - In Rule H ALLOWED list → keep.
+     - In Rule H BANNED list → move its content to `story.dev.md`.
+     - Not in either list → treat as BANNED, move to `story.dev.md`.
+     Log any moves in the Refinement Log: "Moved <Section> to dev (rule H)."
+     Do not proceed to step 8b until the PM draft contains only ALLOWED sections.
+
 8b. **Gather dev-file enrichment** (feeds `story.dev.md` only — see rule 3a). Invoke the enrichment components to populate the technical sections of the dev file:
    - `[[edge-cases]]` → `### Edge Cases` (technical failure axes)
    - `[[risks-and-dependencies]]` → `### Dependencias` + `### Riesgos`
    - `[[analytics-events]]` → `### Analytics / Eventos`
    - `[[definition-of-done]]` → full DoD with CLI commands (PM files get the acceptance-only projection)
    - `[[business-rules]]` → policy invariants (also an *optional* PM section per `[[jira-wiki-formatter]]` when non-empty)
-   None of these may appear in the PM story body except the optional Business Rules section. Skip any component whose output is empty (drop empty sections — rule 3 / jira-wiki-formatter).
+   None of these may appear in the PM story body except the optional Business Rules section (see Rule H for the full PM section whitelist). Skip any component whose output is empty (drop empty sections — rule 3 / jira-wiki-formatter).
 
 9. **Run INVEST** via `[[invest-checklist]]`.
    - `READY` → render.
