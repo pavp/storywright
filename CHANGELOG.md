@@ -1,3 +1,9 @@
+## [1.12.2](https://github.com/pavp/storywright/compare/v1.12.1...v1.12.2) (2026-05-29)
+
+### 📝 Docs
+
+* master context doc + branch+PR convention ([#5](https://github.com/pavp/storywright/issues/5)) ([9c849e9](https://github.com/pavp/storywright/commit/9c849e905a428578a98de387c1aa171add512edf))
+
 ## [1.12.1](https://github.com/pavp/storywright/compare/v1.12.0...v1.12.1) (2026-05-28)
 
 ### 🐛 Bug Fixes
