@@ -3,7 +3,7 @@ name: storywright-base
 description: Shared base behavior for all storywright top-level skills. Hard rules, canonical output, terminal-only Q, context schema, mechanical deps, V audit, language detect.
 trigger: "internal use by story-* skills"
 intent: Component skill that holds the v2.2 baseline. Top-level skills (story-generate, story-refine, story-split, story-from-figma) compose this and add only their source-specific behavior on top.
-version: 2.3.0
+version: 2.4.0
 inputs:
   - none
 outputs:
@@ -74,6 +74,7 @@ If you are reading this through a top-level skill, treat every rule below as non
      "siblings": "TODO | <list of IDs> | not-applicable",
      "design_source": "raster | figma | tokens",
      "naming_pattern": "kebab-feature-action | verb-noun | domain-action | jira-prefix",
+     "source_grounding": "inferred | workspace-confirmed",
      "extra": {}
    }
    ```
@@ -95,6 +96,11 @@ If you are reading this through a top-level skill, treat every rule below as non
     Do not let stylistic/UI-fragment children survive a split.
 
 12. **Passive-goal downstream prompt (rule G).** If the story's `I want to` verb is observational (`view, see, read, browse, look at, inspect, monitor`) AND the `so that` does not name a follow-up user action — ask once via `AskUserQuestion`: "What does the user do with this?". Strengthen the `so that` accordingly. Skip if `so that` already names a downstream action.
+
+13. **Governed source of truth for `story.dev.md`.** The technical detail in `story.dev.md` (endpoints, flags, file paths, CLI commands) has exactly two provenances, and the skill MUST declare which:
+    - `inferred` — filled from domain knowledge; plausible but NOT confirmed against any code. This is the default and the only mode when no workspace is available.
+    - `workspace-confirmed` — verified against the open workspace via the runtime's native Read/Grep/Glob; anything not found stays `⚠️ Assumed`.
+    Resolve the provenance via step 7b (Application) and persist it in `.storywright-context.json.source_grounding`. **Never read the user's workspace until `source_grounding` is resolved** — undeclared, opportunistic repo reads are forbidden (they make the output non-reproducible). This rule governs `story.dev.md` only; the PM files never touch code regardless of mode (rule 3 still holds).
 
 ### 4a. Language auto-detect — expanded signals (rule E)
 
@@ -217,8 +223,17 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
 6. **Sibling reference check.** If unlinked references found → ask once. If user opts for tentative slugs, apply rule F. Persist via rule 9.
 
 7. **Deterministic pre-split test.** Apply the table above mechanically.
-   - Count ≤1 → continue to step 8 (single-story path).
+   - Count ≤1 → continue to step 7b (single-story path).
    - Count ≥2 → execute the **host skill's split behavior** (see Source-specific differential in each top-level skill).
+
+7b. **Grounding resolution (rule 13).** Decide where `story.dev.md`'s technical detail comes from, BEFORE filling any technical section.
+   - If `.storywright-context.json` already has `source_grounding` → use it, do not ask.
+   - Else `AskUserQuestion` (one option set, respects rule 1): *"How should I produce the technical detail in `story.dev.md`?"*
+     - `Infer from the requirement` (default) → `source_grounding = inferred`.
+     - `Confirm against my open code` → `source_grounding = workspace-confirmed`.
+   - Persist the answer via rule 9.
+   - If `workspace-confirmed`: when filling step 8b, use the runtime's native Read/Grep/Glob to confirm real endpoints/flags/paths before writing them; mark anything not found `⚠️ Assumed`. If the workspace is empty or yields no matches, fall back to `inferred`, say so once, and do NOT re-ask.
+   - The chosen mode drives the `[[jira-wiki-formatter]]` source banner at the top of `story.dev.md`.
 
 8. **Fill the canonical block** (Use Case + AC + Design Ref + INVEST). Preserve original wording where it was already good. NEVER invent NFR/edge-case/deps sections **in the PM story body** — rule 3 still holds for `story.standard.md` / `story.jira-wiki.md`.
 
@@ -276,6 +291,9 @@ Everything else is identical and lives in this base.
 - Asking for a downstream action and then not strengthening the `so that`.
 - Re-asking questions already answered in `.storywright-context.json`.
 - Reading `.storywright-context.json` from a sibling or parent folder.
+- Reading the user's workspace before `source_grounding` is resolved (rule 13) — opportunistic, undeclared repo reads are forbidden.
+- Re-asking the grounding question when `source_grounding` is already persisted.
+- Emitting `story.dev.md` without the `[[jira-wiki-formatter]]` source banner.
 
 ## References
 

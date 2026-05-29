@@ -101,6 +101,26 @@ test("golden PM outputs carry no technical leakage", async () => {
   assert.match(dev, /npm run /, "story.dev.md should contain command-level DoD");
 });
 
+// P2.2 — story.dev.md must declare its grounding source (storywright-base
+// rule 13): a banner stating whether technical specs are `inferred` or
+// `workspace-confirmed`. PM files must NOT carry the banner.
+test("golden dev output declares its grounding source", async () => {
+  const dir = join(REPO, "examples/outputs/google-login");
+  const dev = await readFile(join(dir, "story.dev.md"), "utf8");
+  assert.match(
+    dev,
+    /\*\*Source: (inferred|workspace-confirmed)/,
+    "story.dev.md must open with a source banner (rule 13)"
+  );
+  for (const pm of ["story.standard.md", "story.jira-wiki.md"]) {
+    const text = await readFile(join(dir, pm), "utf8");
+    assert.ok(
+      !/\*\*Source: (inferred|workspace-confirmed)/.test(text),
+      `${pm} must not carry the dev-file grounding banner`
+    );
+  }
+});
+
 // P1.3 — the marketplace manifest must list exactly the skills on disk.
 // Catches a stale/incomplete plugin.json (e.g. storywright-base missing).
 test("plugin.json skills match the skills on disk", async () => {

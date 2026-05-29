@@ -3,7 +3,7 @@ name: jira-wiki-formatter
 description: Render a story into three files: story.standard.md and story.jira-wiki.md (PM-facing, no technical detail) plus story.dev.md (dev-facing, full technical detail).
 trigger: "internal use by story-* skills"
 intent: Component skill that takes a structured story and produces three output files following the templates in story-generate/templates.
-version: 2.0.0
+version: 2.1.0
 inputs:
   - structured-story
 outputs:
@@ -32,7 +32,7 @@ Final step in `story-generate` and `story-refine`. Always last.
 |---|---|---|
 | `story.standard.md` | PM, stakeholders | ❌ None — no file paths, no imports, no component names, no `npm run X` in DoD |
 | `story.jira-wiki.md` | PM → Jira paste | ❌ None — same content as standard, Jira markup |
-| `story.dev.md` | Developer | ✅ Full — file paths, imports, Technical Considerations, technical edge cases, full DoD with commands |
+| `story.dev.md` | Developer | ✅ Full — file paths, imports, Technical Considerations, technical edge cases, full DoD with commands. **Opens with a source banner** (`inferred` vs `workspace-confirmed`, rule 13). |
 
 **What is "technical":** file paths, import statements, component/hook names, API method names, CLI commands (`npm run test`), null/undefined checks, browser API constraints (HTTPS, permissions), specific library flags.
 
@@ -59,7 +59,10 @@ Final step in `story-generate` and `story-refine`. Always last.
    - Callouts: `> ⚠️ **Assumed:** …`
    - Strip all technical detail (see audience table above)
 3. Render `story.dev.md` (dev-facing) using CommonMark:
-   - Same structure as `story.standard.md` PLUS:
+   - **First line MUST be a source banner** declaring provenance per `.storywright-context.json.source_grounding` (`[[storywright-base]]` rule 13). This mirrors the rule-5 visual banner pattern:
+     - `inferred` → `**Source: inferred — technical specs are domain-pattern guesses, NOT confirmed against code.**`
+     - `workspace-confirmed` → `**Source: workspace-confirmed — specs verified against <files>; unverified items marked ⚠️ Assumed.**`
+   - Then, same structure as `story.standard.md` PLUS:
    - Technical Considerations section (file paths, imports, API calls)
    - Edge Cases section (null checks, error states, browser constraints)
    - DoD includes CLI commands and file-level criteria

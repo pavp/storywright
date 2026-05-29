@@ -1,5 +1,7 @@
 # Login con Google — Dev Notes
 
+**Source: inferred — technical specs are domain-pattern guesses, NOT confirmed against code.**
+
 > Developer supplement to `story.standard.md`. Holds all technical detail stripped from the PM-facing files (rule 3a).
 
 ## Technical Considerations
