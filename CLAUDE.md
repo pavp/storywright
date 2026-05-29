@@ -66,6 +66,7 @@ The 10 components (composed by top-level skills). All 4 top-level skills compose
 
 ## Repo conventions
 
+- **Branch + PR always.** Never commit directly to `main`. All work goes on a new branch and lands via PR (CI must pass). `main` is protected and is the release trigger — direct commits are forbidden.
 - **Conventional Commits required.** commitlint via husky. `feat:` / `fix:` / `docs:` / `refactor:` / `perf:` / `build:` trigger releases. `chore:` / `ci:` / `test:` / `style:` don't.
 - **Node 22+** in CI; Node 20+ minimum for scripts.
 - **Pure ESM** (`"type": "module"` + `.mjs`). No CommonJS.
