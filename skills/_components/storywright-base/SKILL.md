@@ -97,10 +97,10 @@ If you are reading this through a top-level skill, treat every rule below as non
 
 12. **Passive-goal downstream prompt (rule G).** If the story's `I want to` verb is observational (`view, see, read, browse, look at, inspect, monitor`) AND the `so that` does not name a follow-up user action — ask once via `AskUserQuestion`: "What does the user do with this?". Strengthen the `so that` accordingly. Skip if `so that` already names a downstream action.
 
-13. **Governed source of truth for `story.dev.md`.** The technical detail in `story.dev.md` (endpoints, flags, file paths, CLI commands) has exactly two provenances, and the skill MUST declare which:
-    - `inferred` — filled from domain knowledge; plausible but NOT confirmed against any code. This is the default and the only mode when no workspace is available.
-    - `workspace-confirmed` — verified against the open workspace via the runtime's native Read/Grep/Glob; anything not found stays `⚠️ Assumed`.
-    Resolve the provenance via step 7b (Application) and persist it in `.storywright-context.json.source_grounding`. **Never read the user's workspace until `source_grounding` is resolved** — undeclared, opportunistic repo reads are forbidden (they make the output non-reproducible). This rule governs `story.dev.md` only; the PM files never touch code regardless of mode (rule 3 still holds).
+13. **Governed source of truth for `story.dev.md`.** The technical detail in `story.dev.md` (endpoints, flags, file paths, CLI commands, library/package names, type/interface names, component names) has exactly two provenances, and the skill MUST declare which:
+    - `inferred` — filled from domain knowledge ONLY. **HARD PROHIBITION: in this mode you MUST NOT read, grep, glob, open, list, or otherwise inspect ANY file in the user's workspace/project. Not once. Not "just to check".** Do not name a specific library, package, import path, file, type, or component that you have not been told in the input — if you would only know it by looking at the repo, you may not write it. Generic domain patterns are fine ("a data grid component", "a customer type"); repo-specific identifiers (`@mui/x-data-grid`, `interface Customer`, `common-data-grid-table.tsx`) are NOT. When unsure whether a detail is generic or repo-derived, mark it `⚠️ Assumed` and keep it generic. This is the default and the ONLY mode when no workspace is available.
+    - `workspace-confirmed` — and ONLY here: verified against the open workspace via the runtime's native Read/Grep/Glob; anything not found stays `⚠️ Assumed`.
+    Resolve the provenance via step 7b (Application) and persist it in `.storywright-context.json.source_grounding`. **Never read the user's workspace until `source_grounding` is resolved, and never at all when it is `inferred`** — undeclared or mode-violating repo reads are forbidden (they make the output non-reproducible and break the user's explicit choice). This rule governs `story.dev.md` only; the PM files never touch code regardless of mode (rule 3 still holds).
 
 ### 4a. Language auto-detect — expanded signals (rule E)
 
@@ -232,8 +232,9 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
      - `Infer from the requirement` (default) → `source_grounding = inferred`.
      - `Confirm against my open code` → `source_grounding = workspace-confirmed`.
    - Persist the answer via rule 9.
+   - If `inferred` (default): apply the rule 13 HARD PROHIBITION for the rest of the run — do not inspect the workspace at all while filling step 8b. Keep every technical identifier generic unless it came from the input.
    - If `workspace-confirmed`: when filling step 8b, use the runtime's native Read/Grep/Glob to confirm real endpoints/flags/paths before writing them; mark anything not found `⚠️ Assumed`. If the workspace is empty or yields no matches, fall back to `inferred`, say so once, and do NOT re-ask.
-   - The chosen mode drives the `[[jira-wiki-formatter]]` source banner at the top of `story.dev.md`.
+   - The chosen mode drives the `[[jira-wiki-formatter]]` source banner at the top of `story.dev.md`. Emit the banner **verbatim** from rule 13 / the formatter — do NOT paraphrase it, and in `inferred` mode never add words like "project conventions" that imply you looked at the repo.
 
 8. **Fill the canonical block** (Use Case + AC + Design Ref + INVEST). Preserve original wording where it was already good. NEVER invent NFR/edge-case/deps sections **in the PM story body** — rule 3 still holds for `story.standard.md` / `story.jira-wiki.md`.
 

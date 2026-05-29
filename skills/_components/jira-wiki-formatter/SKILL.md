@@ -59,7 +59,7 @@ Final step in `story-generate` and `story-refine`. Always last.
    - Callouts: `> ⚠️ **Assumed:** …`
    - Strip all technical detail (see audience table above)
 3. Render `story.dev.md` (dev-facing) using CommonMark:
-   - **First line MUST be a source banner** declaring provenance per `.storywright-context.json.source_grounding` (`[[storywright-base]]` rule 13). This mirrors the rule-5 visual banner pattern:
+   - **First line MUST be a source banner** declaring provenance per `.storywright-context.json.source_grounding` (`[[storywright-base]]` rule 13). Emit it **verbatim** — do not paraphrase, do not add clauses (e.g. never write "project conventions" in `inferred` mode). This mirrors the rule-5 visual banner pattern:
      - `inferred` → `**Source: inferred — technical specs are domain-pattern guesses, NOT confirmed against code.**`
      - `workspace-confirmed` → `**Source: workspace-confirmed — specs verified against <files>; unverified items marked ⚠️ Assumed.**`
    - Then, same structure as `story.standard.md` PLUS:
