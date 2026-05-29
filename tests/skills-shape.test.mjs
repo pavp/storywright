@@ -101,6 +101,41 @@ test("golden PM outputs carry no technical leakage", async () => {
   assert.match(dev, /npm run /, "story.dev.md should contain command-level DoD");
 });
 
+// Helper: extract H2 heading text from markdown content.
+function extractH2Sections(content) {
+  return [...content.matchAll(/^## (.+)$/gm)].map((m) => m[1].trim());
+}
+
+// story.standard.md must not contain any section from the Rule H banned list.
+test('story.standard.md contains no banned sections', async () => {
+  const content = await readFile(
+    join(REPO, 'examples/outputs/google-login/story.standard.md'), 'utf8'
+  );
+  const sections = extractH2Sections(content);
+  const BANNED = [
+    'Edge Cases', 'Non-Functional Requirements', 'NFR', 'Performance',
+    'Security', 'Accessibility', 'Technical Considerations', 'Analytics',
+    'Risks', 'Dependencies', 'Dependencias', 'Riesgos',
+  ];
+  for (const b of BANNED) {
+    assert.ok(
+      !sections.some(s => s.toLowerCase().startsWith(b.toLowerCase())),
+      `Banned section found in PM golden: "${b}"`
+    );
+  }
+});
+
+// story.standard.md must contain the mandatory **Summary:** inline line.
+test('story.standard.md contains Summary inline', async () => {
+  const content = await readFile(
+    join(REPO, 'examples/outputs/google-login/story.standard.md'), 'utf8'
+  );
+  assert.ok(
+    content.includes('**Summary:**'),
+    'story.standard.md must contain **Summary:** inline line'
+  );
+});
+
 // P1.3 — the marketplace manifest must list exactly the skills on disk.
 // Catches a stale/incomplete plugin.json (e.g. storywright-base missing).
 test("plugin.json skills match the skills on disk", async () => {
