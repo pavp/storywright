@@ -1,3 +1,9 @@
+## [1.13.0](https://github.com/pavp/storywright/compare/v1.12.2...v1.13.0) (2026-05-29)
+
+### ✨ Features
+
+* **formatter:** consistent output format and PM section guard ([#6](https://github.com/pavp/storywright/issues/6)) ([a0cfdea](https://github.com/pavp/storywright/commit/a0cfdeadfa92f74e56afa92eec300544c64896b2))
+
 ## [1.12.2](https://github.com/pavp/storywright/compare/v1.12.1...v1.12.2) (2026-05-29)
 
 ### 📝 Docs
