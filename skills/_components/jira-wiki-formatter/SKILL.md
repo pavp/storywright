@@ -3,7 +3,7 @@ name: jira-wiki-formatter
 description: Render a story into three files: story.standard.md and story.jira-wiki.md (PM-facing, no technical detail) plus story.dev.md (dev-facing, full technical detail).
 trigger: "internal use by story-* skills"
 intent: Component skill that takes a structured story and produces three output files following the templates in story-generate/templates.
-version: 2.0.0
+version: 2.2.0
 inputs:
   - structured-story
 outputs:
@@ -39,6 +39,12 @@ Final step in `story-generate` and `story-refine`. Always last.
 **ACs in PM files must describe observable behavior only.** "A copy icon appears next to the email field and clicking it copies the value" — not "ContentCopyOutlinedIcon is rendered next to the email Typography block and calls navigator.clipboard.writeText()".
 
 ---
+
+**Pre-emit heading guard (apply before writing any section to any file):**
+- `story.standard.md` and `story.dev.md`: title line must use `#`; every section heading must use `##`. If received content uses `###` or `####` for a section, demote it to `##` before emitting.
+- `story.jira-wiki.md`: title line must use `h2.`; every section heading must use `h3.`. If `h1.` or `h2.` appears on any line after the first heading, correct it to `h3.` before emitting.
+
+Apply silently — no log entry needed for heading-level corrections.
 
 1. Render `story.jira-wiki.md` (PM-facing) using Jira's wiki markup:
    - Headings: `h1. `, `h2. `, `h3. `
@@ -108,22 +114,22 @@ h3. Definition of Done
 ### Good — CommonMark
 
 ```
-## Login con Google
+# Login con Google
 
 Permitir a usuarios autenticarse mediante OAuth con Google.
 
-### User Story
+## User Story
 **As a** visitante nuevo
 **I want** iniciar sesión con mi cuenta de Google
 **So that** puedo evitar crear una nueva contraseña.
 
-### Criterios de Aceptación
+## Criterios de Aceptación
 **AC-1: Login exitoso**
 - Given el usuario está en la pantalla de login
 - When toca "Continuar con Google" y autoriza una cuenta válida
 - Then es redirigido al dashboard en <3s
 
-### Definition of Done
+## Definition of Done
 - [ ] Code merged behind feature flag
 - [ ] ACs pass in QA
 ```
