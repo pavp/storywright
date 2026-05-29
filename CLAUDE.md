@@ -6,6 +6,8 @@ Tells Claude Code how to behave when invoked in this repo.
 
 Skills pack for Claude Code. Markdown-driven. The npm package is a thin installer; no runtime, no LLM calls in code.
 
+> **Canonical context:** for architecture, AI/agent model, story-generation internals, and the glossary, read [`docs/storywright-master-context.md`](docs/storywright-master-context.md) first.
+
 ## Layout
 
 ```
