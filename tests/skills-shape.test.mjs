@@ -136,6 +136,38 @@ test('story.standard.md contains Summary inline', async () => {
   );
 });
 
+// Acceptance criteria must use the single AC-N scheme — never localized
+// variants (CA-01, Criterio 1, Escenario 1). Guards the numbering-drift bug.
+test('story.standard.md uses the AC-N numbering scheme only', async () => {
+  const content = await readFile(
+    join(REPO, 'examples/outputs/google-login/story.standard.md'), 'utf8'
+  );
+  assert.ok(
+    /\*\*AC-\d+:/.test(content),
+    'story.standard.md must label acceptance criteria as **AC-N:**'
+  );
+  const FORBIDDEN_AC_LABELS = [/\bCA-\d/, /\bCriterio\s+\d/i, /\bEscenario\s+\d/i];
+  for (const re of FORBIDDEN_AC_LABELS) {
+    assert.ok(
+      !re.test(content),
+      `story.standard.md uses a forbidden AC label matching ${re}`
+    );
+  }
+});
+
+// The title heading must be the bare story name — no story/sequence-number
+// prefix (Historia 00 —, Story 3:, HU-01 -). Guards the title-prefix bug.
+test('story.standard.md title carries no story-number prefix', async () => {
+  const content = await readFile(
+    join(REPO, 'examples/outputs/google-login/story.standard.md'), 'utf8'
+  );
+  const title = content.match(/^# (.+)$/m)?.[1] ?? '';
+  assert.ok(
+    !/^(historia|story|hu|us)\s*[-–—:]?\s*\d+/i.test(title.trim()),
+    `story.standard.md title must not be prefixed with a story number: "${title}"`
+  );
+});
+
 // P1.3 — the marketplace manifest must list exactly the skills on disk.
 // Catches a stale/incomplete plugin.json (e.g. storywright-base missing).
 test("plugin.json skills match the skills on disk", async () => {
