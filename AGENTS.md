@@ -80,6 +80,7 @@ The 11 components (composed by top-level skills). All 5 top-level skills compose
 - **Branch + PR always.** Never commit directly to `main`. All work goes on a new branch and lands via PR (CI must pass). `main` is protected and is the release trigger — direct commits are forbidden.
 - **PR body must follow the repo template.** If the repo has a PR template (`.github/PULL_REQUEST_TEMPLATE.md`), the PR body MUST follow its structure — every section and checklist it defines. Do not substitute a free-form body. Fill each section; leave human-only checks (e.g. "manually invoked the skill") unchecked for the author to confirm.
 - **Conventional Commits required.** commitlint via husky. `feat:` / `fix:` / `docs:` / `refactor:` / `perf:` / `build:` trigger releases. `chore:` / `ci:` / `test:` / `style:` don't.
+- **Never add `Co-authored-by` trailers or AI attribution to commits.** No `Co-authored-by:` lines, no `Co-Authored-By: Claude`, no agent/tool attribution in commit messages or PR bodies. Commits carry the author's own identity only — never a secondary email (work account, bot, or agent).
 - **Node 22+** in CI; Node 20+ minimum for scripts.
 - **Pure ESM** (`"type": "module"` + `.mjs`). No CommonJS.
 - **No build step.** Scripts are runnable directly via `node`.
