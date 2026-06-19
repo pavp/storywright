@@ -29,7 +29,7 @@ Terminology is normalized in §12 (Glossary).
 **Key architectural characteristics.**
 - [FACT] Two layers: **knowledge** (Markdown skills) + **thin installer** (Node ESM scripts).
 - [FACT] **Composition is lint-enforced, not runtime-enforced** (`scripts/validate-skills.mjs`): every `composes:` reference must exist and no component may be orphaned.
-- [FACT] **Triple output mandatory**: `story.standard.md` + `story.jira-wiki.md` (PM-facing, no technical detail) + `story.dev.md` (dev-facing, full technical detail). The PM↔dev split is the central design invariant (`storywright-base` rule 3 / rule 3a).
+- [FACT] **Dual output mandatory**: `story.standard.md` (PM-facing, no technical detail) + `story.dev.md` (dev-facing, full technical detail). The PM↔dev split is the central design invariant (`storywright-base` rule 3 / rule 3a).
 - [FACT] **Multimodal intake**: text + image + Figma (via MCP), with PNG fallback.
 
 **Main strategic findings.**
@@ -60,13 +60,13 @@ Terminology is normalized in §12 (Glossary).
 - INVEST self-check with verdict → next action mapping.
 - Automatic language detection (responds in the user's chat language).
 - Multi-source conflict resolution with a source-priority matrix.
-- Three-file rendering (PM standard + Jira wiki + dev).
+- Two-file rendering (PM standard + dev).
 
 **User journeys.** [INFERENCE]
-- *Greenfield*: "Permitir login con Google" → clarifications → full story trio. (Canonical dogfood fixture: `tests/fixtures/prompt-google-login.md`.)
+- *Greenfield*: "Permitir login con Google" → clarifications → full story duo. (Canonical dogfood fixture: `tests/fixtures/prompt-google-login.md`.)
 - *Refine*: paste a weak story → gap audit → filled in place, ACs preserved.
 - *Split*: oversize story → INVEST failure → epic + N children with dependency matrix + per-child V audit (user must approve).
-- *Figma*: paste Figma URL → one story per logical flow → trio per flow.
+- *Figma*: paste Figma URL → one story per logical flow → duo per flow.
 
 **Current positioning.** [INFERENCE] A methodology-rich, multimodal, Claude-native PM skill pack. Distinct from coding agents (it produces backlog artifacts, not code) and from in-tool ticket AI (it is portable Markdown, not a SaaS feature). See §7.
 
@@ -110,7 +110,7 @@ Terminology is normalized in §12 (Glossary).
 - `storywright-base` — shared rulebook (hard rules, canonical shape, PM↔dev split, mechanical pre-split/deps, language detect).
 - `clarification-questions`, `acceptance-criteria`, `invest-checklist`, `definition-of-done`, `business-rules` — story-shaping.
 - `edge-cases`, `analytics-events`, `risks-and-dependencies` — **enrichment → `story.dev.md` only** (rule 3a).
-- `jira-wiki-formatter` — renders the 3-file trio.
+- `story-formatter` — renders the 2-file duo.
 
 ### 3.5 Context pipeline
 
@@ -140,7 +140,7 @@ input (text|image|figma)
   → 8. fill canonical block (PM body; rule 3 — no technical detail)
   → 8b. enrichment → story.dev.md (edge-cases/risks/analytics/DoD; rule 3a)
   → 9. INVEST verdict → render | split | refine | reject
-  → 10. render trio via jira-wiki-formatter + write context json
+  → 10. render duo via story-formatter + write context json
   → 11. log (≤3 lines; ≤5 if SPLIT)
 ```
 
@@ -166,13 +166,13 @@ input (text|image|figma)
 
 **Project-aware assumptions.** [FACT] Zero in the codebase. Any project awareness today is emergent runtime behavior, not designed capability.
 
-**Session lifecycle.** [INFERENCE] One invocation = one story (or one epic+children, or one trio per Figma flow). Context file bridges sequential invocations that share an output folder.
+**Session lifecycle.** [INFERENCE] One invocation = one story (or one epic+children, or one duo per Figma flow). Context file bridges sequential invocations that share an output folder.
 
 ---
 
 ## 5. User Story Generation System
 
-**How stories are generated.** [FACT] Skill loads → base Application skeleton (§3.8) → canonical Cohn+Gherkin block for PM files → enrichment components populate `story.dev.md` → INVEST verdict → trio rendered to `docs/storywright/YYYY-MM-DD-HHmm-<slug>/`.
+**How stories are generated.** [FACT] Skill loads → base Application skeleton (§3.8) → canonical Cohn+Gherkin block for PM files → enrichment components populate `story.dev.md` → INVEST verdict → duo rendered to `docs/storywright/YYYY-MM-DD-HHmm-<slug>/`.
 
 **Dependencies on repositories/projects.** [FACT] **None.** Verified across all 4 skills (`inputs:` = text/image/figma-link) and all 10 components (`inputs:` = story-context / domain-hints / etc.; never source-files/workspace/repo).
 
@@ -230,7 +230,7 @@ input (text|image|figma)
 
 **Edge-case handling.** [FACT] `edge-cases` (8 technical failure axes) → dev file only. Passive-goal (rule G), generic personas (step 3), mockup chrome (rule 7), surface-vs-styling (rule D) all have deterministic handling.
 
-**Positioning (brief).** [INFERENCE] Storywright is **not** a coding agent and does not compete on code generation. Its niche: *rigorous, multimodal intent→backlog* (INVEST + Gherkin + PM↔dev trio), portable across Claude Code / claude.ai. Coding agents (Cursor, Devin, Windsurf, Copilot Workspace) are repo-grounded but produce code, not methodology-enforced stories; in-tool ticket AIs (Linear/Jira/Notion) push tickets directly but are neither multimodal nor methodology-enforcing.
+**Positioning (brief).** [INFERENCE] Storywright is **not** a coding agent and does not compete on code generation. Its niche: *rigorous, multimodal intent→backlog* (INVEST + Gherkin + PM↔dev duo), portable across Claude Code / claude.ai. Coding agents (Cursor, Devin, Windsurf, Copilot Workspace) are repo-grounded but produce code, not methodology-enforced stories; in-tool ticket AIs (Linear/Jira/Notion) push tickets directly but are neither multimodal nor methodology-enforcing.
 
 ---
 
@@ -243,10 +243,10 @@ input (text|image|figma)
 - `scripts/lib/skills.mjs` — hand-rolled YAML/frontmatter parser + `SKILL.md` walker.
 - `scripts/{uninstall,zip,list}-skills.mjs`, `scripts/postinstall-hint.mjs`.
 - `skills/_components/storywright-base/SKILL.md` — the rulebook (hard rules, language 4a, rule D, pre-split test, canonical shape, Application skeleton).
-- `skills/_components/jira-wiki-formatter/SKILL.md` — 3-file render + audience table.
-- `.claude-plugin/plugin.json` — manifest (14 skills, 4 commands).
+- `skills/_components/story-formatter/SKILL.md` — 2-file render + audience table.
+- `.claude-plugin/plugin.json` — manifest (15 skills, 5 commands).
 - `tests/skills-shape.test.mjs` — parity + no-leakage golden tests; `tests/validate.test.mjs`.
-- `examples/outputs/google-login/` — committed golden trio.
+- `examples/outputs/google-login/` — committed golden duo.
 
 **Pipelines / execution chains.** [FACT] CLI → spawn script → filesystem op (install layer). Runtime: slash command → skill+components → Anthropic API (knowledge layer; outside repo).
 
@@ -263,7 +263,7 @@ input (text|image|figma)
 ## 9. Architectural Assumptions & Constraints
 
 ### 9.1 Invariants (must not break)
-[FACT] "No LLM in code" · thin installer · PM↔dev split (rule 3/3a) · 3-file parity (enforced by `tests/skills-shape.test.mjs`) · validator orphan check · Conventional Commits + semantic-release · **branch + PR always (never commit to `main`)**.
+[FACT] "No LLM in code" · thin installer · PM↔dev split (rule 3/3a) · 2-file parity (enforced by `tests/skills-shape.test.mjs`) · validator orphan check · Conventional Commits + semantic-release · **branch + PR always (never commit to `main`)**.
 
 ### 9.2 Explicit assumptions
 [FACT] Inputs are text/image/figma; output language = user's chat language; one story per invocation (unless split); composition is correct iff the linter passes.
@@ -324,6 +324,6 @@ input (text|image|figma)
 - **Dependency matrix** — inter-*story* dependency map from text-matching `Given:` lines (rule 10); **not** a code dependency graph.
 - **Pre-split test** — deterministic outcome counter deciding single-story vs split.
 - **PM↔dev split** — rule 3 / 3a: PM files carry no technical detail; `story.dev.md` carries all of it.
-- **Triple output / 3-file parity** — every story emits `story.standard.md` + `story.jira-wiki.md` + `story.dev.md` (CI-enforced).
+- **Dual output / 2-file parity** — every story emits `story.standard.md` + `story.dev.md` (CI-enforced).
 - **Banner** — single source-confidence line at the top of a block (rule 5).
 - **Thin installer** — the npm package: copies files, no runtime, no LLM, no project scanning.

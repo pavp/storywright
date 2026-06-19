@@ -10,7 +10,6 @@ inputs:
   - figma-link
 outputs:
   - story.standard.md
-  - story.jira-wiki.md
   - story.dev.md
   - .storywright-context.json
 composes:
@@ -23,12 +22,12 @@ composes:
   - _components/risks-and-dependencies
   - _components/definition-of-done
   - _components/invest-checklist
-  - _components/jira-wiki-formatter
+  - _components/story-formatter
 ---
 
 ## Purpose
 
-Bring an existing user story up to standard *without* turning it into a feature spec.
+Bring an existing user story up to standard *without* turning it into a feature spec. Emits two files: `story.standard.md` (PM-facing) + `story.dev.md` (dev-facing).
 
 **All hard rules, canonical output shape, language detection, mechanical pre-split test, context persistence, terminal-only Q, mechanical NxN dep matrix, per-child V audit, and INVEST handling live in `[[storywright-base]]`. Read that first. Anything in this file is a SOURCE-SPECIFIC or SPLIT-BEHAVIOR delta only.**
 
@@ -48,7 +47,7 @@ If the base **deterministic pre-split test** returns count ≥2:
 - Show candidate children + per-pair dep notes (base rule 10) + V audit (base rule 11).
 - Ask via `AskUserQuestion`: "This story has [N] independent flows. Run split now?" with options:
   - "Yes, split" → execute `[[story-split]]` inline (epic + children + .storywright-context.json).
-  - "Continue without split" → proceed with single-story path (fill canonical block → INVEST → render the 3-file trio).
+  - "Continue without split" → proceed with single-story path (fill canonical block → INVEST → render both files).
   - "No, keep as-is" → stop. No output written.
 - Do NOT silently auto-split without the AskUserQuestion confirmation.
 

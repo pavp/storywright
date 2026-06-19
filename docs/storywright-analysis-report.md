@@ -20,7 +20,7 @@
 
 2. **Manifest de marketplace roto.** `.claude-plugin/plugin.json` está en `v0.1.0` (vs `package.json` `v1.11.1`) y **omite `storywright-base`** de su lista de skills. Como todos los top-level dependen de esa base, una instalación vía marketplace entregaría skills *sin su rulebook* → degradación silenciosa.
 
-3. **`story-from-figma` desincronizado del contrato de 3 archivos.** Base + generate + refine migraron a salida de 3 archivos (incl. `story.dev.md`); figma sigue en 2 y nunca menciona `dev.md`. `CLAUDE.md` todavía dice "dual output mandatory" (2 archivos). La salida depende del punto de entrada.
+3. **`story-from-figma` desincronizado del contrato de 3 archivos (al momento del análisis).** Base + generate + refine habían migrado a salida de 3 archivos (incl. `story.dev.md`); figma seguía en 2 y no mencionaba `dev.md`. `CLAUDE.md` todavía decía "dual output mandatory" (2 archivos). La salida dependía del punto de entrada. (Resuelto posteriormente con la consolidación a duo: standard + dev.)
 
 **Tabla de severidad.**
 
@@ -77,7 +77,7 @@ story-generate / story-refine / story-split / story-from-figma  →  compose:
   ├─ clarification-questions
   ├─ acceptance-criteria
   ├─ invest-checklist
-  └─ jira-wiki-formatter
+  └─ story-formatter   ← renamed from the original wiki-markup formatter component
 ```
 
 The other 5 (`business-rules`, `edge-cases`, `analytics-events`, `risks-and-dependencies`, `definition-of-done`) are **never referenced in any `composes:`** (verified: `grep _components/ skills/*/SKILL.md` → the wired 5 appear 4× each, the orphans 0×). See §5 / Finding A for why this is worse than dead code.
@@ -119,7 +119,7 @@ Trunk-based: PR → merge `main` → `release.yml` runs semantic-release → `pu
 
 ### 3.4 Versioning
 
-Conventional Commits + commitlint (husky `commit-msg`). `feat`→minor, `fix/perf/refactor/docs/build`→patch, `chore/ci/test/style`→no release. Healthy. **But** three independent version numbers exist and disagree: `package.json` (1.11.1), `.claude-plugin/plugin.json` (0.1.0), and per-skill `version:` fields (top-level 2.3.0, base 2.2.0, most components 1.0.0, jira-wiki-formatter 2.0.0). The per-skill versions are arguably intentional (independent semver per skill), but the manifest at 0.1.0 is plainly stale (Finding B).
+Conventional Commits + commitlint (husky `commit-msg`). `feat`→minor, `fix/perf/refactor/docs/build`→patch, `chore/ci/test/style`→no release. Healthy. **But** three independent version numbers exist and disagree: `package.json` (1.11.1), `.claude-plugin/plugin.json` (0.1.0), and per-skill `version:` fields (top-level 2.3.0, base 2.2.0, most components 1.0.0, story-formatter 2.0.0 at time of analysis). The per-skill versions were arguably intentional (independent semver per skill), but the manifest at 0.1.0 is plainly stale (Finding B).
 
 ---
 
@@ -182,7 +182,7 @@ Three layers of inconsistency, all verified:
 
 ### 5.4 Finding C (HIGH) — `story-from-figma` output drift
 
-`story-from-figma/SKILL.md` `outputs:` lists `story-1.standard.md`, `story-1.jira-wiki.md`, `flow-summary.md` — **two** story files, and `grep -c dev.md` over that file returns **0**. Meanwhile `story-generate` and `story-refine` both declare `story.dev.md` and the base Application step 10 mandates writing **three** files + context JSON. `CLAUDE.md` still states "Dual output mandatory … `story.jira-wiki.md` + `story.standard.md`" — frozen at the 2-file era. Output shape now depends on which entrypoint you used.
+At the time of this analysis, `story-from-figma/SKILL.md` `outputs:` listed `story-1.standard.md`, a wiki-markup story file (since retired), and `flow-summary.md` — **two** story files, and `grep -c dev.md` over that file returned **0**. Meanwhile `story-generate` and `story-refine` both declared `story.dev.md` and the base Application step 10 mandated writing **three** files + context JSON. `CLAUDE.md` still stated "Dual output mandatory" — frozen at the 2-file era. Output shape depended on which entrypoint was used. (Subsequently resolved: the historical trio — which included a wiki-markup-formatted file — was consolidated to a duo: `story.standard.md` + `story.dev.md`.)
 
 ### 5.5 Ambiguity handling — well designed (in the live skills)
 
@@ -239,7 +239,7 @@ Each item names the exact file and the concrete change. **Nothing here has been 
 - Bump `version` to track `package.json` (or wire it into the release step so it's never manual again).
 - Add `"skills/_components/storywright-base"` to the `skills` array (and any other missing component) so marketplace installs ship the rulebook. Cross-check the array against `ls skills/_components/`.
 
-**P0.3 — Align `story-from-figma` to the 3-file contract (Finding C).** Files: `skills/story-from-figma/SKILL.md` (`outputs:` + body, add `story.dev.md` per flow), `CLAUDE.md` ("dual output mandatory" → "triple output").
+**P0.3 — Align `story-from-figma` to the output contract (Finding C, resolved).** At the time of analysis: `skills/story-from-figma/SKILL.md` (`outputs:` + body, add `story.dev.md` per flow), `CLAUDE.md` ("dual output mandatory" → "triple output"). Subsequently: the trio was consolidated to a duo (standard + dev) and `story-from-figma` was aligned as part of the `consolidate-markdown` SDD change.
 
 ### P1 — Make CI catch the next drift (Finding F)
 
@@ -262,7 +262,7 @@ This is a product call for the maintainer, not a unilateral fix. Two clean optio
 | Option | What | Pro | Con |
 |--------|------|-----|-----|
 | **Delete** | Remove the 5 component dirs + their `architecture.md` mentions | Smallest surface; honors rule 3 (their output is banned in story body) | Discards real PM domain knowledge (edge-case axes, analytics taxonomy, risk model) |
-| **Rewire to `dev.md`** *(recommended)* | Rewrite the 5 to target `story.dev.md` and add them to the relevant `composes:` | Preserves the work; aligns with the v2.0 PM/dev split where this content now lives | More effort; requires updating `jira-wiki-formatter` / base to invoke them for the dev file |
+| **Rewire to `dev.md`** *(recommended)* | Rewrite the 5 to target `story.dev.md` and add them to the relevant `composes:` | Preserves the work; aligns with the v2.0 PM/dev split where this content now lives | More effort; required updating `story-formatter` / base to invoke them for the dev file |
 
 **Recommendation:** rewire to `dev.md`. The content (8-axis edge cases, analytics naming convention, risk model) is genuinely valuable and was *intentionally* moved to the dev file — it was simply never reconnected. Deleting throws away the most domain-specific assets in the repo. But surface both options to the maintainer.
 
@@ -274,7 +274,7 @@ Highest value / lowest effort, do today:
 
 1. **`plugin.json`:** bump version + add `storywright-base` (and audit the full skills array). ~10 min. Fixes a broken install path.
 2. **`docs/architecture.md:33-44`:** redraw the composition graph to the real 5 components. ~10 min. Stops misleading every reader.
-3. **`CLAUDE.md`:** "dual output mandatory" → "triple output (standard + jira-wiki + dev)". ~5 min.
+3. **`CLAUDE.md`:** at the time of analysis this was stale — "dual output mandatory" when the system already emitted three files. This was subsequently resolved by consolidating to a duo (standard + dev) and retiring the wiki-markup file.
 4. **`scripts/validate-skills.mjs`:** add the orphan-detection check (P1.1). ~30 min. Prevents recurrence of the biggest finding.
 5. **`README.md:29`:** fix the `ln -s` path. ~5 min. First-contributor papercut.
 

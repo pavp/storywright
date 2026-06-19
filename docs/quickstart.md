@@ -23,7 +23,7 @@ Claude will:
 2. Run a gap check and ask up to 3 critical clarifying questions.
 3. Draft the full story across 15 sections.
 4. Run an INVEST self-check.
-5. Render both `story.jira-wiki.md` and `story.standard.md`.
+5. Render `story.standard.md` (PM-facing) and `story.dev.md` (dev-facing).
 
 ## 3. Refine an existing story
 

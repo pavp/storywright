@@ -17,7 +17,7 @@ Business rules are **policy invariants** the story must respect. They survive ac
 
 ## When to use
 
-After the story body is drafted, before ACs are finalized — so ACs can reference relevant rules. Business Rules are an **optional PM section** (see `[[jira-wiki-formatter]]` — emit in `story.standard.md` / `story.jira-wiki.md` only when non-empty) AND are mirrored in `story.dev.md`. They are policy invariants, not technical detail, so unlike edge-cases they are not dev-only.
+After the story body is drafted, before ACs are finalized — so ACs can reference relevant rules. Business Rules are an **optional PM section** (see `[[story-formatter]]` — emit in `story.standard.md` only when non-empty) AND are also rendered in `story.dev.md`. They are policy invariants, not technical detail, so unlike edge-cases they are not dev-only.
 
 ## Inputs & interpretation
 
