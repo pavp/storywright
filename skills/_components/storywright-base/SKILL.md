@@ -3,7 +3,7 @@ name: storywright-base
 description: Shared base behavior for all storywright top-level skills. Hard rules, canonical output, terminal-only Q, context schema, mechanical deps, V audit, language detect.
 trigger: "internal use by story-* skills"
 intent: Component skill that holds the v2.2 baseline. Top-level skills (story-generate, story-refine, story-split, story-from-figma) compose this and add only their source-specific behavior on top.
-version: 2.5.0
+version: 2.6.0
 inputs:
   - none
 outputs:
@@ -103,6 +103,8 @@ If you are reading this through a top-level skill, treat every rule below as non
     **BANNED** (move content to `story.dev.md`, never emit in PM files): Edge Cases, Non-Functional Requirements, NFR, Performance, Security, Accessibility, Technical Considerations, Analytics, Risks, Dependencies, Dependencias, Riesgos, Estimate, Story Points — and any section whose name does not appear in the ALLOWED list above.
 
     If you find yourself writing a banned section into a PM file, stop. Move its content to `story.dev.md` instead (use `## Technical Considerations` as the target heading for Accessibility, Performance, and Security content). Do not silently drop it.
+
+14. **Project-less by design — never ground in the open repo.** storywright generates a forward contract for work that often does not exist yet; it is NOT a code-analysis tool. Do NOT read, scan, or infer from the files of any repository open in the session, even if they appear relevant. All technical detail in `story.dev.md` (endpoints, components, file paths, library choices) is **inferred from domain knowledge**, not read from a codebase. Mark any non-obvious technical inference with `⚠️ Assumed:` so the developer treats it as a starting point, not verified fact. Grounding silently against an open repo makes output non-deterministic (the same prompt yields different stories depending on what files happen to be open) and gives false confidence that inferred specifics were verified — neither is acceptable. If the user explicitly wants the story grounded in real code, that is out of scope: tell them to confirm the specifics against the codebase themselves.
 
 ### 4a. Language auto-detect — expanded signals (rule E)
 
