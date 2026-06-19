@@ -1,3 +1,9 @@
+## [1.13.3](https://github.com/pavp/storywright/compare/v1.13.2...v1.13.3) (2026-06-19)
+
+### 🐛 Bug Fixes
+
+* **release:** sync plugin.json version on release; harden install + pr-title ([#10](https://github.com/pavp/storywright/issues/10)) ([ea13df5](https://github.com/pavp/storywright/commit/ea13df56e6cbfed471373ea84c5898fde46c246c))
+
 ## [1.13.2](https://github.com/pavp/storywright/compare/v1.13.1...v1.13.2) (2026-06-19)
 
 ### 🐛 Bug Fixes
