@@ -82,7 +82,21 @@ does harm.
 
 ---
 
-## 3. `grounded mode` — explicit project-aware story generation
+## 3. `grounded mode` — explicit project-aware story generation — ❌ WON'T DO
+
+> **Decision (2026-06-20): dropped.** Reasons: (1) it is the only candidate with a
+> **structural** risk, not a calibration one — `[verified]` provenance cannot be
+> enforced in a Markdown-pure pack (no runtime confirms the agent actually read
+> the file it cites), and that does not close with better design; (2) reliable
+> project-awareness needs "an enforcement boundary beyond Markdown prose"
+> (master-context §6) — i.e. runtime — which fights the pack's no-runtime thesis,
+> making it effectively a different product; (3) it serves the narrowest use case
+> (stories about *existing* code), whereas storywright is intent→backlog (stories
+> that live *before* the code). **What we did instead:** the real motivation was
+> the *silent* leak (accidental project-awareness when a repo is open). That is
+> closed cheaply by `storywright-base` hard rule 14 — an explicit "project-less,
+> never ground in the open repo" instruction — without building the risky mode.
+> The analysis below is kept as the decision record.
 
 **Problem.** Storywright is project-less by design (the only designed mode —
 see master-context §6): dev-file specifics come from the model's domain
