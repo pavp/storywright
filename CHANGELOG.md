@@ -1,3 +1,9 @@
+## [1.14.0](https://github.com/pavp/storywright/compare/v1.13.4...v1.14.0) (2026-06-19)
+
+### ✨ Features
+
+* **story-batch:** add story-batch skill, command, manifest, and shape tests ([#13](https://github.com/pavp/storywright/issues/13)) ([9d1a705](https://github.com/pavp/storywright/commit/9d1a70521c47b0391a48efb78f79d76d8b7a5b8a))
+
 ## [1.13.4](https://github.com/pavp/storywright/compare/v1.13.3...v1.13.4) (2026-06-19)
 
 ### 📝 Docs
