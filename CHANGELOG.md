@@ -1,3 +1,13 @@
+## [1.13.1](https://github.com/pavp/storywright/compare/v1.13.0...v1.13.1) (2026-06-19)
+
+### 🐛 Bug Fixes
+
+* **skills:** mandate deliverable purpose in PM Summary; pin AC-N and title scheme ([#7](https://github.com/pavp/storywright/issues/7)) ([a94e95d](https://github.com/pavp/storywright/commit/a94e95d76a1195b0e6d3edf8324c6785fcc85059))
+
+### 📝 Docs
+
+* move dogfood guide to AGENTS.md; CLAUDE.md points to it; add PR-template rule ([#8](https://github.com/pavp/storywright/issues/8)) ([eaeb726](https://github.com/pavp/storywright/commit/eaeb7265f0b4e080f70ed18f373267b66af61ad6))
+
 ## [1.13.0](https://github.com/pavp/storywright/compare/v1.12.2...v1.13.0) (2026-05-29)
 
 ### ✨ Features
