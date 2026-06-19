@@ -175,7 +175,7 @@ input (text|image|figma)
 
 **How stories are generated.** [FACT] Skill loads → base Application skeleton (§3.8) → canonical Cohn+Gherkin block for PM files → enrichment components populate `story.dev.md` → INVEST verdict → duo rendered to `docs/storywright/YYYY-MM-DD-HHmm-<slug>/`.
 
-**Dependencies on repositories/projects.** [FACT] **None.** Verified across all 4 skills (`inputs:` = text/image/figma-link) and all 10 components (`inputs:` = story-context / domain-hints / etc.; never source-files/workspace/repo).
+**Dependencies on repositories/projects.** [FACT] **None.** Verified across all 5 skills (`inputs:` = text/image/figma-link) and all 11 components (`inputs:` = story-context / domain-hints / etc.; never source-files/workspace/repo).
 
 **Current assumptions.** [INFERENCE]
 1. User arrives with functional intent, not a codebase to dissect.
