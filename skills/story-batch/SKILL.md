@@ -123,7 +123,7 @@ Scope: only items that reached `DRAFTED` in Phase 3 participate in the matrix an
 
 ### Phase 5 — Output
 
-Trios are already written by Phase 3 step 10. Emit:
+Story pairs are already written by Phase 3 step 10. Emit:
 
 1. **`backlog-summary.md`** at the batch folder root when N>1 OR any item is SPLIT RECOMMENDED or NOT A STORY:
 

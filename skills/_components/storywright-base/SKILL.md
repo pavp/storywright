@@ -234,7 +234,7 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
 
 8. **Fill the canonical block** (Use Case + AC + Design Ref + INVEST). Preserve original wording where it was already good. NEVER invent NFR/edge-case/deps sections **in the PM story body** — rule 3 still holds for `story.standard.md`.
 
-   **Summary line (mandatory).** Generate `**Summary:**` immediately after the title — one sentence, value-focused, no heading. This line is MANDATORY in all three output files. Format: `**Summary:** <sentence>` in CommonMark files, `*Summary:* <sentence>` in the Jira wiki file. Never omit it.
+   **Summary line (mandatory).** Generate `**Summary:**` immediately after the title — one sentence, value-focused, no heading. This line is MANDATORY in both output files. Format: `**Summary:** <sentence>`. Never omit it.
 
    The Summary MUST open with WHAT the deliverable is and WHICH problem it solves, in business language. The rule 3 / rule H ban on technical detail (file paths, imports, component/CLI names) does NOT exempt you from explaining the purpose — "no technical names" means no jargon, NOT "no explanation of what it does." Strip the jargon, keep the purpose.
 
@@ -268,7 +268,7 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
       - `story.dev.md` — dev-facing CommonMark, full technical detail (file paths, imports, technical edge cases, full DoD with commands)
     - Emit `story.standard.md` as a fenced code block in chat. Do NOT emit `story.dev.md` in chat.
     - Write `.storywright-context.json` to the same folder.
-    - Never ask whether to save — always write all three files.
+    - Never ask whether to save — always write both story files and the context JSON.
 
 11. **Log** ≤3 bullets (≤5 if SPLIT) appended at story end. Log type label is host-specific (Generation / Refinement / Split).
 

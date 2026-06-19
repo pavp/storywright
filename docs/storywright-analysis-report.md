@@ -182,7 +182,7 @@ Three layers of inconsistency, all verified:
 
 ### 5.4 Finding C (HIGH) — `story-from-figma` output drift
 
-At the time of this analysis, `story-from-figma/SKILL.md` `outputs:` listed `story-1.standard.md`, `story-1.wiki-markup.md`, `flow-summary.md` — **two** story files, and `grep -c dev.md` over that file returned **0**. Meanwhile `story-generate` and `story-refine` both declared `story.dev.md` and the base Application step 10 mandated writing **three** files + context JSON. `CLAUDE.md` still stated "Dual output mandatory" — frozen at the 2-file era. Output shape depended on which entrypoint was used. (Subsequently resolved: the trio was consolidated to a duo — `story.standard.md` + `story.dev.md` — and the wiki-markup file was retired.)
+At the time of this analysis, `story-from-figma/SKILL.md` `outputs:` listed `story-1.standard.md`, a wiki-markup story file (since retired), and `flow-summary.md` — **two** story files, and `grep -c dev.md` over that file returned **0**. Meanwhile `story-generate` and `story-refine` both declared `story.dev.md` and the base Application step 10 mandated writing **three** files + context JSON. `CLAUDE.md` still stated "Dual output mandatory" — frozen at the 2-file era. Output shape depended on which entrypoint was used. (Subsequently resolved: the historical trio — which included a wiki-markup-formatted file — was consolidated to a duo: `story.standard.md` + `story.dev.md`.)
 
 ### 5.5 Ambiguity handling — well designed (in the live skills)
 
