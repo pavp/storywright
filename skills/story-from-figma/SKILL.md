@@ -8,7 +8,6 @@ inputs:
   - figma-link
 outputs:
   - story-1.standard.md
-  - story-1.jira-wiki.md
   - story-1.dev.md
   - flow-summary.md
   - .storywright-context.json
@@ -22,7 +21,7 @@ composes:
   - _components/risks-and-dependencies
   - _components/definition-of-done
   - _components/invest-checklist
-  - _components/jira-wiki-formatter
+  - _components/story-formatter
 ---
 
 ## Purpose
@@ -91,8 +90,8 @@ Use the base canonical output shape. Design Reference banner per source-specific
 
 ### Phase 5 — Output
 
-Per drafted flow, render the full trio via `[[jira-wiki-formatter]]` (same 3-file contract as `story-generate` / `story-refine`):
-- `story-<N>.standard.md` + `story-<N>.jira-wiki.md` (PM-facing) + `story-<N>.dev.md` (dev-facing).
+Per drafted flow, render both files via `[[story-formatter]]` (same 2-file contract as `story-generate` / `story-refine`):
+- `story-<N>.standard.md` (PM-facing) + `story-<N>.dev.md` (dev-facing).
 
 If N>1 OR any flow was routed to split:
 - `flow-summary.md` with the matrix, V audit, build order, and SPLIT-RECOMMENDED markers.

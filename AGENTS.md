@@ -65,7 +65,7 @@ The 10 components (composed by top-level skills). All 5 top-level skills compose
 - `edge-cases` — 8 technical failure axes → `story.dev.md` only (rule 3a; never the PM body)
 - `analytics-events` — funnel events + payload taxonomy with PII boundary → `story.dev.md` only
 - `risks-and-dependencies` — risks + deps with owner+status → `story.dev.md` only
-- `jira-wiki-formatter` — renders the 3-file trio (PM standard + PM jira-wiki + dev)
+- `story-formatter` — renders the 2-file duo (PM standard + dev)
 
 ## Repo conventions
 
@@ -76,7 +76,7 @@ The 10 components (composed by top-level skills). All 5 top-level skills compose
 - **Pure ESM** (`"type": "module"` + `.mjs`). No CommonJS.
 - **No build step.** Scripts are runnable directly via `node`.
 - **No LLM in code.** All AI behavior lives in the Markdown skills.
-- **Triple output mandatory.** Every story-producing skill emits three files per story: `story.standard.md` + `story.jira-wiki.md` (PM-facing, no technical detail) + `story.dev.md` (dev-facing, full technical detail). This includes children produced by `story-split` (one trio per child; `epic.md` is the single exception — epic metadata, not a story). Core PM sections always; optional PM sections only when populated; technical detail (edge cases, risks, analytics, command-level DoD) lives in `story.dev.md` only.
+- **Dual output mandatory.** Every story-producing skill emits two files per story: `story.standard.md` (PM-facing, no technical detail) + `story.dev.md` (dev-facing, full technical detail). This includes children produced by `story-split` (one pair per child; `epic.md` is the single exception — epic metadata, not a story). Core PM sections always; optional PM sections only when populated; technical detail (edge cases, risks, analytics, command-level DoD) lives in `story.dev.md` only.
 
 ## Validation
 
@@ -106,4 +106,4 @@ When iterating on a skill, invoke it against fixtures:
 - `tests/fixtures/half-baked-story.md` — refine target
 - `tests/fixtures/oversized-story.md` — split target
 
-Committed golden outputs live under `examples/outputs/<slug>/` (the full trio: `story.standard.md` + `story.jira-wiki.md` + `story.dev.md`). `tests/skills-shape.test.mjs` asserts the PM files carry no technical leakage. If you change a skill's behavior, also update its golden outputs and the matching slash command body in `commands/<name>.md`.
+Committed golden outputs live under `examples/outputs/<slug>/` (the duo: `story.standard.md` + `story.dev.md`). `tests/skills-shape.test.mjs` asserts the PM file carries no technical leakage. If you change a skill's behavior, also update its golden outputs and the matching slash command body in `commands/<name>.md`.

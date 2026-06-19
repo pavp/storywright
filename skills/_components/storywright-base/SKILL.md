@@ -31,14 +31,14 @@ If you are reading this through a top-level skill, treat every rule below as non
    - ONE AC Scenario (one Given chain + one `When` + one `Then`).
    If the input naturally needs >1 `When`/`Then`, the skill MUST stop the single-story path and route to `[[story-split]]`.
 
-3. **No mini-PRDs in the PM story body.** PROHIBITED in `story.standard.md` / `story.jira-wiki.md`:
+3. **No mini-PRDs in the PM story body.** PROHIBITED in `story.standard.md`:
    - Non-Functional Requirements blocks (a11y/i18n/perf/tokens) — DoD only.
    - Edge Cases enumerated as their own section — fold into AC failure paths.
    - Dependencies as prose — Jira ticket links only.
    - Per-claim visual specs (pixel measurements, hex inferences) inline — use single banner (rule 5).
    - Logs >3 lines (>5 if SPLIT verdict).
 
-3a. **Technical detail lives in `story.dev.md`.** The content rule 3 bans from the PM body is NOT discarded — it is rendered in the dev-facing file. Edge cases, analytics events, risks/dependencies, technical considerations, and the command-level DoD belong in `story.dev.md`, populated by the enrichment components (Application step 8b). The PM↔dev split is the home for this content; rule 3 governs the PM files, `story.dev.md` carries the technical detail. See `[[jira-wiki-formatter]]` for the audience table.
+3a. **Technical detail lives in `story.dev.md`.** The content rule 3 bans from the PM body is NOT discarded — it is rendered in the dev-facing file. Edge cases, analytics events, risks/dependencies, technical considerations, and the command-level DoD belong in `story.dev.md`, populated by the enrichment components (Application step 8b). The PM↔dev split is the home for this content; rule 3 governs the PM file, `story.dev.md` carries the technical detail. See `[[story-formatter]]` for the audience table.
 
 4. **Output language matches the user's chat language**, not the input's. Auto-detect first via rule 4a; only ask via `AskUserQuestion` if signals split.
 
@@ -96,7 +96,7 @@ If you are reading this through a top-level skill, treat every rule below as non
 
 12. **Passive-goal downstream prompt (rule G).** If the story's `I want to` verb is observational (`view, see, read, browse, look at, inspect, monitor`) AND the `so that` does not name a follow-up user action — ask once via `AskUserQuestion`: "What does the user do with this?". Strengthen the `so that` accordingly. Skip if `so that` already names a downstream action.
 
-13. **PM section whitelist (rule H).** Only these section names may appear in `story.standard.md` and `story.jira-wiki.md`:
+13. **PM section whitelist (rule H).** Only these section names may appear in `story.standard.md`:
 
     **ALLOWED:** User Story, Acceptance Criteria, Definition of Done, Contexto, Business Goal, Scope, Out of Scope, Business Rules. (`**Summary:**` is inline text, not a section heading — it is not subject to this list.)
 
@@ -171,7 +171,7 @@ Mechanical counter. Apply the table — do NOT eyeball:
 
 ## Canonical output shape (this is the WHOLE story — no exceptions)
 
-> **Note:** This block shows the *section taxonomy and rules* — not heading levels or exact markup. The rendered artifact must follow the `story-generate/templates/` files exactly: `#` for title, `##` for sections (CommonMark) or `h2.`/`h3.` (Jira wiki). INVEST is a **process step** — it informs the Verdict line in the log but is NOT emitted as a section in the output artifact.
+> **Note:** This block shows the *section taxonomy and rules* — not heading levels or exact markup. The rendered artifact must follow the `story-generate/templates/` files exactly: `#` for title, `##` for sections (CommonMark). INVEST is a **process step** — it informs the Verdict line in the log but is NOT emitted as a section in the output artifact.
 
 ```markdown
 ### [Title]
@@ -232,7 +232,7 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
    - Count ≤1 → continue to step 8 (single-story path).
    - Count ≥2 → execute the **host skill's split behavior** (see Source-specific differential in each top-level skill).
 
-8. **Fill the canonical block** (Use Case + AC + Design Ref + INVEST). Preserve original wording where it was already good. NEVER invent NFR/edge-case/deps sections **in the PM story body** — rule 3 still holds for `story.standard.md` / `story.jira-wiki.md`.
+8. **Fill the canonical block** (Use Case + AC + Design Ref + INVEST). Preserve original wording where it was already good. NEVER invent NFR/edge-case/deps sections **in the PM story body** — rule 3 still holds for `story.standard.md`.
 
    **Summary line (mandatory).** Generate `**Summary:**` immediately after the title — one sentence, value-focused, no heading. This line is MANDATORY in all three output files. Format: `**Summary:** <sentence>` in CommonMark files, `*Summary:* <sentence>` in the Jira wiki file. Never omit it.
 
@@ -240,7 +240,7 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
 
    **For enabling / infra / platform stories this is mandatory and load-bearing.** When the deliverable is plumbing (publishing packages, provisioning a registry, setting up a pipeline, wiring shared config), describing only the process (publish / setup / install) is INSUFFICIENT — a PM reading it must understand what each artifact is FOR and what breaks downstream without it. State the consumer value, not the mechanics. Example: "publish 2 shared packages to a private registry" → the Summary explains what each package does and what stops working if it is missing, never just the publish/install cycle.
 
-8.5. **PM section self-audit (rule H).** Before calling [[jira-wiki-formatter]], enumerate every section drafted for the PM files. For each section name:
+8.5. **PM section self-audit (rule H).** Before calling [[story-formatter]], enumerate every section drafted for the PM file. For each section name:
      - In Rule H ALLOWED list → keep.
      - In Rule H BANNED list → move its content to `story.dev.md`.
      - Not in either list → treat as BANNED, move to `story.dev.md`.
@@ -252,8 +252,8 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
    - `[[risks-and-dependencies]]` → `### Dependencias` + `### Riesgos`
    - `[[analytics-events]]` → `### Analytics / Eventos`
    - `[[definition-of-done]]` → full DoD with CLI commands (PM files get the acceptance-only projection)
-   - `[[business-rules]]` → policy invariants (also an *optional* PM section per `[[jira-wiki-formatter]]` when non-empty)
-   None of these may appear in the PM story body except the optional Business Rules section (see Rule H for the full PM section whitelist). Skip any component whose output is empty (drop empty sections — rule 3 / jira-wiki-formatter).
+   - `[[business-rules]]` → policy invariants (also an *optional* PM section per `[[story-formatter]]` when non-empty)
+   None of these may appear in the PM story body except the optional Business Rules section (see Rule H for the full PM section whitelist). Skip any component whose output is empty (drop empty sections — rule 3).
 
 9. **Run INVEST** via `[[invest-checklist]]`.
    - `READY` → render.
@@ -261,15 +261,14 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
    - `NEEDS REFINEMENT` → iterate failing dimension, max 1 cycle, then STOP.
    - `NOT A STORY` → tell user it's a tech task and stop.
 
-10. **Render** via `[[jira-wiki-formatter]]`.
+10. **Render** via `[[story-formatter]]`.
     - Derive the output folder: `docs/storywright/YYYY-MM-DD-HHmm-<title-slug>/` where `YYYY-MM-DD-HHmm` is the current local date+time and `<title-slug>` is the story title in kebab-case (max 5 words, drop articles/prepositions).
-    - Use the `Write` tool to persist three files to that folder (create it if it does not exist):
+    - Use the `Write` tool to persist both files to that folder (create it if it does not exist):
       - `story.standard.md` — PM-facing CommonMark, no technical detail
-      - `story.jira-wiki.md` — PM-facing Jira wiki markup, no technical detail
       - `story.dev.md` — dev-facing CommonMark, full technical detail (file paths, imports, technical edge cases, full DoD with commands)
-    - Emit `story.standard.md` and `story.jira-wiki.md` as fenced code blocks in chat. Do NOT emit `story.dev.md` in chat.
+    - Emit `story.standard.md` as a fenced code block in chat. Do NOT emit `story.dev.md` in chat.
     - Write `.storywright-context.json` to the same folder.
-    - Never ask whether to save — always write all four files.
+    - Never ask whether to save — always write all three files.
 
 11. **Log** ≤3 bullets (≤5 if SPLIT) appended at story end. Log type label is host-specific (Generation / Refinement / Split).
 
@@ -307,7 +306,7 @@ Everything else is identical and lives in this base.
 - [[invest-checklist]]
 - [[acceptance-criteria]]
 - [[clarification-questions]]
-- [[jira-wiki-formatter]]
+- [[story-formatter]]
 - [[story-generate]]
 - [[story-refine]]
 - [[story-split]]

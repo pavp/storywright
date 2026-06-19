@@ -57,22 +57,22 @@ test("every skill declares inputs and outputs", async () => {
   }
 });
 
-// P1.2 — every story-producing top-level skill must declare the full 3-file
-// trio (standard + jira-wiki + dev). Children/flows use a `story-<N>.` prefix;
-// epic.md / flow-summary.md / context are exempt. Catches output-contract drift
-// (e.g. a skill stuck on 2-file output).
-test("all story-producing skills declare the standard/jira-wiki/dev trio", async () => {
+// P1.2 — every story-producing top-level skill must declare the standard + dev
+// duo. Children/flows use a `story-<N>.` prefix; epic.md / flow-summary.md /
+// context are exempt. Catches output-contract drift (e.g. a skill stuck on
+// 1-file output or regressing to a 3-file trio).
+test("all story-producing skills declare the standard/dev duo", async () => {
   const files = await findSkillFiles();
-  const SUFFIXES = ["standard.md", "jira-wiki.md", "dev.md"];
+  const SUFFIXES = ["standard.md", "dev.md"];
   for (const f of files) {
     const s = await loadSkill(f);
     if (s.relPath.includes("_components/")) continue;
     const outputs = Array.isArray(s.frontmatter.outputs) ? s.frontmatter.outputs : [];
-    const storyOutputs = outputs.filter((o) => /\.(standard|jira-wiki|dev)\.md$/.test(o));
+    const storyOutputs = outputs.filter((o) => /\.(standard|dev)\.md$/.test(o));
     for (const suffix of SUFFIXES) {
       assert.ok(
         storyOutputs.some((o) => o.endsWith(suffix)),
-        `${s.relPath}: outputs must include a *.${suffix} file (3-file parity)`
+        `${s.relPath}: outputs must include a *.${suffix} file (duo parity)`
       );
     }
   }
@@ -90,7 +90,7 @@ test("golden PM outputs carry no technical leakage", async () => {
     /### Edge Cases/,
     /## Edge Cases/,
   ];
-  for (const pm of ["story.standard.md", "story.jira-wiki.md"]) {
+  for (const pm of ["story.standard.md"]) {
     const text = await readFile(join(dir, pm), "utf8");
     for (const re of LEAK) {
       assert.ok(!re.test(text), `${pm} leaks technical detail matching ${re}`);
@@ -190,17 +190,17 @@ async function batchGoldenExists() {
   }
 }
 
-// (a) Trio parity: story-1 and story-2 have all 3 suffixes; story-3 has none.
-test("story-batch: trio parity for items 1–3 in golden", async () => {
+// (a) Duo parity: story-1 and story-2 have both suffixes; story-3 has none.
+test("story-batch: duo parity for items 1–3 in golden", async () => {
   if (!(await batchGoldenExists())) return; // skip until PR2
-  const SUFFIXES = ["standard.md", "jira-wiki.md", "dev.md"];
+  const SUFFIXES = ["standard.md", "dev.md"];
   for (const n of [1, 2]) {
     for (const suffix of SUFFIXES) {
       const { stat } = await import("node:fs/promises");
       await stat(join(BATCH_GOLDEN, `story-${n}.${suffix}`));
     }
   }
-  // story-3 is SPLIT RECOMMENDED — no trio files should exist
+  // story-3 is SPLIT RECOMMENDED — no files should exist
   for (const suffix of SUFFIXES) {
     let exists = false;
     try {
@@ -212,7 +212,7 @@ test("story-batch: trio parity for items 1–3 in golden", async () => {
   }
 });
 
-// (b) PM leakage per story: standard + jira-wiki pass LEAK regex; dev.md matches /npm run /.
+// (b) PM leakage per story: standard.md passes LEAK regex; dev.md matches /npm run /.
 test("story-batch: PM files carry no technical leakage", async () => {
   if (!(await batchGoldenExists())) return; // skip until PR2
   const LEAK = [
@@ -223,7 +223,7 @@ test("story-batch: PM files carry no technical leakage", async () => {
     /## Edge Cases/,
   ];
   for (const n of [1, 2]) {
-    for (const pm of [`story-${n}.standard.md`, `story-${n}.jira-wiki.md`]) {
+    for (const pm of [`story-${n}.standard.md`]) {
       const text = await readFile(join(BATCH_GOLDEN, pm), "utf8");
       for (const re of LEAK) {
         assert.ok(!re.test(text), `${pm} leaks technical detail matching ${re}`);

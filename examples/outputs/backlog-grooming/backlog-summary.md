@@ -2,8 +2,8 @@
 
 Generated: 2026-06-19 19:40
 Items: 3
-Drafted: 2 (story trios emitidos)
-Split recommended: 1 (sin trio — ejecutar /storywright-story-split por ítem)
+Drafted: 2 (story pairs emitidas)
+Split recommended: 1 (sin archivos — ejecutar /storywright-story-split por ítem)
 
 **Cohesion:** COHESIVE (100%, umbral 60%, driver: área compartida — checkout / carrito / pago)
 

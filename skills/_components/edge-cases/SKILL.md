@@ -16,7 +16,7 @@ Edge cases are how engineers find latent risk. Generate them **before** acceptan
 
 ## When to use
 
-**Dev-file only.** Invoked while rendering `story.dev.md` (the dev-facing file), never the PM-facing `story.standard.md` / `story.jira-wiki.md`. `[[storywright-base]]` rule 3 forbids an Edge Cases section in the PM story body — this output lands exclusively in `story.dev.md`. It still informs AC failure paths (`[[acceptance-criteria]]`): the AC covers the observable behavior in the PM files; the enumerated technical edge detail lives in dev.md.
+**Dev-file only.** Invoked while rendering `story.dev.md` (the dev-facing file), never the PM-facing `story.standard.md`. `[[storywright-base]]` rule 3 forbids an Edge Cases section in the PM story body — this output lands exclusively in `story.dev.md`. It still informs AC failure paths (`[[acceptance-criteria]]`): the AC covers the observable behavior in the PM file; the enumerated technical edge detail lives in dev.md.
 
 ## Inputs & interpretation
 

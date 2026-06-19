@@ -21,7 +21,7 @@
     "skills/_components/edge-cases",
     "skills/_components/analytics-events",
     "skills/_components/risks-and-dependencies",
-    "skills/_components/jira-wiki-formatter"
+    "skills/_components/story-formatter"
   ],
   "commands": [
     "commands/story-generate.md",

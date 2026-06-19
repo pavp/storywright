@@ -1,20 +1,19 @@
 ---
-name: jira-wiki-formatter
-description: Render a story into three files: story.standard.md and story.jira-wiki.md (PM-facing, no technical detail) plus story.dev.md (dev-facing, full technical detail).
+name: story-formatter
+description: Render a story into two files: story.standard.md (PM-facing CommonMark, no technical detail) and story.dev.md (dev-facing CommonMark, full technical detail).
 trigger: "internal use by story-* skills"
-intent: Component skill that takes a structured story and produces three output files following the templates in story-generate/templates.
-version: 2.2.0
+intent: Component skill that takes a structured story and produces two output files following the templates in story-generate/templates.
+version: 3.0.0
 inputs:
   - structured-story
 outputs:
   - story.standard.md
-  - story.jira-wiki.md
   - story.dev.md
 ---
 
 ## Purpose
 
-Stories need to live in Jira AND in any other markdown surface (Notion, Linear, GitHub Issues, internal wikis). Generate both representations from the same source.
+Stories need to live in Jira Cloud, Notion, Linear, GitHub Issues, and any other Markdown surface. Generate a portable CommonMark PM file and a full developer-facing file from the same source.
 
 ## When to use
 
@@ -26,12 +25,11 @@ Final step in `story-generate` and `story-refine`. Always last.
 
 ## Application (step-by-step)
 
-## Audience separation — THREE files
+## Audience separation — TWO files
 
 | File | Audience | Technical detail |
 |---|---|---|
 | `story.standard.md` | PM, stakeholders | ❌ None — no file paths, no imports, no component names, no `npm run X` in DoD |
-| `story.jira-wiki.md` | PM → Jira paste | ❌ None — same content as standard, Jira markup |
 | `story.dev.md` | Developer | ✅ Full — file paths, imports, Technical Considerations, technical edge cases, full DoD with commands |
 
 **What is "technical":** file paths, import statements, component/hook names, API method names, CLI commands (`npm run test`), null/undefined checks, browser API constraints (HTTPS, permissions), specific library flags.
@@ -42,74 +40,42 @@ Final step in `story-generate` and `story-refine`. Always last.
 
 **Pre-emit heading guard (apply before writing any section to any file):**
 - `story.standard.md` and `story.dev.md`: title line must use `#`; every section heading must use `##`. If received content uses `###` or `####` for a section, demote it to `##` before emitting.
-- `story.jira-wiki.md`: title line must use `h2.`; every section heading must use `h3.`. If `h1.` or `h2.` appears on any line after the first heading, correct it to `h3.` before emitting.
 
 Apply silently — no log entry needed for heading-level corrections.
 
-1. Render `story.jira-wiki.md` (PM-facing) using Jira's wiki markup:
-   - Headings: `h1. `, `h2. `, `h3. `
-   - Bold: `*text*`
-   - Italic: `_text_`
-   - Code: `{{code}}` inline, `{code}…{code}` block
-   - Lists: `* item`, `# item` (numbered)
-   - Tables: `||header||header||` then `|cell|cell|`
-   - Panels for callouts: `{panel:title=⚠️ Assumed}…{panel}`
-   - Strip all technical detail (see audience table above)
-2. Render `story.standard.md` (PM-facing) using CommonMark:
+1. Render `story.standard.md` (PM-facing) using CommonMark:
    - Headings: `##`, `###`
    - Bold: `**text**`
    - Italic: `*text*`
    - Code: `` `inline` ``, ```` ``` ```` blocks
    - Lists: `- item`, `1. item`
-   - Tables: standard pipe tables
    - Callouts: `> ⚠️ **Assumed:** …`
    - Strip all technical detail (see audience table above)
-3. Render `story.dev.md` (dev-facing) using CommonMark:
+   - **No pipe tables.** PM files MUST NOT contain pipe-table Markdown (`| col | col |` rows). Render any tabular content as lists instead — Jira Cloud does not autoformat Markdown tables on paste.
+   - **DoD projection:** when rendering the Definition of Done block in `story.standard.md`, strip `[ ]` from each item — emit `- ` plain bullets, not `- [ ]` checkboxes. Jira Cloud does not autoformat task-list syntax into interactive checkboxes; plain bullets paste cleanly. The dev file keeps `- [ ]` unchanged.
+2. Render `story.dev.md` (dev-facing) using CommonMark:
    - Same structure as `story.standard.md` PLUS:
    - Technical Considerations section (file paths, imports, API calls)
    - Edge Cases section (null checks, error states, browser constraints)
-   - DoD includes CLI commands and file-level criteria
+   - DoD includes CLI commands and file-level criteria; uses `- [ ]` checkboxes
    - Refinement log includes technical changes
-4. Section model for PM files = **core + optional (non-technical)**.
+3. Section model for PM files = **core + optional (non-technical)**.
 
    **Core (always emit, in this order):**
    1. Title
    2. User Story (As a / I want to / so that)
    3. Acceptance Criteria (observable behavior only)
-   4. Definition of Done (acceptance criteria only, no commands)
+   4. Definition of Done (acceptance-only projection, plain `- ` bullets — no commands, no `- [ ]`)
 
    **Optional PM sections (emit only if non-empty):**
    5. Business Goal
    6. Scope / Out of Scope
    7. Business Rules
 
-5. **Drop any section with no real content.** An empty heading is noise.
-6. Emit `story.standard.md` and `story.jira-wiki.md` as fenced code blocks in chat (PM-facing). Do NOT emit `story.dev.md` in chat — write to disk only. File persistence is handled by the calling skill via the `Write` tool.
+4. **Drop any section with no real content.** An empty heading is noise.
+5. Emit `story.standard.md` as a fenced code block in chat (PM-facing). Do NOT emit `story.dev.md` in chat — write to disk only. File persistence is handled by the calling skill via the `Write` tool.
 
 ## Examples
-
-### Good — Jira wiki
-
-```
-h2. Login con Google
-
-Permitir a usuarios autenticarse mediante OAuth con Google.
-
-h3. User Story
-*As a* visitante nuevo
-*I want* iniciar sesión con mi cuenta de Google
-*So that* puedo evitar crear una nueva contraseña.
-
-h3. Criterios de Aceptación
-*AC-1: Login exitoso*
-* Given el usuario está en la pantalla de login
-* When toca "Continuar con Google" y autoriza una cuenta válida
-* Then es redirigido al dashboard en <3s
-
-h3. Definition of Done
-* (/) Code merged behind feature flag
-* (/) ACs pass in QA
-```
 
 ### Good — CommonMark
 
@@ -130,17 +96,16 @@ Permitir a usuarios autenticarse mediante OAuth con Google.
 - Then es redirigido al dashboard en <3s
 
 ## Definition of Done
-- [ ] Code merged behind feature flag
-- [ ] ACs pass in QA
+- Code merged behind feature flag
+- ACs pass in QA
 ```
 
 ## Common Pitfalls
 
-- Mixing Jira and CommonMark in the same file. Pick one per file.
-- Forgetting that Jira's `{code}` block doesn't support all languages — fall back to `{noformat}` for plain text.
-- Emoji in Jira: works in cloud, often mangled in older self-hosted. Keep emojis to non-critical decoration.
+- Emitting `- [ ]` checkboxes in PM-file DoD — use plain `- ` bullets in `story.standard.md`; keep `- [ ]` only in `story.dev.md`.
+- Including pipe tables in PM files — render tabular content as lists instead.
 - Empty headings. Drop.
-- Wrong heading levels: CommonMark output uses `#` (H1) for title, `##` (H2) for sections. Jira uses `h2.` for title, `h3.` for sections. The canonical block in `[[storywright-base]]` uses `###`/`####` as taxonomy shorthand only — do not copy those levels into the rendered artifact.
+- Wrong heading levels: CommonMark output uses `#` (H1) for title, `##` (H2) for sections. The canonical block in `[[storywright-base]]` uses `###`/`####` as taxonomy shorthand only — do not copy those levels into the rendered artifact.
 - Emitting INVEST as a section: INVEST is a process step. Its verdict belongs in the log line only (`INVEST Verdict: READY`), never as a standalone section in the output file.
 
 ## References
@@ -148,5 +113,5 @@ Permitir a usuarios autenticarse mediante OAuth con Google.
 - [[story-generate]] (templates live under `story-generate/templates/`)
 
 <claude-specific>
-Cache both syntax tables (Jira wiki and CommonMark) — they're stable.
+Cache the CommonMark syntax table — it's stable. Remember: PM file DoD uses plain `- ` bullets; dev file DoD uses `- [ ]` checkboxes. PM files must not contain pipe tables.
 </claude-specific>

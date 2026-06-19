@@ -15,7 +15,7 @@ Squash-merge uses this title as the release-triggering commit subject.
 
 ## Output impact
 
-<!-- Does the shape of story.standard.md / story.jira-wiki.md / story.dev.md change? -->
+<!-- Does the shape of story.standard.md / story.dev.md change? -->
 
 - [ ] No change to story output shape
 - [ ] Output shape changed — golden outputs in `examples/outputs/` updated

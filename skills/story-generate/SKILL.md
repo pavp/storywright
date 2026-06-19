@@ -10,7 +10,6 @@ inputs:
   - figma-link
 outputs:
   - story.standard.md
-  - story.jira-wiki.md
   - story.dev.md
   - .storywright-context.json
 composes:
@@ -23,12 +22,12 @@ composes:
   - _components/risks-and-dependencies
   - _components/definition-of-done
   - _components/invest-checklist
-  - _components/jira-wiki-formatter
+  - _components/story-formatter
 ---
 
 ## Purpose
 
-Take whatever the PM has — a one-liner, a half-baked story, a screenshot, a Figma link — and produce a Cohn+Gherkin story an engineer can pick up and ship without follow-up questions.
+Take whatever the PM has — a one-liner, a half-baked story, a screenshot, a Figma link — and produce a Cohn+Gherkin story an engineer can pick up and ship without follow-up questions. Emits two files: `story.standard.md` (PM-facing) + `story.dev.md` (dev-facing).
 
 **All hard rules, canonical output shape, language detection, mechanical pre-split test, context persistence, terminal-only Q, and INVEST handling live in `[[storywright-base]]`. Read that first. Anything in this file is a SOURCE-SPECIFIC or SPLIT-BEHAVIOR delta only.**
 
@@ -56,7 +55,7 @@ If the base **deterministic pre-split test** returns count ≥2:
 - Show candidate children + dep notes + V audit.
 - Ask via `AskUserQuestion`: "This story has [N] independent flows. Run split now?" with options:
   - "Yes, split" → execute `[[story-split]]` inline (epic + children + .storywright-context.json).
-  - "Continue without split" → proceed with single-story path (fill canonical block → INVEST → render the 3-file trio).
+  - "Continue without split" → proceed with single-story path (fill canonical block → INVEST → render both files).
   - "No, keep as-is" → stop. No output written.
 - Do NOT silently auto-split without the AskUserQuestion confirmation.
 
