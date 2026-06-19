@@ -4,9 +4,14 @@ Tells coding agents (Claude Code and any AGENTS.md-aware tool) how to behave whe
 
 ## Repo type
 
-Skills pack for Claude Code. Markdown-driven. The npm package is a thin installer; no runtime, no LLM calls in code.
+Skills pack for Claude Code. Markdown-driven. The npm package is a thin installer; no runtime, no LLM calls in code — all behavior lives in the Markdown skills.
 
-> **Canonical context:** for architecture, AI/agent model, story-generation internals, and the glossary, read [`docs/storywright-master-context.md`](docs/storywright-master-context.md) first.
+Two invariants govern everything the skills produce; internalize them before editing any skill:
+
+- **Two-file output (PM↔dev split).** Every story renders as `story.standard.md` (PM-facing — no technical detail) + `story.dev.md` (dev-facing — full detail). Never leak technical content into the PM file.
+- **Project-less.** Stories are inferred from the prompt/image/Figma input, never grounded in the open repo (see convention 7 below).
+
+> **Canonical context:** for architecture, the AI/agent model, story-generation internals, and the glossary, read [`docs/storywright-master-context.md`](docs/storywright-master-context.md) first.
 
 ## Layout
 
@@ -33,7 +38,7 @@ storywright/
 2. **Adding / editing a slash command**
    Create or edit `commands/<name>.md` with frontmatter `description` + `argument-hint`, body calling out to the corresponding skill. The CLI installs each as `storywright-<name>.md` under `~/.claude/commands/` (prefix avoids collisions).
 
-3. **Composition is enforced.** Validator (`scripts/validate-skills.mjs`) fails if `composes:` references a non-existent component **or if any component is orphaned** (referenced by no skill via `composes:` or a body `[[link]]`). All five top-level skills compose the same 11 components. The five enrichment components (`business-rules`, `edge-cases`, `analytics-events`, `risks-and-dependencies`, `definition-of-done`) feed `story.dev.md` per `storywright-base` rule 3a — never the PM body (except Business Rules, an optional PM section). The `estimation` component runs after INVEST and feeds `## Estimate` into `story.dev.md` only.
+3. **Composition is enforced.** Validator (`scripts/validate-skills.mjs`) fails if `composes:` references a non-existent component **or if any component is orphaned** (referenced by no skill via `composes:` or a body `[[link]]`). All five top-level skills compose the same 11 components. The five enrichment components (`business-rules`, `edge-cases`, `analytics-events`, `risks-and-dependencies`, `definition-of-done`) feed `story.dev.md` per `storywright-base` rule 3 — never the PM body (except Business Rules, an optional PM section). The `estimation` component runs after INVEST and feeds `## Estimate` into `story.dev.md` only.
 
 4. **Output language.** Skills must respond in the input language. Don't force English. Detect Spanish / English / other from the user message.
 
@@ -41,7 +46,9 @@ storywright/
 
 6. **Multi-source inputs are first-class.** When user passes text + image + Figma simultaneously, follow the source-priority matrix in `skills/story-generate/SKILL.md` ("Mixed inputs" section). Surface conflicts as BLOCKING clarifications, never silently pick a winner.
 
-7. **Clean room.** Do not copy content from `deanpeters/Product-Manager-Skills` (CC BY-NC-SA — incompatible with our MIT). Inspired-by only: frontmatter shape, body skeleton, INVEST + Humanizing Work pattern catalog. All prose, taxonomy, and templates are this repo's own.
+7. **Project-less — never ground stories in the open repo.** storywright generates a forward contract, not a code analysis. When generating or refining a story, do NOT read, scan, or infer from the files of whatever repository is open in the session — even if they look relevant. All technical detail in `story.dev.md` is domain-knowledge inference, marked `⚠️ Assumed:`, never scraped from a codebase. This is `storywright-base` hard rule 14; grounding silently makes output non-deterministic and gives false confidence. (Editing the pack's OWN source — skills, scripts, tests — is normal repo work and unaffected; this rule is about the *generated stories*, not your edits.)
+
+8. **Clean room.** Do not copy content from `deanpeters/Product-Manager-Skills` (CC BY-NC-SA — incompatible with our MIT). Inspired-by only: frontmatter shape, body skeleton, INVEST + Humanizing Work pattern catalog. All prose, taxonomy, and templates are this repo's own.
 
 ## Skills surface
 
