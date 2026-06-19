@@ -1,3 +1,9 @@
+## [1.18.0](https://github.com/pavp/storywright/compare/v1.17.0...v1.18.0) (2026-06-19)
+
+### ✨ Features
+
+* **base:** project-less hard rule; drop grounded-mode from roadmap ([#18](https://github.com/pavp/storywright/issues/18)) ([60e7d8f](https://github.com/pavp/storywright/commit/60e7d8f23d6e9b3446ec728e400956d7d7bce57b)), closes [#3](https://github.com/pavp/storywright/issues/3) [#3](https://github.com/pavp/storywright/issues/3)
+
 ## [1.17.0](https://github.com/pavp/storywright/compare/v1.16.0...v1.17.0) (2026-06-19)
 
 ### ✨ Features
