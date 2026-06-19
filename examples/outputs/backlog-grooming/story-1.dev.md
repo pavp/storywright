@@ -50,6 +50,22 @@
 - [ ] Eventos de analytics implementados y verificados en dashboard
 - [ ] Sin regresiones en la suite E2E de critical path de checkout
 
+## Estimate
+
+**Story Points: 5** (Fibonacci)
+
+| Signal | Value | Weight | Contribution |
+|--------|-------|--------|--------------|
+| Acceptance Criteria | 3 | ×1.0 | 3.0 |
+| Edge Cases | 5 | ×0.6 | 3.0 |
+| Dependencies | 3 | ×1.5 | 4.5 |
+| High-severity Risks 🚨 | 0 | ×2.0 | 0.0 |
+| Business Rules | 2 | ×0.5 | 1.0 |
+| **Raw score** | | | **11.5** → bucket 5 |
+| LLM adjustment | | | none — deterministic bucket retained |
+
+> Planning note: story points reflect relative complexity, not time, commitment, or velocity. Use them to compare stories against the calibration anchors in `[[estimation]]` — not to forecast hours.
+
 ---
 
 *Generation log*

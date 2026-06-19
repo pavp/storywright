@@ -26,6 +26,7 @@ composes:
   - _components/risks-and-dependencies
   - _components/definition-of-done
   - _components/story-formatter
+  - _components/estimation
 ---
 
 ## Purpose

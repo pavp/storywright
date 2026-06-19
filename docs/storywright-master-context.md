@@ -20,7 +20,7 @@ Terminology is normalized in §12 (Glossary).
 
 ## 1. Executive Summary
 
-**What Storywright is.** [FACT] A *skills pack* for Claude Code that turns ambiguous product inputs — vague prompts, half-baked stories, screenshots, Figma links — into Jira-ready user stories. It ships as 4 top-level skills (`story-generate`, `story-refine`, `story-split`, `story-from-figma`) composing 10 shared components under `skills/_components/`. Everything is Markdown with YAML frontmatter. The npm package is a **thin installer**: it copies skill/command files into `~/.claude/`; it contains no runtime and makes no LLM calls.
+**What Storywright is.** [FACT] A *skills pack* for Claude Code that turns ambiguous product inputs — vague prompts, half-baked stories, screenshots, Figma links — into Jira-ready user stories. It ships as 5 top-level skills (`story-generate`, `story-refine`, `story-split`, `story-from-figma`, `story-batch`) composing 11 shared components under `skills/_components/`. Everything is Markdown with YAML frontmatter. The npm package is a **thin installer**: it copies skill/command files into `~/.claude/`; it contains no runtime and makes no LLM calls.
 
 **Core product vision.** [INFERENCE] Be the PM-facing discovery layer that converts *intent* into a rigorous, INVEST-compliant, Gherkin-structured backlog artifact — without forcing the user through a heavy tool. Methodology-as-skill, not software-as-service.
 
@@ -80,7 +80,7 @@ Terminology is normalized in §12 (Glossary).
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ KNOWLEDGE LAYER  (skills/, Markdown + YAML)                  │
-│   4 top-level skills ── compose ──► 10 _components/          │
+│   5 top-level skills ── compose ──► 11 _components/          │
 │   storywright-base = shared rulebook (every skill inherits)  │
 │   Read & executed by Claude Code's runtime (NOT this repo)   │
 ├─────────────────────────────────────────────────────────────┤
@@ -106,11 +106,12 @@ Terminology is normalized in §12 (Glossary).
 
 ### 3.4 Skills/tools architecture
 
-[FACT] All 4 top-level skills compose all 10 components. The 10:
+[FACT] All 5 top-level skills compose all 11 components. The 11:
 - `storywright-base` — shared rulebook (hard rules, canonical shape, PM↔dev split, mechanical pre-split/deps, language detect).
 - `clarification-questions`, `acceptance-criteria`, `invest-checklist`, `definition-of-done`, `business-rules` — story-shaping.
 - `edge-cases`, `analytics-events`, `risks-and-dependencies` — **enrichment → `story.dev.md` only** (rule 3a).
 - `story-formatter` — renders the 2-file duo.
+- `estimation` — Fibonacci story-point estimate from 6 weighted signals; runs as step 8c after INVEST; emits `## Estimate` in `story.dev.md` only.
 
 ### 3.5 Context pipeline
 

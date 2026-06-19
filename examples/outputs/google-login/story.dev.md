@@ -48,6 +48,22 @@
 - [ ] Estados de error con copy accionable
 - [ ] Sin regresiones en la suite E2E de critical path
 
+## Estimate
+
+**Story Points: 5** (Fibonacci)
+
+| Signal | Value | Weight | Contribution |
+|--------|-------|--------|--------------|
+| Acceptance Criteria | 1 | ×1.0 | 1.0 |
+| Edge Cases | 5 | ×0.6 | 3.0 |
+| Dependencies | 3 | ×1.5 | 4.5 |
+| High-severity Risks 🚨 | 1 | ×2.0 | 2.0 |
+| Business Rules | 3 | ×0.5 | 1.5 |
+| **Raw score** | | | **12.0** → bucket 5 |
+| LLM adjustment | | | none — deterministic bucket retained |
+
+> Planning note: story points reflect relative complexity, not time, commitment, or velocity. Use them to compare stories against the calibration anchors in `[[estimation]]` — not to forecast hours.
+
 ---
 
 *Generation log*

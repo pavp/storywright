@@ -22,6 +22,7 @@ composes:
   - _components/definition-of-done
   - _components/invest-checklist
   - _components/story-formatter
+  - _components/estimation
 ---
 
 ## Purpose
@@ -158,6 +159,25 @@ Story pairs are already written by Phase 3 step 10. Emit:
    ```
 
    **GUARD — banned sections:** do not use headings that start with "Dependencies", "Dependencias", "Risks", or "Riesgos" — use "Dependency matrix" and "Notes" instead (base rule H).
+
+   After `## Stories` and before `## Dependency matrix`, include a `## Backlog Estimate` section as a planning aid:
+
+   ```
+   ## Backlog Estimate
+
+   | # | Title | Points | Key Driver |
+   |---|-------|--------|------------|
+   | 1 | ...   | 5      | 3 deps     |
+   | 2 | ...   | —  (split first) | SPLIT RECOMMENDED |
+   | 3 | ...   | Spike  | E = FAIL   |
+   |   | **Total drafted** | **10 SP** | sum of numeric values only |
+   ```
+
+   Rules:
+   - SPLIT RECOMMENDED items → `— (split first)` in Points column; `SPLIT RECOMMENDED` in Key Driver.
+   - Spike items (INVEST E = FAIL) → `Spike` in Points; `E = FAIL` in Key Driver.
+   - Total row sums only numeric point values; excludes `—` and `Spike` rows.
+   - Full justification table stays in `story-N.dev.md`; only Points + Key Driver appear here.
 
 2. **`.storywright-context.json`** updated per base rule 9 (one file per batch folder). No `clarifications.md`.
 
