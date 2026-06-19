@@ -9,3 +9,9 @@ coverage/
 
 # gentle-ai local skill-registry cache (per-environment, not project state)
 .atl/
+
+# SDD planning artifacts — kept in engram (hybrid mode), not tracked in the repo
+openspec/
+
+# Claude Code local session config (per-environment permissions, not project state)
+.claude/
