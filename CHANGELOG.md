@@ -1,3 +1,9 @@
+## [1.17.0](https://github.com/pavp/storywright/compare/v1.16.0...v1.17.0) (2026-06-19)
+
+### ✨ Features
+
+* **estimation:** add story-point estimation as 11th component ([#17](https://github.com/pavp/storywright/issues/17)) ([0b4e708](https://github.com/pavp/storywright/commit/0b4e708c035b279350695d03b256b346ac9bddc5))
+
 ## [1.16.0](https://github.com/pavp/storywright/compare/v1.15.0...v1.16.0) (2026-06-19)
 
 ### ✨ Features
