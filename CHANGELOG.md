@@ -1,3 +1,9 @@
+## [1.18.1](https://github.com/pavp/storywright/compare/v1.18.0...v1.18.1) (2026-06-19)
+
+### 📝 Docs
+
+* remove ROADMAP.md — all items resolved ([#19](https://github.com/pavp/storywright/issues/19)) ([6a96686](https://github.com/pavp/storywright/commit/6a9668637ff46ad068863e304dff2379be26b995))
+
 ## [1.18.0](https://github.com/pavp/storywright/compare/v1.17.0...v1.18.0) (2026-06-19)
 
 ### ✨ Features
