@@ -2,7 +2,7 @@
 import { homedir } from "node:os";
 import { cp, mkdir, readdir, readFile, rm, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { execSync } from "node:child_process";
+import { execSync, execFileSync } from "node:child_process";
 import { REPO_ROOT, SKILLS_DIR, pathExists } from "./lib/skills.mjs";
 
 const skillsTarget = join(homedir(), ".claude", "skills", "storywright");
@@ -51,7 +51,9 @@ async function ensureGlobalGitignore() {
     globalIgnorePath = execSync("git config --global core.excludesFile", { encoding: "utf8" }).trim();
   } catch {
     globalIgnorePath = join(homedir(), ".gitignore_global");
-    execSync(`git config --global core.excludesFile "${globalIgnorePath}"`);
+    // Array form (no shell) so a homedir with spaces or shell metacharacters
+    // can't break or inject into the command.
+    execFileSync("git", ["config", "--global", "core.excludesFile", globalIgnorePath]);
   }
   if (globalIgnorePath === "~") {
     globalIgnorePath = homedir();
