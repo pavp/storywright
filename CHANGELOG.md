@@ -1,3 +1,9 @@
+## [1.19.1](https://github.com/pavp/storywright/compare/v1.19.0...v1.19.1) (2026-06-19)
+
+### 📝 Docs
+
+* forbid Co-authored-by trailers and AI attribution in commits ([#22](https://github.com/pavp/storywright/issues/22)) ([496b4b5](https://github.com/pavp/storywright/commit/496b4b59b2ad4ae9f40da21814153ffbd0638ef0))
+
 ## [1.19.0](https://github.com/pavp/storywright/compare/v1.18.2...v1.19.0) (2026-06-19)
 
 ### ✨ Features
