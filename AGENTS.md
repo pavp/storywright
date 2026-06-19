@@ -33,7 +33,7 @@ storywright/
 2. **Adding / editing a slash command**
    Create or edit `commands/<name>.md` with frontmatter `description` + `argument-hint`, body calling out to the corresponding skill. The CLI installs each as `storywright-<name>.md` under `~/.claude/commands/` (prefix avoids collisions).
 
-3. **Composition is enforced.** Validator (`scripts/validate-skills.mjs`) fails if `composes:` references a non-existent component **or if any component is orphaned** (referenced by no skill via `composes:` or a body `[[link]]`). All four top-level skills compose the same 10 components. The five enrichment components (`business-rules`, `edge-cases`, `analytics-events`, `risks-and-dependencies`, `definition-of-done`) feed `story.dev.md` per `storywright-base` rule 3a — never the PM body (except Business Rules, an optional PM section).
+3. **Composition is enforced.** Validator (`scripts/validate-skills.mjs`) fails if `composes:` references a non-existent component **or if any component is orphaned** (referenced by no skill via `composes:` or a body `[[link]]`). All five top-level skills compose the same 10 components. The five enrichment components (`business-rules`, `edge-cases`, `analytics-events`, `risks-and-dependencies`, `definition-of-done`) feed `story.dev.md` per `storywright-base` rule 3a — never the PM body (except Business Rules, an optional PM section).
 
 4. **Output language.** Skills must respond in the input language. Don't force English. Detect Spanish / English / other from the user message.
 
@@ -45,7 +45,7 @@ storywright/
 
 ## Skills surface
 
-The 4 top-level skills:
+The 5 top-level skills:
 
 | Skill | When | Slash command |
 |---|---|---|
@@ -53,8 +53,9 @@ The 4 top-level skills:
 | `story-refine` | Existing story → audit + fill gaps in place | `/storywright-story-refine` |
 | `story-split` | Oversize story → INVEST-driven epic + children | `/storywright-story-split` |
 | `story-from-figma` | Figma URL → one story per flow | `/storywright-story-from-figma` |
+| `story-batch` | Multi-item backlog → one story per item in a single pass | `/storywright-story-batch` |
 
-The 10 components (composed by top-level skills). All 4 top-level skills compose all 10:
+The 10 components (composed by top-level skills). All 5 top-level skills compose all 10:
 - `storywright-base` — shared rulebook (hard rules, canonical shape, PM↔dev split, mechanical pre-split/deps, language detect). Every top-level skill inherits this.
 - `clarification-questions` — minimum critical questions across 9 axes (including multi-source conflicts)
 - `acceptance-criteria` — Given/When/Then ACs; splitting signal on multiple When/Then
