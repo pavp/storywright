@@ -1,3 +1,9 @@
+## [1.16.0](https://github.com/pavp/storywright/compare/v1.15.0...v1.16.0) (2026-06-19)
+
+### ✨ Features
+
+* consolidate trio to duo, retire story.jira-wiki.md (size:exception) ([#16](https://github.com/pavp/storywright/issues/16)) ([5d55775](https://github.com/pavp/storywright/commit/5d5577534976a7efd84ed9d8e982f84cb1f4959f))
+
 ## [1.15.0](https://github.com/pavp/storywright/compare/v1.14.0...v1.15.0) (2026-06-19)
 
 ### ✨ Features
