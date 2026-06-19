@@ -6,3 +6,6 @@ dist/
 .env.*
 !.env.example
 coverage/
+
+# gentle-ai local skill-registry cache (per-environment, not project state)
+.atl/
