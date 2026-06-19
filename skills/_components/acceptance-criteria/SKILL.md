@@ -3,7 +3,7 @@ name: acceptance-criteria
 description: Write acceptance criteria for a user story in Given/When/Then style. Covers happy path, edge cases, and explicit non-goals. Returns only the AC block, never a full story.
 trigger: "internal use by story-* skills"
 intent: Component skill that produces a complete, testable acceptance-criteria block. Pure renderer — does not ask the user questions; relies on context already gathered upstream.
-version: 1.0.0
+version: 1.1.0
 inputs:
   - story-context
   - edge-cases-block
@@ -38,8 +38,8 @@ Invoked by `story-generate` and `story-refine` after the body of the story is dr
    - Then <observable outcome>
    - And <secondary observable outcome>  (optional)
    ```
-6. Number ACs `AC-1`, `AC-2`, …. Stable numbering — never renumber when adding new ones in iterations.
-7. Emit only the AC block. Do NOT include explanations, headers above `## Criterios de Aceptación`, or surrounding prose.
+6. Number ACs `AC-1`, `AC-2`, …. This is the ONLY allowed scheme, in every language — never `CA-01`, `Criterio 1`, `Escenario 1`, or any localized variant. The `AC` label is fixed; translate only the scenario title after it. Stable numbering — never renumber when adding new ones in iterations.
+7. Emit only the AC block. Do NOT include explanations, a section heading above the ACs, or surrounding prose. The host renderer (`[[jira-wiki-formatter]]`) owns the `## Acceptance Criteria` heading.
 
 ## Examples
 

@@ -3,7 +3,7 @@ name: storywright-base
 description: Shared base behavior for all storywright top-level skills. Hard rules, canonical output, terminal-only Q, context schema, mechanical deps, V audit, language detect.
 trigger: "internal use by story-* skills"
 intent: Component skill that holds the v2.2 baseline. Top-level skills (story-generate, story-refine, story-split, story-from-figma) compose this and add only their source-specific behavior on top.
-version: 2.4.0
+version: 2.5.0
 inputs:
   - none
 outputs:
@@ -188,7 +188,7 @@ Mechanical counter. Apply the table — do NOT eyeball:
 - ...
 
 #### Acceptance Criteria
-- **Scenario:** [single-outcome scenario name]
+**AC-1: [single-outcome scenario name]**
 - **Given:** [context — surface nouns here drive dep matrix per rule 10]
 - **and Given:** [context]
 - **When:** [single trigger]
@@ -205,6 +205,10 @@ Mechanical counter. Apply the table — do NOT eyeball:
 ```
 
 NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No Assumptions block (assumptions get `⚠️ Assumed` inline or are resolved via `AskUserQuestion`). No standalone INVEST section — verdict belongs in the log only.
+
+**Title — no story-number prefix.** The title is the bare story name. NEVER prefix it with a story/sequence number (`Historia 00 —`, `Story 3:`, `HU-01 -`, or any equivalent). Sequence belongs in the ticket ID / filename, not the heading. One title heading, one scheme, every file.
+
+**AC numbering — one scheme only: `AC-N`.** Every acceptance criterion is labelled `**AC-1:**`, `**AC-2:**`, … in ALL output files and ALL languages — never `CA-01`, `Criterio 1`, `Escenario 1`, or any localized variant. The label `AC` is fixed; only the scenario title after it is translated. Numbering is stable: append, never renumber existing ACs across iterations (see `[[acceptance-criteria]]`).
 
 ## Application (step-by-step — every skill follows this skeleton)
 
@@ -231,6 +235,10 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
 8. **Fill the canonical block** (Use Case + AC + Design Ref + INVEST). Preserve original wording where it was already good. NEVER invent NFR/edge-case/deps sections **in the PM story body** — rule 3 still holds for `story.standard.md` / `story.jira-wiki.md`.
 
    **Summary line (mandatory).** Generate `**Summary:**` immediately after the title — one sentence, value-focused, no heading. This line is MANDATORY in all three output files. Format: `**Summary:** <sentence>` in CommonMark files, `*Summary:* <sentence>` in the Jira wiki file. Never omit it.
+
+   The Summary MUST open with WHAT the deliverable is and WHICH problem it solves, in business language. The rule 3 / rule H ban on technical detail (file paths, imports, component/CLI names) does NOT exempt you from explaining the purpose — "no technical names" means no jargon, NOT "no explanation of what it does." Strip the jargon, keep the purpose.
+
+   **For enabling / infra / platform stories this is mandatory and load-bearing.** When the deliverable is plumbing (publishing packages, provisioning a registry, setting up a pipeline, wiring shared config), describing only the process (publish / setup / install) is INSUFFICIENT — a PM reading it must understand what each artifact is FOR and what breaks downstream without it. State the consumer value, not the mechanics. Example: "publish 2 shared packages to a private registry" → the Summary explains what each package does and what stops working if it is missing, never just the publish/install cycle.
 
 8.5. **PM section self-audit (rule H).** Before calling [[jira-wiki-formatter]], enumerate every section drafted for the PM files. For each section name:
      - In Rule H ALLOWED list → keep.
