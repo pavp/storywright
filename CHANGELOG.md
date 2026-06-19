@@ -1,3 +1,9 @@
+## [1.19.0](https://github.com/pavp/storywright/compare/v1.18.2...v1.19.0) (2026-06-19)
+
+### ✨ Features
+
+* **cli:** add --version/-v flag ([#21](https://github.com/pavp/storywright/issues/21)) ([8287865](https://github.com/pavp/storywright/commit/8287865ada930f7805688d75dff46995e8a3e673))
+
 ## [1.18.2](https://github.com/pavp/storywright/compare/v1.18.1...v1.18.2) (2026-06-19)
 
 ### 📝 Docs
