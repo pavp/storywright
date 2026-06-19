@@ -100,7 +100,7 @@ If you are reading this through a top-level skill, treat every rule below as non
 
     **ALLOWED:** User Story, Acceptance Criteria, Definition of Done, Contexto, Business Goal, Scope, Out of Scope, Business Rules. (`**Summary:**` is inline text, not a section heading — it is not subject to this list.)
 
-    **BANNED** (move content to `story.dev.md`, never emit in PM files): Edge Cases, Non-Functional Requirements, NFR, Performance, Security, Accessibility, Technical Considerations, Analytics, Risks, Dependencies, Dependencias, Riesgos — and any section whose name does not appear in the ALLOWED list above.
+    **BANNED** (move content to `story.dev.md`, never emit in PM files): Edge Cases, Non-Functional Requirements, NFR, Performance, Security, Accessibility, Technical Considerations, Analytics, Risks, Dependencies, Dependencias, Riesgos, Estimate, Story Points — and any section whose name does not appear in the ALLOWED list above.
 
     If you find yourself writing a banned section into a PM file, stop. Move its content to `story.dev.md` instead (use `## Technical Considerations` as the target heading for Accessibility, Performance, and Security content). Do not silently drop it.
 
@@ -261,6 +261,16 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
    - `NEEDS REFINEMENT` → iterate failing dimension, max 1 cycle, then STOP.
    - `NOT A STORY` → tell user it's a tech task and stop.
 
+8c. **Estimate** via `[[estimation]]`. (Runs AFTER step 9 — requires the INVEST E verdict.)
+    1. Read the step-9 INVEST E verdict.
+    2. If `E — FAIL` → emit Spike block in `story.dev.md`; skip formula.
+    3. Else: read 6 signals across both drafts (`ac_count` + `rule_count` from `story.standard.md`; `edge_count` + `dep_count` + `risk_hh_count` from `story.dev.md`).
+    4. Run formula: `raw = AC×1.0 + edge×0.6 + dep×1.5 + 🚨×2.0 + rules×0.5`.
+    5. Map raw to Fibonacci bucket (≤1.5→1, ≤3.5→2, ≤7→3, ≤12.5→5, ≤18→8, >18→13).
+    6. Apply ±1 LLM adjustment only with a named signal citation; no citation → deterministic bucket retained.
+    7. Emit `## Estimate` section in `story.dev.md` only (after DoD, before generation log).
+    8. If points = 13 → append `> ⚠️ Consider splitting:` advisory (advisory only; never auto-split).
+
 10. **Render** via `[[story-formatter]]`.
     - Derive the output folder: `docs/storywright/YYYY-MM-DD-HHmm-<title-slug>/` where `YYYY-MM-DD-HHmm` is the current local date+time and `<title-slug>` is the story title in kebab-case (max 5 words, drop articles/prepositions).
     - Use the `Write` tool to persist both files to that folder (create it if it does not exist):
@@ -287,6 +297,8 @@ Everything else is identical and lives in this base.
 
 ## Common Pitfalls (all skills)
 
+- Running step 8c (Estimate) before step 9 INVEST — E verdict not yet available; always run INVEST first.
+- Matching bare `###` headings in dev.md for estimation signal extraction — use depth-agnostic `^#{2,3}` pattern; rendered goldens use H2 sections.
 - Writing any sidecar question file (clarifications.md, questions.md, etc).
 - Announcing "Clarification resolved" or "no clarifications.md needed" instead of proceeding silently.
 - Offering to save a clarifications file to disk after resolving gaps.

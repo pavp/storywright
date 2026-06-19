@@ -17,7 +17,7 @@ storywright/
 │   ├── story-refine/
 │   ├── story-split/
 │   ├── story-from-figma/
-│   └── _components/          ← 10 components composed by top-level skills
+│   └── _components/          ← 11 components composed by top-level skills
 ├── commands/                 ← slash-command entrypoints for ~/.claude/commands/
 ├── bin/storywright.mjs       ← CLI
 ├── scripts/                  ← install / uninstall / validate / zip / list
@@ -33,7 +33,7 @@ storywright/
 2. **Adding / editing a slash command**
    Create or edit `commands/<name>.md` with frontmatter `description` + `argument-hint`, body calling out to the corresponding skill. The CLI installs each as `storywright-<name>.md` under `~/.claude/commands/` (prefix avoids collisions).
 
-3. **Composition is enforced.** Validator (`scripts/validate-skills.mjs`) fails if `composes:` references a non-existent component **or if any component is orphaned** (referenced by no skill via `composes:` or a body `[[link]]`). All five top-level skills compose the same 10 components. The five enrichment components (`business-rules`, `edge-cases`, `analytics-events`, `risks-and-dependencies`, `definition-of-done`) feed `story.dev.md` per `storywright-base` rule 3a — never the PM body (except Business Rules, an optional PM section).
+3. **Composition is enforced.** Validator (`scripts/validate-skills.mjs`) fails if `composes:` references a non-existent component **or if any component is orphaned** (referenced by no skill via `composes:` or a body `[[link]]`). All five top-level skills compose the same 11 components. The five enrichment components (`business-rules`, `edge-cases`, `analytics-events`, `risks-and-dependencies`, `definition-of-done`) feed `story.dev.md` per `storywright-base` rule 3a — never the PM body (except Business Rules, an optional PM section). The `estimation` component runs after INVEST and feeds `## Estimate` into `story.dev.md` only.
 
 4. **Output language.** Skills must respond in the input language. Don't force English. Detect Spanish / English / other from the user message.
 
@@ -55,7 +55,7 @@ The 5 top-level skills:
 | `story-from-figma` | Figma URL → one story per flow | `/storywright-story-from-figma` |
 | `story-batch` | Multi-item backlog → one story per item in a single pass | `/storywright-story-batch` |
 
-The 10 components (composed by top-level skills). All 5 top-level skills compose all 10:
+The 11 components (composed by top-level skills). All 5 top-level skills compose all 11:
 - `storywright-base` — shared rulebook (hard rules, canonical shape, PM↔dev split, mechanical pre-split/deps, language detect). Every top-level skill inherits this.
 - `clarification-questions` — minimum critical questions across 9 axes (including multi-source conflicts)
 - `acceptance-criteria` — Given/When/Then ACs; splitting signal on multiple When/Then
@@ -66,6 +66,7 @@ The 10 components (composed by top-level skills). All 5 top-level skills compose
 - `analytics-events` — funnel events + payload taxonomy with PII boundary → `story.dev.md` only
 - `risks-and-dependencies` — risks + deps with owner+status → `story.dev.md` only
 - `story-formatter` — renders the 2-file duo (PM standard + dev)
+- `estimation` — Fibonacci story-point estimate from 6 weighted signals; runs after INVEST; `## Estimate` in `story.dev.md` only
 
 ## Repo conventions
 

@@ -23,6 +23,7 @@ composes:
   - _components/definition-of-done
   - _components/invest-checklist
   - _components/story-formatter
+  - _components/estimation
 ---
 
 ## Purpose

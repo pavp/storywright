@@ -21,7 +21,8 @@
     "skills/_components/edge-cases",
     "skills/_components/analytics-events",
     "skills/_components/risks-and-dependencies",
-    "skills/_components/story-formatter"
+    "skills/_components/story-formatter",
+    "skills/_components/estimation"
   ],
   "commands": [
     "commands/story-generate.md",
