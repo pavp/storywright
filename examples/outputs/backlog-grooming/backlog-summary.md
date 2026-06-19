@@ -15,6 +15,15 @@ Split recommended: 1 (sin archivos — ejecutar /storywright-story-split por ít
 | 2 | Código de descuento en el checkout | PASS | Depende de Story 1 (requiere total de carrito visible para mostrar descuento aplicado) |
 | 3 | Flujo completo de pago (tarjeta, PayPal, transferencia, reintentos, reembolsos) | SPLIT RECOMMENDED (pre-split count ≥ 5) | No evaluada — requiere split antes de analizar dependencias |
 
+## Backlog Estimate
+
+| # | Título | Points | Key Driver |
+|---|--------|--------|------------|
+| 1 | Resumen del carrito antes de pagar | 5 | 3 deps |
+| 2 | Código de descuento en el checkout | 5 | 4 deps (sibling adj −1) |
+| 3 | Flujo completo de pago | — (split first) | SPLIT RECOMMENDED |
+|   | **Total drafted** | **10 SP** | |
+
 ## Dependency matrix
 
 Alcance: solo ítems DRAFTED (Stories 1 y 2).

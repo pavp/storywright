@@ -89,6 +89,8 @@ test("golden PM outputs carry no technical leakage", async () => {
     /\.(mjs|ts|tsx|jsx)\b/,
     /### Edge Cases/,
     /## Edge Cases/,
+    /## Estimate/,
+    /Story Points/,
   ];
   for (const pm of ["story.standard.md"]) {
     const text = await readFile(join(dir, pm), "utf8");
@@ -99,6 +101,7 @@ test("golden PM outputs carry no technical leakage", async () => {
   // The dev file SHOULD contain the technical detail.
   const dev = await readFile(join(dir, "story.dev.md"), "utf8");
   assert.match(dev, /npm run /, "story.dev.md should contain command-level DoD");
+  assert.match(dev, /## Estimate/, "story.dev.md should contain ## Estimate");
 });
 
 // Helper: extract H2 heading text from markdown content.
@@ -116,6 +119,7 @@ test('story.standard.md contains no banned sections', async () => {
     'Edge Cases', 'Non-Functional Requirements', 'NFR', 'Performance',
     'Security', 'Accessibility', 'Technical Considerations', 'Analytics',
     'Risks', 'Dependencies', 'Dependencias', 'Riesgos',
+    'Estimate', 'Story Points',
   ];
   for (const b of BANNED) {
     assert.ok(
@@ -221,6 +225,8 @@ test("story-batch: PM files carry no technical leakage", async () => {
     /\.(mjs|ts|tsx|jsx)\b/,
     /### Edge Cases/,
     /## Edge Cases/,
+    /## Estimate/,
+    /Story Points/,
   ];
   for (const n of [1, 2]) {
     for (const pm of [`story-${n}.standard.md`]) {
