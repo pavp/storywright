@@ -24,7 +24,7 @@ jobs:
           if echo "$PR_TITLE" | grep -Eq "$PATTERN"; then
             echo "✅ PR title OK: $PR_TITLE"
           else
-            echo "::error::PR title must be a Conventional Commit (e.g. 'fix(plugin): align manifest version'). Got: $PR_TITLE"
+            echo "::error::PR title must be a Conventional Commit (e.g. 'fix(plugin): align manifest version'). Got: \"$PR_TITLE\""
             echo "Allowed types: feat fix docs refactor perf build ci chore test style. Add '!' for breaking changes."
             exit 1
           fi
