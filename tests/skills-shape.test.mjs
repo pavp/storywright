@@ -168,6 +168,146 @@ test('story.standard.md title carries no story-number prefix', async () => {
   );
 });
 
+// ── story-batch golden fixture tests ─────────────────────────────────────────
+// These tests assert the shape of committed golden outputs for story-batch.
+// The golden lives at examples/outputs/backlog-grooming/ and is delivered in PR2.
+// All assertions here compile and are registered now; assertions that reference
+// the golden directory will be skipped (not fail) when the directory is absent,
+// so the test suite passes in PR1 and enforces shape in PR2+.
+//
+// Known-failing-until-PR2: assertions (a)–(f) below all depend on the golden
+// directory existing. They are skipped (directory-absent guard) until PR2 lands.
+
+const BATCH_GOLDEN = join(REPO, "examples/outputs/backlog-grooming");
+
+async function batchGoldenExists() {
+  try {
+    const { stat } = await import("node:fs/promises");
+    await stat(BATCH_GOLDEN);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// (a) Trio parity: story-1 and story-2 have all 3 suffixes; story-3 has none.
+test("story-batch: trio parity for items 1–3 in golden", async () => {
+  if (!(await batchGoldenExists())) return; // skip until PR2
+  const SUFFIXES = ["standard.md", "jira-wiki.md", "dev.md"];
+  for (const n of [1, 2]) {
+    for (const suffix of SUFFIXES) {
+      const { stat } = await import("node:fs/promises");
+      await stat(join(BATCH_GOLDEN, `story-${n}.${suffix}`));
+    }
+  }
+  // story-3 is SPLIT RECOMMENDED — no trio files should exist
+  for (const suffix of SUFFIXES) {
+    let exists = false;
+    try {
+      const { stat } = await import("node:fs/promises");
+      await stat(join(BATCH_GOLDEN, `story-3.${suffix}`));
+      exists = true;
+    } catch { /* expected */ }
+    assert.ok(!exists, `story-3.${suffix} must not exist (item is SPLIT RECOMMENDED)`);
+  }
+});
+
+// (b) PM leakage per story: standard + jira-wiki pass LEAK regex; dev.md matches /npm run /.
+test("story-batch: PM files carry no technical leakage", async () => {
+  if (!(await batchGoldenExists())) return; // skip until PR2
+  const LEAK = [
+    /npm run /,
+    /\bimport\b/,
+    /\.(mjs|ts|tsx|jsx)\b/,
+    /### Edge Cases/,
+    /## Edge Cases/,
+  ];
+  for (const n of [1, 2]) {
+    for (const pm of [`story-${n}.standard.md`, `story-${n}.jira-wiki.md`]) {
+      const text = await readFile(join(BATCH_GOLDEN, pm), "utf8");
+      for (const re of LEAK) {
+        assert.ok(!re.test(text), `${pm} leaks technical detail matching ${re}`);
+      }
+    }
+    const dev = await readFile(join(BATCH_GOLDEN, `story-${n}.dev.md`), "utf8");
+    assert.match(dev, /npm run /, `story-${n}.dev.md should contain command-level DoD`);
+  }
+});
+
+// (c) backlog-summary.md: no LEAK, no BANNED H2, contains **Cohesion:**, contains ## Dependency matrix.
+test("story-batch: backlog-summary.md shape", async () => {
+  if (!(await batchGoldenExists())) return; // skip until PR2
+  const text = await readFile(join(BATCH_GOLDEN, "backlog-summary.md"), "utf8");
+  const LEAK = [
+    /npm run /,
+    /\bimport\b/,
+    /\.(mjs|ts|tsx|jsx)\b/,
+    /### Edge Cases/,
+    /## Edge Cases/,
+  ];
+  for (const re of LEAK) {
+    assert.ok(!re.test(text), `backlog-summary.md leaks technical detail matching ${re}`);
+  }
+  const sections = extractH2Sections(text);
+  const BANNED = [
+    "Edge Cases", "Non-Functional Requirements", "NFR", "Performance",
+    "Security", "Accessibility", "Technical Considerations", "Analytics",
+    "Risks", "Dependencies", "Dependencias", "Riesgos",
+  ];
+  for (const b of BANNED) {
+    assert.ok(
+      !sections.some((s) => s.toLowerCase().startsWith(b.toLowerCase())),
+      `Banned section found in backlog-summary.md: "${b}"`
+    );
+  }
+  assert.ok(
+    text.includes("**Cohesion:**"),
+    "backlog-summary.md must contain **Cohesion:** line"
+  );
+  assert.ok(
+    sections.some((s) => s.toLowerCase().startsWith("dependency matrix")),
+    "backlog-summary.md must contain ## Dependency matrix section"
+  );
+});
+
+// (d) AC-N scheme in story-1.standard.md.
+test("story-batch: story-1.standard.md uses AC-N numbering scheme", async () => {
+  if (!(await batchGoldenExists())) return; // skip until PR2
+  const content = await readFile(join(BATCH_GOLDEN, "story-1.standard.md"), "utf8");
+  assert.ok(
+    /\*\*AC-\d+:/.test(content),
+    "story-1.standard.md must label acceptance criteria as **AC-N:**"
+  );
+  const FORBIDDEN_AC_LABELS = [/\bCA-\d/, /\bCriterio\s+\d/i, /\bEscenario\s+\d/i];
+  for (const re of FORBIDDEN_AC_LABELS) {
+    assert.ok(
+      !re.test(content),
+      `story-1.standard.md uses a forbidden AC label matching ${re}`
+    );
+  }
+});
+
+// (e) No story-number title prefix in story-1.standard.md.
+test("story-batch: story-1.standard.md title carries no story-number prefix", async () => {
+  if (!(await batchGoldenExists())) return; // skip until PR2
+  const content = await readFile(join(BATCH_GOLDEN, "story-1.standard.md"), "utf8");
+  const title = content.match(/^# (.+)$/m)?.[1] ?? "";
+  assert.ok(
+    !/^(historia|story|hu|us)\s*[-–—:]?\s*\d+/i.test(title.trim()),
+    `story-1.standard.md title must not be prefixed with a story number: "${title}"`
+  );
+});
+
+// (f) **Summary:** inline in story-1.standard.md.
+test("story-batch: story-1.standard.md contains Summary inline", async () => {
+  if (!(await batchGoldenExists())) return; // skip until PR2
+  const content = await readFile(join(BATCH_GOLDEN, "story-1.standard.md"), "utf8");
+  assert.ok(
+    content.includes("**Summary:**"),
+    "story-1.standard.md must contain **Summary:** inline line"
+  );
+});
+
 // P1.3 — the marketplace manifest must list exactly the skills on disk.
 // Catches a stale/incomplete plugin.json (e.g. storywright-base missing).
 test("plugin.json skills match the skills on disk", async () => {
