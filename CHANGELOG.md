@@ -1,3 +1,9 @@
+## [1.18.2](https://github.com/pavp/storywright/compare/v1.18.1...v1.18.2) (2026-06-19)
+
+### 📝 Docs
+
+* rewrite README and refresh AGENTS for current pack state ([#20](https://github.com/pavp/storywright/issues/20)) ([132f9e1](https://github.com/pavp/storywright/commit/132f9e187f8ee229b9c78a56c24d802e50cf48d4))
+
 ## [1.18.1](https://github.com/pavp/storywright/compare/v1.18.0...v1.18.1) (2026-06-19)
 
 ### 📝 Docs
