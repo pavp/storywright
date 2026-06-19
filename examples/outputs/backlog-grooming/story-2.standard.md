@@ -25,10 +25,10 @@
 - **Then** el código se retira y el total vuelve al precio original sin descuento
 
 ## Definition of Done
-- [ ] Todos los criterios de aceptación pasan en QA
-- [ ] Los mensajes de error son claros y accionables para el comprador
-- [ ] Accesible por teclado y lector de pantalla; contraste ≥ WCAG AA
-- [ ] Revisado por ≥1 ingeniero; signoff de PM tras walkthrough
+- Todos los criterios de aceptación pasan en QA
+- Los mensajes de error son claros y accionables para el comprador
+- Accesible por teclado y lector de pantalla; contraste ≥ WCAG AA
+- Revisado por ≥1 ingeniero; signoff de PM tras walkthrough
 
 ---
 
