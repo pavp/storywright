@@ -1,3 +1,9 @@
+## [1.15.0](https://github.com/pavp/storywright/compare/v1.14.0...v1.15.0) (2026-06-19)
+
+### ✨ Features
+
+* **story-batch:** add golden fixtures and register skill in AGENTS.md ([#14](https://github.com/pavp/storywright/issues/14)) ([d3fc924](https://github.com/pavp/storywright/commit/d3fc9242df26941b6a8b6856bdfde8c95cfb5db7))
+
 ## [1.14.0](https://github.com/pavp/storywright/compare/v1.13.4...v1.14.0) (2026-06-19)
 
 ### ✨ Features
