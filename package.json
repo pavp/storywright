@@ -1,6 +1,6 @@
 {
   "name": "@pavp/storywright",
-  "version": "1.17.0",
+  "version": "1.18.0",
   "description": "PM Skills pack for Claude Code — turn ambiguous inputs (prompts, screenshots, Figma links) into Jira-ready user stories.",
   "keywords": [
     "claude",
