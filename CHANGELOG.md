@@ -1,3 +1,9 @@
+## [1.13.4](https://github.com/pavp/storywright/compare/v1.13.3...v1.13.4) (2026-06-19)
+
+### 📝 Docs
+
+* add feature roadmap ([#12](https://github.com/pavp/storywright/issues/12)) ([e231413](https://github.com/pavp/storywright/commit/e231413c0b89f3c00e74a9e0df37370f1529026c))
+
 ## [1.13.3](https://github.com/pavp/storywright/compare/v1.13.2...v1.13.3) (2026-06-19)
 
 ### 🐛 Bug Fixes
