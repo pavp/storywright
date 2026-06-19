@@ -8,7 +8,7 @@ PR titles and commit messages must follow [Conventional Commits](https://www.con
 
 ```
 feat: add story-points-estimate component
-fix(jira-wiki-formatter): escape pipes inside table cells
+fix(story-formatter): escape pipes inside table cells
 docs(readme): clarify MCP setup
 chore: bump dev deps
 feat!: rename CLI install command
@@ -34,7 +34,7 @@ Required frontmatter fields: `name`, `description`, `trigger`, `intent`, `versio
 
 - Run `npm run validate` and `npm test`.
 - Manually invoke the affected skill in Claude Code with the example fixtures in `tests/fixtures/`.
-- Check that the dual outputs render correctly in Jira and in any CommonMark viewer.
+- Check that both outputs render correctly in Jira Cloud and in any CommonMark viewer.
 
 ## Release flow
 

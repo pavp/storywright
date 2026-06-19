@@ -57,7 +57,7 @@ this story is too big, split it:
 <paste a story that visibly mixes flows>
 ```
 
-Outputs always include both `story.jira-wiki.md` (Jira wiki markup) and `story.standard.md` (CommonMark).
+Outputs always include `story.standard.md` (PM-facing CommonMark) and `story.dev.md` (dev-facing CommonMark).
 
 ## Skills
 
@@ -78,7 +78,7 @@ Outputs always include both `story.jira-wiki.md` (Jira wiki markup) and `story.s
 - `edge-cases` — boundary/network/concurrency/permission/state
 - `analytics-events` — funnel events with payload taxonomy
 - `risks-and-dependencies` — risks + blocking deps
-- `jira-wiki-formatter` — dual-format renderer
+- `story-formatter` — portable Markdown renderer
 
 ## Multimodal
 

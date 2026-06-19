@@ -25,10 +25,10 @@
 - **Then** se muestra un mensaje que indica que el carrito está vacío y un enlace para volver al catálogo
 
 ## Definition of Done
-- [ ] Todos los criterios de aceptación pasan en QA
-- [ ] El resumen refleja el estado real del carrito en tiempo real
-- [ ] Accesible por teclado y lector de pantalla; contraste ≥ WCAG AA
-- [ ] Revisado por ≥1 ingeniero; signoff de PM tras walkthrough
+- Todos los criterios de aceptación pasan en QA
+- El resumen refleja el estado real del carrito en tiempo real
+- Accesible por teclado y lector de pantalla; contraste ≥ WCAG AA
+- Revisado por ≥1 ingeniero; signoff de PM tras walkthrough
 
 ---
 

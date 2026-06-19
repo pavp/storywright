@@ -39,7 +39,7 @@ Invoked by `story-generate` and `story-refine` after the body of the story is dr
    - And <secondary observable outcome>  (optional)
    ```
 6. Number ACs `AC-1`, `AC-2`, …. This is the ONLY allowed scheme, in every language — never `CA-01`, `Criterio 1`, `Escenario 1`, or any localized variant. The `AC` label is fixed; translate only the scenario title after it. Stable numbering — never renumber when adding new ones in iterations.
-7. Emit only the AC block. Do NOT include explanations, a section heading above the ACs, or surrounding prose. The host renderer (`[[jira-wiki-formatter]]`) owns the `## Acceptance Criteria` heading.
+7. Emit only the AC block. Do NOT include explanations, a section heading above the ACs, or surrounding prose. The host renderer (`[[story-formatter]]`) owns the `## Acceptance Criteria` heading.
 
 ## Examples
 

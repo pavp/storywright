@@ -20,6 +20,6 @@ Follow the skill's procedure:
 4. Draft a split plan as a Markdown table with rationale, pattern, and proposed children.
 5. Run the strategic evaluation: does the split reveal low-value work? Are children equal-sized?
 6. STOP and ask the user to approve / adjust / cancel. Never auto-split.
-7. After approval: write `epic.md` (single file — epic metadata, holds the decision trail; NO `split-plan.md`) + the full 3-file trio per child (`story-<N>.standard.md` + `story-<N>.jira-wiki.md` + `story-<N>.dev.md`).
+7. After approval: write `epic.md` (single file — epic metadata, holds the decision trail; NO `split-plan.md`) + both files per child (`story-<N>.standard.md` + `story-<N>.dev.md`).
 8. Coherence check + recursive re-split for children still >1 sprint.
 9. Save artifacts under the canonical output folder `docs/storywright/YYYY-MM-DD-HHmm-<epic-slug>/`.

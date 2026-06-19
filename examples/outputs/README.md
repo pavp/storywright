@@ -2,10 +2,9 @@
 
 Real, committed sample outputs so you can see what a skill produces **without installing anything**.
 
-Each folder is one run. The trio mirrors what every story-producing skill writes to `docs/storywright/<timestamp>-<slug>/`:
+Each folder is one run. The duo mirrors what every story-producing skill writes to `docs/storywright/<timestamp>-<slug>/`:
 
-- `story.standard.md` — PM-facing, CommonMark. No technical detail.
-- `story.jira-wiki.md` — PM-facing, Jira wiki markup (copy-paste into a Jira ticket).
+- `story.standard.md` — PM-facing, CommonMark. No technical detail. Pastes cleanly into Jira Cloud, Notion, Linear, and GitHub Issues.
 - `story.dev.md` — dev-facing, full technical detail (file paths, edge cases, analytics, risks, command-level DoD).
 
 | Folder | Input | Skill |

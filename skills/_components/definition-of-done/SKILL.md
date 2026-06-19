@@ -17,7 +17,7 @@ A Definition of Done is the contract for "shippable". It must be **checkable, ob
 
 ## When to use
 
-Invoked after acceptance criteria and technical considerations are drafted. DoD is **dual-rendered** (see `[[jira-wiki-formatter]]`): the PM-facing files (`story.standard.md` / `story.jira-wiki.md`) carry the **acceptance-only** DoD (no CLI commands, no file-level criteria); `story.dev.md` carries the **full** DoD including CLI commands (`npm run test`) and file-level lines. Produce both projections from the baseline below: PM projection = drop command/file lines; dev projection = keep everything.
+Invoked after acceptance criteria and technical considerations are drafted. DoD is **dual-rendered** (see `[[story-formatter]]`): `story.standard.md` carries the **acceptance-only** DoD projection (no CLI commands, no file-level criteria, plain `- ` bullets — no `- [ ]` checkboxes); `story.dev.md` carries the **full** DoD including CLI commands (`npm run test`), file-level lines, and `- [ ]` checkboxes. Produce both projections from the baseline below: PM projection = drop command/file lines AND strip `[ ]` to plain `- `; dev projection = keep everything including `- [ ]`.
 
 ## Inputs & interpretation
 
@@ -29,7 +29,7 @@ Invoked after acceptance criteria and technical considerations are drafted. DoD 
 1. Start from the baseline list below.
 2. Drop lines that don't apply (e.g., no analytics if the story is purely internal).
 3. Add story-specific lines from technical considerations (e.g., "Database migration runs cleanly on staging").
-4. Use checkbox markdown (`- [ ]`) so reviewers can tick during review.
+4. Use checkbox markdown (`- [ ]`) so reviewers can tick during review. **PM projection exception:** when rendering the DoD for `story.standard.md`, replace `- [ ]` with plain `- ` bullets — Jira Cloud does not autoformat task-list syntax. `story.dev.md` keeps `- [ ]` unchanged.
 
 ### Baseline DoD
 

@@ -6,7 +6,7 @@ design risk to watch. Nothing here is committed scope until it goes through SDD.
 
 > **Guiding constraint:** every feature must respect the pack's non-goals
 > (no Jira/Linear API in code, not project-aware, no long-term memory) and the
-> central PM↔dev triple-output invariant. Features that fight the thesis are
+> central PM↔dev dual-output invariant. Features that fight the thesis are
 > out — see [`storywright-master-context.md`](storywright-master-context.md).
 
 ---
@@ -25,8 +25,8 @@ stories.
    same backlog usually share product, user, and business-rule context — the
    gain a human invoking N times loses.
 3. Runs the existing pipeline per item: INVEST → deterministic pre-split check →
-   render the trio.
-4. Emits a `backlog-summary.md` index mapping the N trios and flagging items
+   render both files (standard + dev).
+4. Emits a `backlog-summary.md` index mapping the N story pairs and flagging items
    that came back `SPLIT RECOMMENDED`.
 
 **Why it fits.** Pure composition. The pack already does "N stories per
@@ -149,72 +149,51 @@ delivers.
 
 ---
 
-## 4. Consolidate to portable Markdown — retire the broken Jira-wiki file
+## 4. Consolidate to portable Markdown — retire the broken Jira-wiki file ✅ Done
 
-**Problem.** The trio's second PM file, `story.jira-wiki.md`, emits Jira **wiki
-markup** (`h2.`, `*bold*`, `{panel}`). Jira Cloud's new issue view moved to ADF /
+**Problem (resolved).** The original trio's second PM file (the wiki-markup file) emitted Jira wiki
+markup (`h2.`, `*bold*`, `{panel}`). Jira Cloud's new issue view moved to ADF /
 Markdown and **removed wiki-markup support from the editor — Atlassian states it
 won't support it** ([JRACLOUD-69259](https://jira.atlassian.com/browse/JRACLOUD-69259)).
-Pasting the file into a Cloud ticket now fails both ways: the editor doesn't
-interpret the wiki markup (so `h2.` shows literally) while it *does* autoformat
-Markdown (so it half-renders) — broken formatting, confirmed in real use. The
-file the pack ships specifically for Jira is the one that pastes worst.
+Pasting it into a Cloud ticket failed both ways: the editor didn't
+interpret the wiki markup (so `h2.` showed literally) while it *did* autoformat
+Markdown (so it half-rendered) — broken formatting, confirmed in real use. The
+file the pack shipped specifically for Jira was the one that pasted worst.
 
-**Why it's nearly redundant.** Jira Cloud's editor autoformats standard Markdown
+**Why it was nearly redundant.** Jira Cloud's editor autoformats standard Markdown
 on paste (headings, bold, lists, code, blockquotes, links —
 [Atlassian docs](https://support.atlassian.com/jira-software-cloud/docs/markdown-and-keyboard-shortcuts/)).
-That means the existing `story.standard.md` (CommonMark) already pastes into Jira
-Cloud *better* than the dedicated wiki file. The two PM files are nearly twins —
-a redundancy that signals the wiki file has outlived its purpose. (Wiki markup
-still works in legacy self-hosted Jira Data Center/Server, a shrinking niche.)
+The existing `story.standard.md` (CommonMark) already pasted into Jira
+Cloud *better* than the dedicated wiki file. The two PM files were nearly twins —
+a redundancy that signaled the wiki file had outlived its purpose.
 
-**Approach.** Consolidate to one portable PM Markdown file instead of two:
-1. Drop `story.jira-wiki.md` from the trio (trio → PM `standard` + `dev`).
-2. Apply the 2–3 corrections that make `story.standard.md` paste cleanly into the
-   Jira Cloud editor (e.g. DoD checkboxes `- [ ]` → bulleted markers Jira
-   autoformats; avoid Markdown tables in PM files, which the Cloud editor doesn't
-   autoformat on paste — render as lists). The result is one PM file portable
-   across Jira Cloud / Notion / Linear / GitHub.
+**Approach (implemented).** Consolidated to one portable PM Markdown file:
+1. Dropped the wiki-markup PM file from the output set (trio → PM `standard` + `dev`).
+2. Applied corrections that make `story.standard.md` paste cleanly into the
+   Jira Cloud editor: DoD `- [ ]` → plain `- ` bullets in PM projection;
+   Markdown pipe tables banned from PM files. One file now portable across
+   Jira Cloud / Notion / Linear / GitHub.
+3. Renamed the formatter component: `story-formatter`.
 
-**Why it fits.** Pure Markdown, no API — fully inside the thesis. It *simplifies*
+**Why it fit.** Pure Markdown, no API — fully inside the thesis. Simplified
 the model (fewer files, one less dialect to maintain) rather than adding surface.
 
-**Cost:** Medium — but it's mostly migration, not new capability. The change
-ripples through the central triple-output invariant: `jira-wiki-formatter`,
-`tests/skills-shape.test.mjs` (parity asserts the trio), the committed golden
-outputs, AGENTS.md ("triple output mandatory"), the validator, and every skill's
-frontmatter `outputs:`. This is exactly why it needs SDD, not a mechanical PR.
-
-**Design risks.**
-1. **Touches the core invariant.** "Triple output" is the pack's central design
-   rule (audit-confirmed). Dropping to two files is a deliberate redesign of that
-   invariant — not a bug fix. Must update every place that asserts three files in
-   lockstep or CI breaks.
-2. **Self-hosted legacy loss.** Retiring wiki markup abandons legacy Jira Data
-   Center/Server users. Decide explicitly whether that niche matters before
-   dropping it; if it does, the fallback is keeping wiki as an *optional* 4th
-   output rather than a mandatory one — but that re-adds the surface this change
-   removes.
-3. **"Pastes cleanly" is editor-version-dependent.** Jira Cloud's Markdown
-   autoformat covers most but not all elements (tables, task lists are weak).
-   "Clean" means "the common case autoformats", not "pixel-perfect".
-
-**Open design question for SDD:** two files or keep wiki as an *optional* output
-for legacy self-hosted? The answer decides whether this simplifies the invariant
-or just reshapes it.
+**Delivered.** Atomic PR — one branch, one revert. Self-hosted Jira Data
+Center/Server wiki-markup support was explicitly retired (shrinking niche).
+Design questions resolved in SDD: duo, not optional wiki output.
 
 ---
 
 ## Shared principle
 
-Every feature here stays inside the thesis — Markdown-pure, no API, PM↔dev trio —
+Every feature here stays inside the thesis — Markdown-pure, no API, PM↔dev duo —
 by **extending the composition model rather than fighting it.** Features 1–3
 invent no new capability: they harvest signal the pack already generates and
 wastes (batch reuses the pipeline, estimate reuses the enrichment, grounded mode
 reuses the confidence-banner pattern). Feature 4 goes the other way — it
 *removes* surface, retiring a dialect that outlived its purpose. The recurring
 design risk across 1–3 is over-automating away the PM's judgment; for 4 it's
-touching the core triple-output invariant. In every case the real work is knowing
+touching the core output invariant (now resolved). In every case the real work is knowing
 where to STOP.
 
 **Suggested order:** `story-batch` first — highest value, lowest risk, reuses the

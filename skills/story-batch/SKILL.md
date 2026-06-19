@@ -8,7 +8,6 @@ inputs:
   - backlog-text
 outputs:
   - story-1.standard.md
-  - story-1.jira-wiki.md
   - story-1.dev.md
   - backlog-summary.md
   - .storywright-context.json
@@ -22,12 +21,12 @@ composes:
   - _components/risks-and-dependencies
   - _components/definition-of-done
   - _components/invest-checklist
-  - _components/jira-wiki-formatter
+  - _components/story-formatter
 ---
 
 ## Purpose
 
-A backlog input usually contains N discrete items — different features, improvements, or requirements listed together. This skill maps that multi-item input into Cohn+Gherkin stories — **one story per item, processed in a single invocation**.
+A backlog input usually contains N discrete items — different features, improvements, or requirements listed together. This skill maps that multi-item input into Cohn+Gherkin stories — **one story per item, processed in a single invocation**. Each story emits two files: `story-N.standard.md` (PM-facing) + `story-N.dev.md` (dev-facing).
 
 **All hard rules, canonical output shape, language detection, terminal-only Q, mechanical NxN dep matrix, per-child V audit, context persistence, and INVEST handling live in `[[storywright-base]]`. Read that first. Anything in this file is a SOURCE-SPECIFIC or SPLIT-BEHAVIOR delta only.**
 
@@ -54,7 +53,7 @@ This skill produces **multiple stories in one invocation** (one per confirmed it
 
 For any item whose deterministic pre-split count ≥2 → STOP that item's draft, mark it `SPLIT RECOMMENDED` in `backlog-summary.md`, and continue with the remaining items. NEVER auto-invoke `[[story-split]]`.
 
-For any item whose INVEST V dimension FAILS → mark it `NOT A STORY` in `backlog-summary.md`, emit no trio, and continue. NEVER stop the batch.
+For any item whose INVEST V dimension FAILS → mark it `NOT A STORY` in `backlog-summary.md`, emit no files, and continue. NEVER stop the batch.
 
 If N=1 after boundary confirmation → abort and instruct the user to use `/storywright-story-generate` instead.
 
@@ -106,11 +105,11 @@ If the PM replies with an override, honor it and re-announce the new mode before
 
 For each confirmed item (1-based index N):
 
-1. Run base Application steps 3–11 verbatim (persona, passive-goal check, gap-check, pre-split count, canonical block, rule H audit, dev enrichment, INVEST, render trio, log).
+1. Run base Application steps 3–11 verbatim (persona, passive-goal check, gap-check, pre-split count, canonical block, rule H audit, dev enrichment, INVEST, render duo, log).
 2. Use filename prefix `story-<N>.` (all items share one flat batch folder).
-3. **Pre-split ≥2:** mark item as `SPLIT RECOMMENDED`, skip drafting the canonical block, emit no trio. Continue to the next item.
-4. **INVEST V = FAIL:** mark item as `NOT A STORY`, emit no trio. Continue to the next item.
-5. **INVEST other failures (T, N, E, I, S):** flag inline with `⚠️` in `backlog-summary.md` but still emit the trio (base behavior).
+3. **Pre-split ≥2:** mark item as `SPLIT RECOMMENDED`, skip drafting the canonical block, emit no files. Continue to the next item.
+4. **INVEST V = FAIL:** mark item as `NOT A STORY`, emit no files. Continue to the next item.
+5. **INVEST other failures (T, N, E, I, S):** flag inline with `⚠️` in `backlog-summary.md` but still emit both files (base behavior).
 
 Only items in `DRAFTED` status (step 10 logged) proceed to the Phase 4 matrix.
 
@@ -124,7 +123,7 @@ Scope: only items that reached `DRAFTED` in Phase 3 participate in the matrix an
 
 ### Phase 5 — Output
 
-Trios are already written by Phase 3 step 10. Emit:
+Story pairs are already written by Phase 3 step 10. Emit:
 
 1. **`backlog-summary.md`** at the batch folder root when N>1 OR any item is SPLIT RECOMMENDED or NOT A STORY:
 
@@ -133,8 +132,8 @@ Trios are already written by Phase 3 step 10. Emit:
 
    Generated: YYYY-MM-DD HH:mm
    Items: N
-   Drafted: D (story trios emitted)
-   Split recommended: S (no trio — run /storywright-story-split per item)
+   Drafted: D (story pairs emitted)
+   Split recommended: S (no story files — run /storywright-story-split per item)
 
    **Cohesion:** COHESIVE | DISPARATE (<cohesion%>, threshold 60%, driver: persona/area/both)
 
@@ -172,7 +171,7 @@ NO `clarifications.md`. NO Edge Cases / NFR sections **in PM files** (they live 
 Input: numbered list of 3 checkout-related items.
 - Phase 0 finds 3 items structurally.
 - Phase 1: cohesion% = 100% → COHESIVE, one shared clarification round.
-- Phase 3: items 1 and 2 pass INVEST → trios emitted; item 3 has pre-split ≥2 → SPLIT RECOMMENDED, no trio.
+- Phase 3: items 1 and 2 pass INVEST → story pairs emitted; item 3 has pre-split ≥2 → SPLIT RECOMMENDED, no files.
 - Phase 5: `backlog-summary.md` with 3-row table (2 DRAFTED, 1 SPLIT RECOMMENDED), 2×2 dep matrix over items 1–2.
 
 ### Good — disparate batch

@@ -15,11 +15,11 @@
 - **Then** se crea su sesión y es redirigido al dashboard en menos de 3 segundos
 
 ## Definition of Done
-- [ ] Todos los criterios de aceptación pasan en QA
-- [ ] El flujo de error muestra copy accionable cuando la autorización falla o se cancela
-- [ ] Eventos de analytics verificados en el dashboard
-- [ ] Accesible por teclado y lector de pantalla; contraste ≥ WCAG AA
-- [ ] Revisado por ≥1 ingeniero; signoff de PM tras walkthrough
+- Todos los criterios de aceptación pasan en QA
+- El flujo de error muestra copy accionable cuando la autorización falla o se cancela
+- Eventos de analytics verificados en el dashboard
+- Accesible por teclado y lector de pantalla; contraste ≥ WCAG AA
+- Revisado por ≥1 ingeniero; signoff de PM tras walkthrough
 
 ---
 
