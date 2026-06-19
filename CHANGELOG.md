@@ -1,3 +1,9 @@
+## [1.13.2](https://github.com/pavp/storywright/compare/v1.13.1...v1.13.2) (2026-06-19)
+
+### 🐛 Bug Fixes
+
+* **commands:** sync entrypoints + skills to triple-output and canonical paths ([#9](https://github.com/pavp/storywright/issues/9)) ([7e9c5cc](https://github.com/pavp/storywright/commit/7e9c5cc8f22fea6916f3986805d7b7145ba5f90b))
+
 ## [1.13.1](https://github.com/pavp/storywright/compare/v1.13.0...v1.13.1) (2026-06-19)
 
 ### 🐛 Bug Fixes
