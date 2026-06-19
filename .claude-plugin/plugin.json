@@ -11,6 +11,7 @@
     "skills/story-refine",
     "skills/story-split",
     "skills/story-from-figma",
+    "skills/story-batch",
     "skills/_components/storywright-base",
     "skills/_components/clarification-questions",
     "skills/_components/acceptance-criteria",
@@ -26,7 +27,8 @@
     "commands/story-generate.md",
     "commands/story-refine.md",
     "commands/story-split.md",
-    "commands/story-from-figma.md"
+    "commands/story-from-figma.md",
+    "commands/story-batch.md"
   ],
   "tags": ["product-management", "user-stories", "jira", "agile", "invest"]
 }
