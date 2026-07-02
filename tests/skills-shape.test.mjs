@@ -335,3 +335,136 @@ test("plugin.json skills match the skills on disk", async () => {
     assert.ok(onDisk.has(p), `plugin.json lists a skill not on disk: ${p}`);
   }
 });
+
+// ── story-refine amendment mode ──────────────────────────────────────────────
+// These tests assert the shape of the Amendment mode addition to story-refine
+// (spec R1/R2, tasks T4.1/T4.2). The trigger-phrase and detection-step tests
+// run against the skill file directly, independent of the golden.
+
+async function loadStoryRefineSkill() {
+  const files = await findSkillFiles();
+  const path = files.find((f) => f.includes("story-refine/SKILL.md"));
+  assert.ok(path, "skills/story-refine/SKILL.md not found");
+  return loadSkill(path);
+}
+
+// (T4.1) trigger frontmatter must carry the 5 pre-existing plain-refine
+// phrases AND the 5 new amendment phrases (spec R1 scenario 1.1).
+test("story-refine: trigger frontmatter carries plain-refine and amendment phrases", async () => {
+  const skill = await loadStoryRefineSkill();
+  const trigger = skill.frontmatter.trigger ?? "";
+  const PLAIN_REFINE_PHRASES = [
+    "/story-refine",
+    "refine this story",
+    "improve this story",
+    "refinar historia",
+    "this story is incomplete",
+  ];
+  const AMENDMENT_PHRASES = [
+    "I forgot to mention",
+    "add this to the story",
+    "one more requirement",
+    "me olvidé de mencionar",
+    "agregale a la historia",
+  ];
+  for (const phrase of [...PLAIN_REFINE_PHRASES, ...AMENDMENT_PHRASES]) {
+    assert.ok(
+      trigger.includes(phrase),
+      `story-refine trigger frontmatter missing phrase: "${phrase}"`
+    );
+  }
+});
+
+// (T4.1 / R2 scenario 2.4) a numbered amendment-detection step (Step R) must
+// exist in the Application section, distinguishable from the "Amendment
+// differential" prose section header, and it must precede references to base
+// steps 2+.
+test("story-refine: numbered amendment-detection step exists in Application section", async () => {
+  const skill = await loadStoryRefineSkill();
+  const applicationSection = skill.body.split(/^## Application/m)[1] ?? "";
+  assert.match(
+    applicationSection,
+    /^\d+\.\s.*Step R.*[Aa]mendment/m,
+    "Application section must contain a numbered detection-step line referencing Step R / amendment"
+  );
+});
+
+// (T4.2 / R3 scenario 3.2, R6 scenario 6.2, D6) amendment golden — no PM
+// leakage, AC append-not-renumber. Follows the backlog-grooming
+// directory-absent guard idiom so the suite stays green before the golden
+// lands and enforces shape once it does.
+
+const AMENDMENT_GOLDEN = join(REPO, "examples/outputs/story-refine-amendment");
+
+async function amendmentGoldenExists() {
+  try {
+    const { stat } = await import("node:fs/promises");
+    await stat(AMENDMENT_GOLDEN);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+test("story-refine-amendment golden: PM file carries no technical leakage", async () => {
+  if (!(await amendmentGoldenExists())) return; // skip until golden lands
+  const LEAK = [
+    /npm run /,
+    /\bimport\b/,
+    /\.(mjs|ts|tsx|jsx)\b/,
+    /### Edge Cases/,
+    /## Edge Cases/,
+    /## Estimate/,
+    /Story Points/,
+  ];
+  const text = await readFile(join(AMENDMENT_GOLDEN, "story.standard.md"), "utf8");
+  for (const re of LEAK) {
+    assert.ok(!re.test(text), `story.standard.md leaks technical detail matching ${re}`);
+  }
+  const sections = extractH2Sections(text);
+  const BANNED = [
+    "Edge Cases", "Non-Functional Requirements", "NFR", "Performance",
+    "Security", "Accessibility", "Technical Considerations", "Analytics",
+    "Risks", "Dependencies", "Dependencias", "Riesgos",
+    "Estimate", "Story Points",
+  ];
+  for (const b of BANNED) {
+    assert.ok(
+      !sections.some((s) => s.toLowerCase().startsWith(b.toLowerCase())),
+      `Banned section found in amendment golden PM file: "${b}"`
+    );
+  }
+});
+
+test("story-refine-amendment golden: AC-N scheme, append-not-renumber", async () => {
+  if (!(await amendmentGoldenExists())) return; // skip until golden lands
+  const content = await readFile(join(AMENDMENT_GOLDEN, "story.standard.md"), "utf8");
+  assert.ok(
+    /\*\*AC-\d+:/.test(content),
+    "story.standard.md must label acceptance criteria as **AC-N:**"
+  );
+  const FORBIDDEN_AC_LABELS = [/\bCA-\d/, /\bCriterio\s+\d/i, /\bEscenario\s+\d/i];
+  for (const re of FORBIDDEN_AC_LABELS) {
+    assert.ok(
+      !re.test(content),
+      `story.standard.md uses a forbidden AC label matching ${re}`
+    );
+  }
+  const acNumbers = [...content.matchAll(/\*\*AC-(\d+):/g)]
+    .map((m) => Number(m[1]))
+    .sort((a, b) => a - b);
+  assert.deepEqual(
+    acNumbers,
+    [1, 2, 3],
+    "amendment golden must show AC-1 and AC-2 preserved plus AC-3 appended, no gap, no duplicate"
+  );
+  const unique = new Set(acNumbers);
+  assert.equal(unique.size, acNumbers.length, "AC numbers must not repeat");
+});
+
+test("story-refine-amendment golden: dev file carries technical detail and Estimate", async () => {
+  if (!(await amendmentGoldenExists())) return; // skip until golden lands
+  const dev = await readFile(join(AMENDMENT_GOLDEN, "story.dev.md"), "utf8");
+  assert.match(dev, /npm run /, "story.dev.md should contain command-level DoD");
+  assert.match(dev, /## Estimate/, "story.dev.md should contain ## Estimate");
+});
