@@ -378,7 +378,10 @@ test("story-refine: trigger frontmatter carries plain-refine and amendment phras
 // (T4.1 / R2 scenario 2.4) a numbered amendment-detection step (Step R) must
 // exist in the Application section, distinguishable from the "Amendment
 // differential" prose section header, and it must precede references to base
-// steps 2+.
+// steps 2+. R2 also mandates the classification rule itself be STATED in this
+// numbered step (not just referenced) — assert the two-path predicate and all
+// three accepted existing-story sources are present in the step's own text,
+// and that the step appears before any reference to base steps 5/7/11.
 test("story-refine: numbered amendment-detection step exists in Application section", async () => {
   const skill = await loadStoryRefineSkill();
   const applicationSection = skill.body.split(/^## Application/m)[1] ?? "";
@@ -387,27 +390,49 @@ test("story-refine: numbered amendment-detection step exists in Application sect
     /^\d+\.\s.*Step R.*[Aa]mendment/m,
     "Application section must contain a numbered detection-step line referencing Step R / amendment"
   );
+  const stepRMatch = applicationSection.match(/^\d+\.\s.*Step R[\s\S]*?(?=\n- Step \d|\n\d+\.\s|$)/m);
+  assert.ok(stepRMatch, "Step R numbered entry must be extractable from the Application section");
+  const stepRText = stepRMatch[0];
+  assert.match(
+    stepRText,
+    /Amendment.{0,40}Plain refine|Plain refine.{0,40}Amendment/s,
+    "Step R must state the two-path predicate (Amendment vs Plain refine) in its own text, not by reference"
+  );
+  assert.match(
+    stepRText,
+    /pasted as text/i,
+    "Step R must enumerate story source (a): existing story pasted as text"
+  );
+  assert.match(
+    stepRText,
+    /story\.standard\.md.*story\.dev\.md|story\.dev\.md.*story\.standard\.md/,
+    "Step R must enumerate story source (b): a prior story.standard.md/story.dev.md pair"
+  );
+  assert.match(
+    stepRText,
+    /\.storywright-context\.json/,
+    "Step R must enumerate story source (c): a reference resolvable via .storywright-context.json"
+  );
+  const stepRIndex = applicationSection.indexOf(stepRText);
+  for (const laterRef of [/Step 5/, /Step 7/, /Step 11/]) {
+    const m = applicationSection.match(laterRef);
+    if (m) {
+      assert.ok(
+        m.index > stepRIndex,
+        `Step R must precede references to base steps 2+ (found "${laterRef}" before Step R)`
+      );
+    }
+  }
 });
 
 // (T4.2 / R3 scenario 3.2, R6 scenario 6.2, D6) amendment golden — no PM
-// leakage, AC append-not-renumber. Follows the backlog-grooming
-// directory-absent guard idiom so the suite stays green before the golden
-// lands and enforces shape once it does.
+// leakage, AC append-not-renumber. The golden ships in this same change, so
+// these assertions run unconditionally — a missing golden fails loudly
+// instead of being silently skipped.
 
 const AMENDMENT_GOLDEN = join(REPO, "examples/outputs/story-refine-amendment");
 
-async function amendmentGoldenExists() {
-  try {
-    const { stat } = await import("node:fs/promises");
-    await stat(AMENDMENT_GOLDEN);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 test("story-refine-amendment golden: PM file carries no technical leakage", async () => {
-  if (!(await amendmentGoldenExists())) return; // skip until golden lands
   const LEAK = [
     /npm run /,
     /\bimport\b/,
@@ -437,7 +462,6 @@ test("story-refine-amendment golden: PM file carries no technical leakage", asyn
 });
 
 test("story-refine-amendment golden: AC-N scheme, append-not-renumber", async () => {
-  if (!(await amendmentGoldenExists())) return; // skip until golden lands
   const content = await readFile(join(AMENDMENT_GOLDEN, "story.standard.md"), "utf8");
   assert.ok(
     /\*\*AC-\d+:/.test(content),
@@ -463,8 +487,91 @@ test("story-refine-amendment golden: AC-N scheme, append-not-renumber", async ()
 });
 
 test("story-refine-amendment golden: dev file carries technical detail and Estimate", async () => {
-  if (!(await amendmentGoldenExists())) return; // skip until golden lands
   const dev = await readFile(join(AMENDMENT_GOLDEN, "story.dev.md"), "utf8");
   assert.match(dev, /npm run /, "story.dev.md should contain command-level DoD");
   assert.match(dev, /## Estimate/, "story.dev.md should contain ## Estimate");
+});
+
+// (R4 scenarios 4.1–4.3) conflict-path golden — the user-declared delta
+// contradicts an existing AC's Given. One BLOCKING AskUserQuestion resolves
+// it; only the contradicted AC changes, the independent AC survives
+// byte-identical, and the Refinement log records the conflict + resolution.
+// No directory-exists guard — a missing golden fails loudly, consistent with
+// the amendment-golden tests above.
+
+const CONFLICT_GOLDEN = join(REPO, "examples/outputs/story-refine-amendment-conflict");
+
+test("story-refine-amendment-conflict golden: PM file carries no technical leakage", async () => {
+  const LEAK = [
+    /npm run /,
+    /\bimport\b/,
+    /\.(mjs|ts|tsx|jsx)\b/,
+    /### Edge Cases/,
+    /## Edge Cases/,
+    /## Estimate/,
+    /Story Points/,
+  ];
+  const text = await readFile(join(CONFLICT_GOLDEN, "story.standard.md"), "utf8");
+  for (const re of LEAK) {
+    assert.ok(!re.test(text), `story.standard.md leaks technical detail matching ${re}`);
+  }
+  const sections = extractH2Sections(text);
+  const BANNED = [
+    "Edge Cases", "Non-Functional Requirements", "NFR", "Performance",
+    "Security", "Accessibility", "Technical Considerations", "Analytics",
+    "Risks", "Dependencies", "Dependencias", "Riesgos",
+    "Estimate", "Story Points",
+  ];
+  for (const b of BANNED) {
+    assert.ok(
+      !sections.some((s) => s.toLowerCase().startsWith(b.toLowerCase())),
+      `Banned section found in conflict golden PM file: "${b}"`
+    );
+  }
+});
+
+test("story-refine-amendment-conflict golden: AC numbering unchanged, no renumbering", async () => {
+  const content = await readFile(join(CONFLICT_GOLDEN, "story.standard.md"), "utf8");
+  assert.ok(
+    /\*\*AC-\d+:/.test(content),
+    "story.standard.md must label acceptance criteria as **AC-N:**"
+  );
+  const FORBIDDEN_AC_LABELS = [/\bCA-\d/, /\bCriterio\s+\d/i, /\bEscenario\s+\d/i];
+  for (const re of FORBIDDEN_AC_LABELS) {
+    assert.ok(
+      !re.test(content),
+      `story.standard.md uses a forbidden AC label matching ${re}`
+    );
+  }
+  const acNumbers = [...content.matchAll(/\*\*AC-(\d+):/g)]
+    .map((m) => Number(m[1]))
+    .sort((a, b) => a - b);
+  assert.deepEqual(
+    acNumbers,
+    [1, 2],
+    "conflict golden must show exactly AC-1 (resolved) and AC-2 (untouched) — a conflict resolves existing content, it does not append a new AC"
+  );
+});
+
+test("story-refine-amendment-conflict golden: Refinement log records conflict marker and resolution", async () => {
+  const dev = await readFile(join(CONFLICT_GOLDEN, "story.dev.md"), "utf8");
+  assert.match(dev, /npm run /, "story.dev.md should contain command-level DoD");
+  assert.match(dev, /## Estimate/, "story.dev.md should contain ## Estimate");
+  const logMatch = dev.match(/\*Refinement log\*\n([\s\S]*)$/);
+  assert.ok(logMatch, "story.dev.md must contain a *Refinement log* block");
+  const logLines = logMatch[1].trim().split("\n").filter((l) => l.trim().length > 0);
+  assert.ok(
+    logLines.length <= 3,
+    `Refinement log must stay within the ≤3-line ceiling (found ${logLines.length})`
+  );
+  assert.match(
+    logMatch[1],
+    /Conflict:/i,
+    "Refinement log must contain a conflict marker line"
+  );
+  assert.match(
+    logMatch[1],
+    /resolved|resolution|supersedes/i,
+    "Refinement log conflict line must record the resolution"
+  );
 });
