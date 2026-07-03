@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -83,18 +83,9 @@ test("all story-producing skills declare the standard/dev duo", async () => {
 // file is exempt. Guards the PM↔dev separation against future regressions.
 test("golden PM outputs carry no technical leakage", async () => {
   const dir = join(REPO, "examples/outputs/google-login");
-  const LEAK = [
-    /npm run /,
-    /\bimport\b/,
-    /\.(mjs|ts|tsx|jsx)\b/,
-    /### Edge Cases/,
-    /## Edge Cases/,
-    /## Estimate/,
-    /Story Points/,
-  ];
   for (const pm of ["story.standard.md"]) {
     const text = await readFile(join(dir, pm), "utf8");
-    for (const re of LEAK) {
+    for (const re of LEAK_PM) {
       assert.ok(!re.test(text), `${pm} leaks technical detail matching ${re}`);
     }
   }
@@ -109,19 +100,45 @@ function extractH2Sections(content) {
   return [...content.matchAll(/^## (.+)$/gm)].map((m) => m[1].trim());
 }
 
+// Shared PM-leakage constants — single source for every golden. Order matters:
+// backlog-summary.md uses the first 5 LEAK entries and BANNED minus the last 2
+// (a summary has no per-story Estimate section to ban).
+const LEAK_PM = [
+  /npm run /,
+  /\bimport\b/,
+  /\.(mjs|ts|tsx|jsx)\b/,
+  /### Edge Cases/,
+  /## Edge Cases/,
+  /## Estimate/,
+  /Story Points/,
+];
+const BANNED_PM = [
+  "Edge Cases", "Non-Functional Requirements", "NFR", "Performance",
+  "Security", "Accessibility", "Technical Considerations", "Analytics",
+  "Risks", "Dependencies", "Dependencias", "Riesgos",
+  "Estimate", "Story Points",
+];
+
+function assertNoPmLeakage(text, label, { leak = LEAK_PM, banned = BANNED_PM } = {}) {
+  for (const re of leak) {
+    assert.ok(!re.test(text), `${label} leaks technical detail matching ${re}`);
+  }
+  const sections = extractH2Sections(text);
+  for (const b of banned) {
+    assert.ok(
+      !sections.some((s) => s.toLowerCase().startsWith(b.toLowerCase())),
+      `Banned section found in ${label}: "${b}"`
+    );
+  }
+}
+
 // story.standard.md must not contain any section from the Rule H banned list.
 test('story.standard.md contains no banned sections', async () => {
   const content = await readFile(
     join(REPO, 'examples/outputs/google-login/story.standard.md'), 'utf8'
   );
   const sections = extractH2Sections(content);
-  const BANNED = [
-    'Edge Cases', 'Non-Functional Requirements', 'NFR', 'Performance',
-    'Security', 'Accessibility', 'Technical Considerations', 'Analytics',
-    'Risks', 'Dependencies', 'Dependencias', 'Riesgos',
-    'Estimate', 'Story Points',
-  ];
-  for (const b of BANNED) {
+  for (const b of BANNED_PM) {
     assert.ok(
       !sections.some(s => s.toLowerCase().startsWith(b.toLowerCase())),
       `Banned section found in PM golden: "${b}"`
@@ -186,7 +203,6 @@ const BATCH_GOLDEN = join(REPO, "examples/outputs/backlog-grooming");
 
 async function batchGoldenExists() {
   try {
-    const { stat } = await import("node:fs/promises");
     await stat(BATCH_GOLDEN);
     return true;
   } catch {
@@ -200,7 +216,6 @@ test("story-batch: duo parity for items 1–3 in golden", async () => {
   const SUFFIXES = ["standard.md", "dev.md"];
   for (const n of [1, 2]) {
     for (const suffix of SUFFIXES) {
-      const { stat } = await import("node:fs/promises");
       await stat(join(BATCH_GOLDEN, `story-${n}.${suffix}`));
     }
   }
@@ -208,7 +223,6 @@ test("story-batch: duo parity for items 1–3 in golden", async () => {
   for (const suffix of SUFFIXES) {
     let exists = false;
     try {
-      const { stat } = await import("node:fs/promises");
       await stat(join(BATCH_GOLDEN, `story-3.${suffix}`));
       exists = true;
     } catch { /* expected */ }
@@ -219,19 +233,10 @@ test("story-batch: duo parity for items 1–3 in golden", async () => {
 // (b) PM leakage per story: standard.md passes LEAK regex; dev.md matches /npm run /.
 test("story-batch: PM files carry no technical leakage", async () => {
   if (!(await batchGoldenExists())) return; // skip until PR2
-  const LEAK = [
-    /npm run /,
-    /\bimport\b/,
-    /\.(mjs|ts|tsx|jsx)\b/,
-    /### Edge Cases/,
-    /## Edge Cases/,
-    /## Estimate/,
-    /Story Points/,
-  ];
   for (const n of [1, 2]) {
     for (const pm of [`story-${n}.standard.md`]) {
       const text = await readFile(join(BATCH_GOLDEN, pm), "utf8");
-      for (const re of LEAK) {
+      for (const re of LEAK_PM) {
         assert.ok(!re.test(text), `${pm} leaks technical detail matching ${re}`);
       }
     }
@@ -244,28 +249,12 @@ test("story-batch: PM files carry no technical leakage", async () => {
 test("story-batch: backlog-summary.md shape", async () => {
   if (!(await batchGoldenExists())) return; // skip until PR2
   const text = await readFile(join(BATCH_GOLDEN, "backlog-summary.md"), "utf8");
-  const LEAK = [
-    /npm run /,
-    /\bimport\b/,
-    /\.(mjs|ts|tsx|jsx)\b/,
-    /### Edge Cases/,
-    /## Edge Cases/,
-  ];
-  for (const re of LEAK) {
-    assert.ok(!re.test(text), `backlog-summary.md leaks technical detail matching ${re}`);
-  }
+  // A summary aggregates stories: no per-story Estimate section exists to ban.
+  assertNoPmLeakage(text, "backlog-summary.md", {
+    leak: LEAK_PM.slice(0, 5),
+    banned: BANNED_PM.slice(0, -2),
+  });
   const sections = extractH2Sections(text);
-  const BANNED = [
-    "Edge Cases", "Non-Functional Requirements", "NFR", "Performance",
-    "Security", "Accessibility", "Technical Considerations", "Analytics",
-    "Risks", "Dependencies", "Dependencias", "Riesgos",
-  ];
-  for (const b of BANNED) {
-    assert.ok(
-      !sections.some((s) => s.toLowerCase().startsWith(b.toLowerCase())),
-      `Banned section found in backlog-summary.md: "${b}"`
-    );
-  }
   assert.ok(
     text.includes("**Cohesion:**"),
     "backlog-summary.md must contain **Cohesion:** line"
@@ -433,32 +422,8 @@ test("story-refine: numbered amendment-detection step exists in Application sect
 const AMENDMENT_GOLDEN = join(REPO, "examples/outputs/story-refine-amendment");
 
 test("story-refine-amendment golden: PM file carries no technical leakage", async () => {
-  const LEAK = [
-    /npm run /,
-    /\bimport\b/,
-    /\.(mjs|ts|tsx|jsx)\b/,
-    /### Edge Cases/,
-    /## Edge Cases/,
-    /## Estimate/,
-    /Story Points/,
-  ];
   const text = await readFile(join(AMENDMENT_GOLDEN, "story.standard.md"), "utf8");
-  for (const re of LEAK) {
-    assert.ok(!re.test(text), `story.standard.md leaks technical detail matching ${re}`);
-  }
-  const sections = extractH2Sections(text);
-  const BANNED = [
-    "Edge Cases", "Non-Functional Requirements", "NFR", "Performance",
-    "Security", "Accessibility", "Technical Considerations", "Analytics",
-    "Risks", "Dependencies", "Dependencias", "Riesgos",
-    "Estimate", "Story Points",
-  ];
-  for (const b of BANNED) {
-    assert.ok(
-      !sections.some((s) => s.toLowerCase().startsWith(b.toLowerCase())),
-      `Banned section found in amendment golden PM file: "${b}"`
-    );
-  }
+  assertNoPmLeakage(text, "amendment golden story.standard.md");
 });
 
 test("story-refine-amendment golden: AC-N scheme, append-not-renumber", async () => {
@@ -492,6 +457,30 @@ test("story-refine-amendment golden: dev file carries technical detail and Estim
   assert.match(dev, /## Estimate/, "story.dev.md should contain ## Estimate");
 });
 
+// (R6 scenarios 6.1/6.2) the amendment Refinement log must carry the amendment
+// marker with a one-line delta summary and the estimate-change note, and stay
+// within the ≤3-line ceiling (no SPLIT verdict in this golden).
+test("story-refine-amendment golden: Refinement log records amendment within the line ceiling", async () => {
+  const dev = await readFile(join(AMENDMENT_GOLDEN, "story.dev.md"), "utf8");
+  const logMatch = dev.match(/\*Refinement log\*\n([\s\S]*)$/);
+  assert.ok(logMatch, "story.dev.md must contain a *Refinement log* block");
+  const logLines = logMatch[1].trim().split("\n").filter((l) => l.trim().length > 0);
+  assert.ok(
+    logLines.length <= 3,
+    `Refinement log must stay within the ≤3-line ceiling (found ${logLines.length})`
+  );
+  assert.match(
+    logMatch[1],
+    /Amendment:/,
+    "Refinement log must contain the amendment marker line with the delta summary"
+  );
+  assert.match(
+    logMatch[1],
+    /Estimate refreshed:/i,
+    "Refinement log must record the estimate-change note"
+  );
+});
+
 // (R4 scenarios 4.1–4.3) conflict-path golden — the user-declared delta
 // contradicts an existing AC's Given. One BLOCKING AskUserQuestion resolves
 // it; only the contradicted AC changes, the independent AC survives
@@ -502,32 +491,8 @@ test("story-refine-amendment golden: dev file carries technical detail and Estim
 const CONFLICT_GOLDEN = join(REPO, "examples/outputs/story-refine-amendment-conflict");
 
 test("story-refine-amendment-conflict golden: PM file carries no technical leakage", async () => {
-  const LEAK = [
-    /npm run /,
-    /\bimport\b/,
-    /\.(mjs|ts|tsx|jsx)\b/,
-    /### Edge Cases/,
-    /## Edge Cases/,
-    /## Estimate/,
-    /Story Points/,
-  ];
   const text = await readFile(join(CONFLICT_GOLDEN, "story.standard.md"), "utf8");
-  for (const re of LEAK) {
-    assert.ok(!re.test(text), `story.standard.md leaks technical detail matching ${re}`);
-  }
-  const sections = extractH2Sections(text);
-  const BANNED = [
-    "Edge Cases", "Non-Functional Requirements", "NFR", "Performance",
-    "Security", "Accessibility", "Technical Considerations", "Analytics",
-    "Risks", "Dependencies", "Dependencias", "Riesgos",
-    "Estimate", "Story Points",
-  ];
-  for (const b of BANNED) {
-    assert.ok(
-      !sections.some((s) => s.toLowerCase().startsWith(b.toLowerCase())),
-      `Banned section found in conflict golden PM file: "${b}"`
-    );
-  }
+  assertNoPmLeakage(text, "conflict golden story.standard.md");
 });
 
 test("story-refine-amendment-conflict golden: AC numbering unchanged, no renumbering", async () => {
