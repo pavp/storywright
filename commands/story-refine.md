@@ -11,7 +11,7 @@ Follow the skill's procedure:
 
 0. Detect companion sources (image, figma-link). If present, run conflict detection between the story text and the design BEFORE filling sections. Surface conflicts as BLOCKING clarifications; never silently rewrite the story to match the design.
 1. Parse the existing story into the section taxonomy. Mark each section: present / missing / weak.
-2. Amendment detection (Step R). Classify the input into exactly ONE of two paths: **Amendment** if the message contains the existing story PLUS user-declared new content not derivable from it (signalled by an R1 trigger phrase like "I forgot to mention" / "me olvidé de mencionar", OR framing like "also"/"new requirement" on uncovered sections); otherwise **Plain refine**. A trigger phrase with no new content falls through to Plain refine. If ambiguous and scope-affecting, ask ONE `AskUserQuestion`. On the Amendment path: (a) if the new info contradicts the story, raise a BLOCKING `AskUserQuestion` before merging; (b) merge the delta — APPEND new ACs, never renumber, preserve sharp existing wording; (c) re-run the pre-split test on the MERGED story (existing step, now mandatory after a delta); (d) INVEST + render both files as normal.
+2. Amendment detection (Step R): classify the input as Amendment or Plain refine per the skill's Step R detection rule; on Amendment, follow the Amendment differential (merge, conflict-as-BLOCKING, pre-split re-run on the merged story).
 3. Gap-check weak sections via `clarification-questions`. Ask only BLOCKING questions.
 4. Detect language and preserve it in output.
 5. Fill missing/weak sections via component skills. Preserve original wording where good.
