@@ -1,3 +1,9 @@
+## [1.20.0](https://github.com/pavp/storywright/compare/v1.19.1...v1.20.0) (2026-07-03)
+
+### ✨ Features
+
+* **story-refine:** add Amendment mode for user-declared forgotten requirements ([#23](https://github.com/pavp/storywright/issues/23)) ([883a59d](https://github.com/pavp/storywright/commit/883a59d4b5fb723c11d3fc1a6e3da985297df82e))
+
 ## [1.19.1](https://github.com/pavp/storywright/compare/v1.19.0...v1.19.1) (2026-06-19)
 
 ### 📝 Docs
