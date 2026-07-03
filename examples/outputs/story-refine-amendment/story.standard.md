@@ -19,14 +19,14 @@
 - **When** the results screen renders
 - **Then** an empty-state message invites them to refine the search terms
 
-**AC-3: Export search results as CSV**
-- **Given** the agent has a non-empty set of search results on screen
-- **When** they select "Export CSV"
-- **Then** a CSV file containing the visible results downloads to their device
+**AC-3: Results show a total match count**
+- **Given** the agent has submitted a search that returns one or more matching customers
+- **When** the results screen renders
+- **Then** it displays the total number of matches found, alongside the results
 
 ## Definition of Done
 - All acceptance criteria pass in QA
-- Empty-state and export flows have actionable copy
+- Empty-state and match-count copy are actionable
 - Analytics events verified in the dashboard
 - Keyboard and screen-reader accessible; contrast ≥ WCAG AA
 - Reviewed by ≥1 engineer; PM signoff after walkthrough

@@ -20,6 +20,6 @@ Follow the skill's procedure:
 8. Render two outputs via `story-formatter` to `docs/storywright/YYYY-MM-DD-HHmm-<title-slug>/` (current local time, title kebab-case max 5 words). Use the `Write` tool for all files — never ask:
    - `story.standard.md` — PM-facing CommonMark: observable behavior only, no file paths/imports/component names/CLI commands; DoD uses plain `- ` bullets (no checkboxes); no pipe tables
    - `story.dev.md` — dev-facing CommonMark: full technical detail (file paths, imports, Technical Considerations, technical edge cases, DoD with `npm run` commands and `- [ ]` checkboxes)
-   - `.storywright-context.json` — resolved session answers: `{"language":"...","persona":"...","naming_pattern":null,"output_folder":"...","resolved_questions":[],"sibling_refs":[]}`
+   - `.storywright-context.json` — resolved session answers: `{"language":"...","persona":"...","naming_pattern":null,"output_folder":"...","resolved_questions":[],"sibling_refs":[],"extra":{}}`
    Emit `story.standard.md` as a fenced code block in chat. Do NOT emit `story.dev.md` in chat.
 9. Non-blocking assumptions remain? Mark inline with `⚠️ Assumed:`. Do NOT emit clarifications.md.

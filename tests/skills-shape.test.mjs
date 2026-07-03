@@ -476,8 +476,13 @@ test("story-refine-amendment golden: Refinement log records amendment within the
   );
   assert.match(
     logMatch[1],
-    /Estimate refreshed:/i,
-    "Refinement log must record the estimate-change note"
+    /no conflict/i,
+    "Refinement log must record explicit conflict status (no conflict, in this golden)"
+  );
+  assert.match(
+    logMatch[1],
+    /Estimate:/i,
+    "Refinement log must record the estimate note"
   );
 });
 
@@ -531,6 +536,11 @@ test("story-refine-amendment-conflict golden: Refinement log records conflict ma
   );
   assert.match(
     logMatch[1],
+    /Amendment:/,
+    "Refinement log must contain the amendment marker line with the delta summary"
+  );
+  assert.match(
+    logMatch[1],
     /Conflict:/i,
     "Refinement log must contain a conflict marker line"
   );
@@ -538,5 +548,10 @@ test("story-refine-amendment-conflict golden: Refinement log records conflict ma
     logMatch[1],
     /resolved|resolution|supersedes/i,
     "Refinement log conflict line must record the resolution"
+  );
+  assert.match(
+    logMatch[1],
+    /Estimate:/i,
+    "Refinement log must record the estimate note"
   );
 });

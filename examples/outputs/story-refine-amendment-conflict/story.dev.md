@@ -46,8 +46,8 @@
 | Dependencies | 1 | ×1.5 | 1.5 |
 | High-severity Risks 🚨 | 0 | ×2.0 | 0.0 |
 | Business Rules | 0 | ×0.5 | 0.0 |
-| **Raw score** | | | **5.3** → bucket 5 |
-| LLM adjustment | | | −3 → 2: conflict resolution replaced an implicit constraint (authenticated-only) with an already-scoped alternative (guest path); no new integration surface beyond the existing checkout endpoint |
+| **Raw score** | | | **5.3** → bucket 3 |
+| LLM adjustment | | | −1 → 2: dep "Guest-order linkage (email + order ID, no implicit account)" — reuses the existing checkout endpoint, no new integration surface |
 
 > Planning note: story points reflect relative complexity, not time, commitment, or velocity. Use them to compare stories against the calibration anchors in `[[estimation]]` — not to forecast hours.
 
@@ -55,5 +55,5 @@
 
 *Refinement log*
 - INVEST Verdict: READY
-- Amendment: delta "guests can also check out" contradicted AC-1's original authenticated-only Given.
-- Conflict: BLOCKING AskUserQuestion raised; resolved as "guests allowed, supersedes the authenticated-only precondition" — AC-1 Given updated in place; AC-2 unchanged.
+- Amendment: delta "guests can also check out" contradicted AC-1's original authenticated-only Given — Conflict: resolved as "guests allowed, supersedes the authenticated-only precondition" via BLOCKING AskUserQuestion; AC-1 Given updated in place, AC-2 unchanged.
+- Estimate: changed 5 (pre-conflict, authenticated-only scope) → 2 (post-resolution, guest path reuses the existing checkout endpoint).
