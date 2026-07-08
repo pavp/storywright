@@ -47,17 +47,7 @@ this story is too big, split it:
 
 Claude proposes a split plan in a table. You approve / adjust / cancel. Children are only written after approval.
 
-## 5. Generate from Figma
-
-Set up an MCP Figma server (see [`skills/story-from-figma/mcp-figma-notes.md`](../skills/story-from-figma/mcp-figma-notes.md)), then:
-
-```
-generate stories from this figma: https://www.figma.com/file/abc/auth-flows
-```
-
-Without MCP, drop PNG exports and the skill falls back to vision.
-
-## 6. ZIP for claude.ai upload
+## 5. ZIP for claude.ai upload
 
 ```bash
 storywright zip story-generate

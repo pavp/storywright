@@ -30,10 +30,10 @@
 
 Top-level skills name their components in `composes:` frontmatter. The validator confirms every referenced component exists **and that no component is orphaned** (referenced by zero skills). Composition is enforced at lint time, not at runtime — Claude reads the skill body and follows the references naturally.
 
-All five top-level skills (`story-generate`, `story-refine`, `story-split`, `story-from-figma`, `story-batch`) compose the **same 10 components**:
+All four top-level skills (`story-generate`, `story-refine`, `story-split`, `story-batch`) compose the **same 11 components**:
 
 ```
-story-generate / story-refine / story-split / story-from-figma / story-batch
+story-generate / story-refine / story-split / story-batch
 ├─ storywright-base          ← shared rulebook (inherited by all)
 ├─ clarification-questions
 ├─ business-rules            ← optional PM section + dev.md
@@ -43,12 +43,13 @@ story-generate / story-refine / story-split / story-from-figma / story-batch
 ├─ risks-and-dependencies    ← dev.md only
 ├─ definition-of-done        ← acceptance-only in PM, full in dev.md
 ├─ invest-checklist
-└─ story-formatter           ← renders the 2-file duo
+├─ story-formatter           ← renders the 2-file duo
+└─ estimation                ← Fibonacci ## Estimate → dev.md only (after INVEST)
 ```
 
 ### PM ↔ dev split
 
-The PM-facing file (`story.standard.md`) carries only what a PM needs — no file paths, imports, or commands (`storywright-base` rule 3). Technical detail produced by the enrichment components (edge cases, analytics events, risks/dependencies, command-level DoD) is **not discarded** — it is rendered into `story.dev.md` (rule 3a). This is why the five enrichment components are composed but never emit sections into the PM body.
+The PM-facing file (`story.standard.md`) carries only what a PM needs — no file paths, imports, or commands (`storywright-base` rule 3). Technical detail produced by the enrichment components (edge cases, analytics events, risks/dependencies, command-level DoD) is **not discarded** — it is rendered into `story.dev.md` (rule 3a). This is why the enrichment components are composed but never emit sections into the PM body.
 
 ## Multi-provider stance
 
@@ -61,7 +62,6 @@ Skills are written in format-neutral Markdown. Each skill ends with an optional 
 | Hallucinated requirements | Every assumed value is wrapped in `> ⚠️ Assumed:` blockquotes |
 | Over-splitting | `story-split` proposes; never auto-acts |
 | Vision misread | Per-inference confidence; LOW/MEDIUM surfaced as clarifications |
-| Figma access failure | Falls back to PNG drop + manual flow description |
 | Context drift | Each skill ends with a fresh summary section |
 | Locale mismatch | Output language matches input language |
 | Provider lock-in | `<claude-specific>` blocks isolate Claude-only optimizations |

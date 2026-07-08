@@ -7,7 +7,6 @@ version: 2.4.0
 inputs:
   - text
   - image
-  - figma-link
 outputs:
   - story.standard.md
   - story.dev.md
@@ -39,13 +38,13 @@ Bring an existing user story up to standard *without* turning it into a feature 
   - **Preserve original wording** where it was already good. Refine is NOT regenerate — if the PM already wrote a sharp persona / goal / so-that, do not rephrase it.
   - **Don't renumber ACs** the team may already reference externally. Append new content, don't shuffle.
   - **Detect which sections are present / missing / weak** before applying the base canonical block. Fill only what's weak; leave good sections alone.
-  - If companion image / Figma is attached, base conflict-detection applies. Story text is canonical for `User Story / Scope / Business value`; image/Figma is canonical for `component names / observable states` referenced in AC.
+  - If a companion image is attached, base conflict-detection applies. Story text is canonical for `User Story / Scope / Business value`; the image is canonical for `component names / observable states` referenced in AC.
 
 ## Amendment differential
 
 - **Detection:** the full classification rule (two-path test, accepted story sources, ambiguity fallback) is stated in the numbered **Step R** in the Application section below — not duplicated here. This section covers only what happens once Step R has already selected the Amendment path: merge, conflict, and re-run semantics.
 - **Merge-not-regenerate (on the Amendment path):** fold the delta into the parsed story BEFORE base step 5 (gap-check), so base steps 5–11 operate on the merged story. Preserve all existing wording not directly contradicted or extended by the delta — the Source-specific differential's "preserve original wording" rule applies unchanged; Amendment mode gets no weaker preservation rule. New ACs introduced by the delta are **appended** at the next unused `AC-N` (base AC-numbering rule, unchanged) — never renumber, reorder, or reuse existing AC numbers. If the delta only narrowly extends an existing AC's scope (e.g. a qualifier on an existing Given), editing that AC's text in place is permitted instead of appending a new one; log the edit either way (see Refinement log below).
-- **Conflict-as-BLOCKING:** if the delta contradicts existing story content (Use Case, Preconditions, Business Rules, or an existing AC's Given/When/Then), this generalizes base step 0's conflict pattern (today used for image/Figma vs text) to story-vs-delta. Raise ONE BLOCKING `AskUserQuestion` (batched with any other blocking gaps in the same pass, per base rule 1's ≤4-per-call cap) before merging any contradicted content. Never silently prefer the existing story or the delta. Persist the resolution to `.storywright-context.json`'s existing `extra` field (base rule 9) — no new schema field. Only the contradicted content blocks; independent delta content proceeds through normal merge unless it causally depends on the contradicted content's resolution.
+- **Conflict-as-BLOCKING:** if the delta contradicts existing story content (Use Case, Preconditions, Business Rules, or an existing AC's Given/When/Then), this generalizes base step 0's conflict pattern (today used for image vs text) to story-vs-delta. Raise ONE BLOCKING `AskUserQuestion` (batched with any other blocking gaps in the same pass, per base rule 1's ≤4-per-call cap) before merging any contradicted content. Never silently prefer the existing story or the delta. Persist the resolution to `.storywright-context.json`'s existing `extra` field (base rule 9) — no new schema field. Only the contradicted content blocks; independent delta content proceeds through normal merge unless it causally depends on the contradicted content's resolution.
 - **Mandatory pre-split re-run:** after merge and any conflict resolution, run the base deterministic pre-split test (base Application step 7) on the **merged** story, not the original. A prior pre-split pass on the pre-amendment story does not carry over — this is the load-bearing anti-silent-scope-growth guarantee. Count ≥2 fires the existing Split behavior differential below unchanged (no new split-decision options, no auto-split).
 - **Re-render + refresh estimate:** when merged pre-split count ≤1, run base step 9 (INVEST), base step 8c (Estimate — re-run on the merged story, never carried over even if the verdict is unchanged), and base step 10 (render) exactly as for plain refine. Both `story.standard.md` and `story.dev.md` are re-rendered in full, not patched.
 - **Project-less restatement (base rule 14):** the delta comes only from the user's message. Never read, scan, or infer the delta's content from the open repository, even to "verify" it. Technical inference stays marked `⚠️ Assumed:`.
@@ -129,7 +128,7 @@ Producing a 400-line refined story (violates base rule 3 + INVEST Small ceiling)
 - [[storywright-base]] — the rulebook
 - [[story-generate]] (when input is ambiguous, not an existing story)
 - [[story-split]] (when count ≥2)
-- [[story-from-figma]] (when input is Figma URL)
+- [[story-batch]] (when input is a multi-item backlog)
 
 <claude-specific>
 - Read `[[storywright-base]]` before applying. Do not duplicate its rules in your reasoning.

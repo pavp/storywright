@@ -1,13 +1,12 @@
 ---
 name: story-generate
-description: Transform an ambiguous prompt, half-baked story, screenshot, or Figma link into a Cohn+Gherkin user story. Inherits all hard rules from storywright-base.
+description: Transform an ambiguous prompt, half-baked story, or screenshot into a Cohn+Gherkin user story. Inherits all hard rules from storywright-base.
 trigger: "/story-generate | generate a user story | write a user story | turn this into a story | crear historia de usuario"
 intent: Top-level orchestrator that drafts a fresh story from any input. Behavior 100% identical to siblings except for source (raw / ambiguous input) and split-behavior (recommend /story-split when pre-split count ≥2).
 version: 2.3.0
 inputs:
   - text
   - image
-  - figma-link
 outputs:
   - story.standard.md
   - story.dev.md
@@ -28,23 +27,23 @@ composes:
 
 ## Purpose
 
-Take whatever the PM has — a one-liner, a half-baked story, a screenshot, a Figma link — and produce a Cohn+Gherkin story an engineer can pick up and ship without follow-up questions. Emits two files: `story.standard.md` (PM-facing) + `story.dev.md` (dev-facing).
+Take whatever the PM has — a one-liner, a half-baked story, a screenshot — and produce a Cohn+Gherkin story an engineer can pick up and ship without follow-up questions. Emits two files: `story.standard.md` (PM-facing) + `story.dev.md` (dev-facing).
 
 **All hard rules, canonical output shape, language detection, mechanical pre-split test, context persistence, terminal-only Q, and INVEST handling live in `[[storywright-base]]`. Read that first. Anything in this file is a SOURCE-SPECIFIC or SPLIT-BEHAVIOR delta only.**
 
 ## Source-specific differential
 
-- **Source:** raw / ambiguous text, optionally fused with screenshot and/or Figma URL.
+- **Source:** raw / ambiguous text, optionally fused with a screenshot.
 - **What changes vs base:** at intake the prompt may name only a feature; infer the implicit user goal via rule 3 (persona sharpening) + rule G (passive-goal check) of the base. Mixed inputs follow the base conflict-detection rule plus the source-priority table below.
 
-### Mixed-input source priority (text + image + Figma)
+### Mixed-input source priority (text + image)
 
-| Section | Primary | Secondary | Tertiary |
-|---|---|---|---|
-| User Story / Goal | Text | Figma frame titles | Image |
-| Scope | Text | Figma | Image |
-| UI Components / States | Figma | Image | Text |
-| AC observable outcomes | Triangulate | — | — |
+| Section | Primary | Secondary |
+|---|---|---|
+| User Story / Goal | Text | Image |
+| Scope | Text | Image |
+| UI Components / States | Image | Text |
+| AC observable outcomes | Triangulate | — |
 
 Conflicts → BLOCKING `AskUserQuestion` per base rule 1.
 
@@ -97,7 +96,7 @@ Drafting a 15-section story when pre-split count ≥2 (violates split behavior d
 - [[storywright-base]] — the rulebook
 - [[story-refine]] (when input is an existing story)
 - [[story-split]] (when count ≥2)
-- [[story-from-figma]] (when input is Figma URL)
+- [[story-batch]] (when input is a multi-item backlog)
 
 <claude-specific>
 - Read `[[storywright-base]]` before applying. Do not duplicate its rules in your reasoning.

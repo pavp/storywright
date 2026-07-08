@@ -1,6 +1,6 @@
 ---
-description: Audit an existing story and fill gaps in place — or amend it with a forgotten requirement (supports text + optional image / Figma companion)
-argument-hint: <paste existing story> [+ new requirement to add | + image / Figma URL]
+description: Audit an existing story and fill gaps in place — or amend it with a forgotten requirement (supports text + optional image companion)
+argument-hint: <paste existing story> [+ new requirement to add | + image]
 ---
 
 Invoke the `story-refine` skill from the storywright pack to audit and improve this story:
@@ -9,7 +9,7 @@ $ARGUMENTS
 
 Follow the skill's procedure:
 
-0. Detect companion sources (image, figma-link). If present, run conflict detection between the story text and the design BEFORE filling sections. Surface conflicts as BLOCKING clarifications; never silently rewrite the story to match the design.
+0. Detect companion sources (image). If present, run conflict detection between the story text and the design BEFORE filling sections. Surface conflicts as BLOCKING clarifications; never silently rewrite the story to match the design.
 1. Parse the existing story into the section taxonomy. Mark each section: present / missing / weak.
 2. Amendment detection (Step R): classify the input as Amendment or Plain refine per the skill's Step R detection rule; on Amendment, follow the Amendment differential (merge, conflict-as-BLOCKING, pre-split re-run on the merged story).
 3. Gap-check weak sections via `clarification-questions`. Ask only BLOCKING questions.

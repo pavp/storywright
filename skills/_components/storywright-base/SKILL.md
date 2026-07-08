@@ -2,7 +2,7 @@
 name: storywright-base
 description: Shared base behavior for all storywright top-level skills. Hard rules, canonical output, terminal-only Q, context schema, mechanical deps, V audit, language detect.
 trigger: "internal use by story-* skills"
-intent: Component skill that holds the v2.2 baseline. Top-level skills (story-generate, story-refine, story-split, story-from-figma) compose this and add only their source-specific behavior on top.
+intent: Component skill that holds the v2.2 baseline. Top-level skills (story-generate, story-refine, story-split, story-batch) compose this and add only their source-specific behavior on top.
 version: 2.6.0
 inputs:
   - none
@@ -14,7 +14,7 @@ outputs:
 
 Every top-level storywright skill must behave identically except for three things:
 
-1. **Source** — what the input is (raw prompt / existing story / oversize story / Figma URL).
+1. **Source** — what the input is (raw prompt / existing story / oversize story / multi-item backlog).
 2. **Prompt** — what the user is asking for.
 3. **Split behavior** — whether the skill produces 1 story, recommends a split, or produces N stories directly.
 
@@ -44,7 +44,6 @@ If you are reading this through a top-level skill, treat every rule below as non
 
 5. **Visual inference confidence — single banner only.** Do NOT tag every visual claim. ONE banner at the top of the Design Reference block declares source type; all claims under it inherit:
    - Raster source (PNG/JPG) → `**Source: raster mockup → all visual specs are pixel-derived, not token-confirmed.**`
-   - Figma source → `**Source: Figma → values can be tokenized at implementation.**`
    - Design-token source → `**Source: design tokens → values are authoritative.**`
    Never assert hex / px / spacing from raster without the raster banner.
 
@@ -68,11 +67,11 @@ If you are reading this through a top-level skill, treat every rule below as non
    {
      "version": 1,
      "decided_at": "<ISO date>",
-     "decided_by_skill": "story-generate | story-refine | story-split | story-from-figma",
+     "decided_by_skill": "story-generate | story-refine | story-split | story-batch",
      "language": "EN | ES | ...",
      "chrome_scope": "in-scope | in-scope-placeholder | sibling | out-of-scope",
      "siblings": "TODO | <list of IDs> | not-applicable",
-     "design_source": "raster | figma | tokens",
+     "design_source": "raster | tokens",
      "naming_pattern": "kebab-feature-action | verb-noun | domain-action | jira-prefix",
      "extra": {}
    }
@@ -80,7 +79,7 @@ If you are reading this through a top-level skill, treat every rule below as non
 
    Every skill MUST read this file BEFORE asking any question. Every skill MUST write this file when it resolves a question.
 
-10. **Children independence — mechanical detection (rule A).** When any skill produces multiple stories or children (story-split, story-from-figma multi-flow, story-refine recommending split):
+10. **Children independence — mechanical detection (rule A).** When any skill produces multiple stories or children (story-split, story-batch multi-item, story-refine recommending split):
     - For each child Cj, parse its `Given:` and `and Given:` lines.
     - If any Given text contains a surface noun owned by child Ci (Ci's title/scope owns "grid" and Cj's Given mentions "the grid") → mark `DEP(Cj → Ci)`.
     - The dependency map IS the union of those text matches. **Do not add deps "you sense" without a Given citation.**
@@ -116,7 +115,6 @@ Run cheap detection before asking. Multi-signal weighted decision:
 | Persona phrasing in M ("As a user" vs "Como un usuario") | Use Case | high |
 | Column / field names in M ("Phone - primary", "Teléfono - principal") | AC bullets | medium |
 | Domain verbs in M ("clicking" vs "hacer clic") | AC bullets | medium |
-| Figma frame names / layer text in M (when source = figma) | design source | medium |
 | Title language | header | low |
 
 **Decision:**
@@ -197,7 +195,7 @@ Mechanical counter. Apply the table — do NOT eyeball:
 - **Then:** [single observable outcome]
 
 #### Design Reference (optional)
-**Source: <raster | figma | tokens> → <banner from rule 5>**
+**Source: <raster | tokens> → <banner from rule 5>**
 - [link or path]
 - visual notes: [...]
 
@@ -214,7 +212,7 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
 
 ## Application (step-by-step — every skill follows this skeleton)
 
-0. **Detect companion sources** (image, figma-link, accompanying text). Run conflict detection against the primary input. Run chrome detection using rule 7. Surface conflicts as BLOCKING `AskUserQuestion`.
+0. **Detect companion sources** (image, accompanying text). Run conflict detection against the primary input. Run chrome detection using rule 7. Surface conflicts as BLOCKING `AskUserQuestion`.
 
 1. **Read prior context.** Load `<output-folder>/.storywright-context.json` if present (exact folder only). Apply resolved answers; skip the corresponding questions.
 
@@ -290,10 +288,10 @@ Only these three things vary:
 
 | Skill | Source | Split behavior |
 |---|---|---|
-| `story-generate` | Raw prompt / ambiguous text + optional image/Figma | If pre-split count ≥2 → STOP, recommend `/story-split`. Otherwise draft 1 story. |
-| `story-refine` | Existing story text + optional image/Figma | If pre-split count ≥2 → STOP, recommend `/story-split`. Otherwise fix in place. |
+| `story-generate` | Raw prompt / ambiguous text + optional image | If pre-split count ≥2 → STOP, recommend `/story-split`. Otherwise draft 1 story. |
+| `story-refine` | Existing story text + optional image | If pre-split count ≥2 → STOP, recommend `/story-split`. Otherwise fix in place. |
 | `story-split` | Oversize story (any source) | Always produces epic + N children. Mechanical NxN matrix + per-child V audit MANDATORY. Recursive re-split per child if count ≥2. |
-| `story-from-figma` | Figma file/page/frame URL (+ optional companion text) | One story per logical user-goal flow. Multi-flow output → mandatory `flow-summary.md` with mechanical matrix + V audit. Any flow with count ≥2 → hand off to `[[story-split]]`. |
+| `story-batch` | Multi-item backlog (+ optional companion text) | One story per backlog item. Multi-item output → mandatory `backlog-summary.md` with mechanical matrix + V audit. Any item with count ≥2 → hand off to `[[story-split]]`. |
 
 Everything else is identical and lives in this base.
 
@@ -324,7 +322,7 @@ Everything else is identical and lives in this base.
 - [[story-generate]]
 - [[story-refine]]
 - [[story-split]]
-- [[story-from-figma]]
+- [[story-batch]]
 
 <claude-specific>
 - Treat every rule above as load-bearing across all top-level skills.
