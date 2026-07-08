@@ -1,3 +1,9 @@
+## [1.21.0](https://github.com/pavp/storywright/compare/v1.20.0...v1.21.0) (2026-07-08)
+
+### ✨ Features
+
+* remove story-from-figma skill ([#24](https://github.com/pavp/storywright/issues/24)) ([ad1be74](https://github.com/pavp/storywright/commit/ad1be7499deeacf2e87c46a3cc51fdacb9cd2d2e))
+
 ## [1.20.0](https://github.com/pavp/storywright/compare/v1.19.1...v1.20.0) (2026-07-03)
 
 ### ✨ Features
