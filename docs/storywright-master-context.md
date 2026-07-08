@@ -20,7 +20,7 @@ Terminology is normalized in §12 (Glossary).
 
 ## 1. Executive Summary
 
-**What Storywright is.** [FACT] A *skills pack* for Claude Code that turns ambiguous product inputs — vague prompts, half-baked stories, screenshots, Figma links — into Jira-ready user stories. It ships as 5 top-level skills (`story-generate`, `story-refine`, `story-split`, `story-from-figma`, `story-batch`) composing 11 shared components under `skills/_components/`. Everything is Markdown with YAML frontmatter. The npm package is a **thin installer**: it copies skill/command files into `~/.claude/`; it contains no runtime and makes no LLM calls.
+**What Storywright is.** [FACT] A *skills pack* for Claude Code that turns ambiguous product inputs — vague prompts, half-baked stories, screenshots — into Jira-ready user stories. It ships as 4 top-level skills (`story-generate`, `story-refine`, `story-split`, `story-batch`) composing 11 shared components under `skills/_components/`. Everything is Markdown with YAML frontmatter. The npm package is a **thin installer**: it copies skill/command files into `~/.claude/`; it contains no runtime and makes no LLM calls.
 
 **Core product vision.** [INFERENCE] Be the PM-facing discovery layer that converts *intent* into a rigorous, INVEST-compliant, Gherkin-structured backlog artifact — without forcing the user through a heavy tool. Methodology-as-skill, not software-as-service.
 
@@ -30,7 +30,7 @@ Terminology is normalized in §12 (Glossary).
 - [FACT] Two layers: **knowledge** (Markdown skills) + **thin installer** (Node ESM scripts).
 - [FACT] **Composition is lint-enforced, not runtime-enforced** (`scripts/validate-skills.mjs`): every `composes:` reference must exist and no component may be orphaned.
 - [FACT] **Dual output mandatory**: `story.standard.md` (PM-facing, no technical detail) + `story.dev.md` (dev-facing, full technical detail). The PM↔dev split is the central design invariant (`storywright-base` rule 3 / rule 3a).
-- [FACT] **Multimodal intake**: text + image + Figma (via MCP), with PNG fallback.
+- [FACT] **Multimodal intake**: text + image (Claude vision).
 
 **Main strategic findings.**
 1. [FACT] Storywright is **100% project-less by design**. It does not read, scan, index, or embed any codebase. Its only disk read is `.storywright-context.json` (its own per-run decision memory), confined to the run's output folder (`storywright-base` rule 9).
@@ -50,7 +50,7 @@ Terminology is normalized in §12 (Glossary).
 | `story-generate` | Ambiguous prompt / screenshot / fresh story request | `/storywright-story-generate` |
 | `story-refine` | Existing but incomplete/weak story → audit & fill in place | `/storywright-story-refine` |
 | `story-split` | Oversize story failing INVEST on I/E/S → epic + children | `/storywright-story-split` |
-| `story-from-figma` | Figma URL → one story per user-goal flow | `/storywright-story-from-figma` |
+| `story-batch` | Multi-item backlog → one story per item in a single pass | `/storywright-story-batch` |
 
 **Target users.** [INFERENCE] Product managers and PM-adjacent roles who live in Claude Code or claude.ai; secondarily engineers who consume `story.dev.md`. Not a coding-agent audience.
 
@@ -66,7 +66,6 @@ Terminology is normalized in §12 (Glossary).
 - *Greenfield*: "Permitir login con Google" → clarifications → full story duo. (Canonical dogfood fixture: `tests/fixtures/prompt-google-login.md`.)
 - *Refine*: paste a weak story → gap audit → filled in place, ACs preserved.
 - *Split*: oversize story → INVEST failure → epic + N children with dependency matrix + per-child V audit (user must approve).
-- *Figma*: paste Figma URL → one story per logical flow → duo per flow.
 
 **Current positioning.** [INFERENCE] A methodology-rich, multimodal, Claude-native PM skill pack. Distinct from coding agents (it produces backlog artifacts, not code) and from in-tool ticket AI (it is portable Markdown, not a SaaS feature). See §7.
 
@@ -80,7 +79,7 @@ Terminology is normalized in §12 (Glossary).
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ KNOWLEDGE LAYER  (skills/, Markdown + YAML)                  │
-│   5 top-level skills ── compose ──► 11 _components/          │
+│   4 top-level skills ── compose ──► 11 _components/          │
 │   storywright-base = shared rulebook (every skill inherits)  │
 │   Read & executed by Claude Code's runtime (NOT this repo)   │
 ├─────────────────────────────────────────────────────────────┤
@@ -106,7 +105,7 @@ Terminology is normalized in §12 (Glossary).
 
 ### 3.4 Skills/tools architecture
 
-[FACT] All 5 top-level skills compose all 11 components. The 11:
+[FACT] All 4 top-level skills compose all 11 components. The 11:
 - `storywright-base` — shared rulebook (hard rules, canonical shape, PM↔dev split, mechanical pre-split/deps, language detect).
 - `clarification-questions`, `acceptance-criteria`, `invest-checklist`, `definition-of-done`, `business-rules` — story-shaping.
 - `edge-cases`, `analytics-events`, `risks-and-dependencies` — **enrichment → `story.dev.md` only** (rule 3a).
@@ -129,7 +128,7 @@ Terminology is normalized in §12 (Glossary).
 
 [FACT, from `storywright-base` Application]
 ```
-input (text|image|figma)
+input (text|image)
   → 0. detect companion sources + conflicts (BLOCKING AskUserQuestion)
   → 1. read .storywright-context.json (exact folder)
   → 2. language resolution (4a signals)
@@ -157,7 +156,7 @@ input (text|image|figma)
 
 **Memory handling.** [FACT] `.storywright-context.json` is the only memory primitive — decision cache, scoped to one run's output folder.
 
-**Routing systems.** [INFERENCE] "Routing" is conditional prose: the pre-split test routes to single-story vs split; `story-generate` recommends `/story-split` at count ≥2; `story-from-figma` hands multi-flow off to split. No code router.
+**Routing systems.** [INFERENCE] "Routing" is conditional prose: the pre-split test routes to single-story vs split; `story-generate` recommends `/story-split` at count ≥2; `story-batch` hands multi-item backlogs off to per-item drafting. No code router.
 
 **Tool execution patterns.** [FACT] Skills use `AskUserQuestion` (clarifications, batched ≤4) and `Write` (render files). [INFERENCE] The runtime *additionally* has Read/Grep/Glob available and receives harness-injected context — the source of the ungoverned nuance (§5).
 
@@ -167,7 +166,7 @@ input (text|image|figma)
 
 **Project-aware assumptions.** [FACT] Zero in the codebase. Any project awareness today is emergent runtime behavior, not designed capability.
 
-**Session lifecycle.** [INFERENCE] One invocation = one story (or one epic+children, or one duo per Figma flow). Context file bridges sequential invocations that share an output folder.
+**Session lifecycle.** [INFERENCE] One invocation = one story (or one epic+children, or one duo per backlog item). Context file bridges sequential invocations that share an output folder.
 
 ---
 
@@ -175,7 +174,7 @@ input (text|image|figma)
 
 **How stories are generated.** [FACT] Skill loads → base Application skeleton (§3.8) → canonical Cohn+Gherkin block for PM files → enrichment components populate `story.dev.md` → INVEST verdict → duo rendered to `docs/storywright/YYYY-MM-DD-HHmm-<slug>/`.
 
-**Dependencies on repositories/projects.** [FACT] **None.** Verified across all 5 skills (`inputs:` = text/image/figma-link) and all 11 components (`inputs:` = story-context / domain-hints / etc.; never source-files/workspace/repo).
+**Dependencies on repositories/projects.** [FACT] **None.** Verified across all 4 skills (`inputs:` = text/image) and all 11 components (`inputs:` = story-context / domain-hints / etc.; never source-files/workspace/repo).
 
 **Current assumptions.** [INFERENCE]
 1. User arrives with functional intent, not a codebase to dissect.
@@ -245,13 +244,13 @@ input (text|image|figma)
 - `scripts/{uninstall,zip,list}-skills.mjs`, `scripts/postinstall-hint.mjs`.
 - `skills/_components/storywright-base/SKILL.md` — the rulebook (hard rules, language 4a, rule D, pre-split test, canonical shape, Application skeleton).
 - `skills/_components/story-formatter/SKILL.md` — 2-file render + audience table.
-- `.claude-plugin/plugin.json` — manifest (15 skills, 5 commands).
+- `.claude-plugin/plugin.json` — manifest (15 skills, 4 commands).
 - `tests/skills-shape.test.mjs` — parity + no-leakage golden tests; `tests/validate.test.mjs`.
 - `examples/outputs/google-login/` — committed golden duo.
 
 **Pipelines / execution chains.** [FACT] CLI → spawn script → filesystem op (install layer). Runtime: slash command → skill+components → Anthropic API (knowledge layer; outside repo).
 
-**Services / adapters / APIs.** [FACT] None in repo. Figma access is via the runtime's MCP server, not repo code.
+**Services / adapters / APIs.** [FACT] None in repo. Image intake is via the runtime's native vision, not repo code.
 
 **Embeddings / vector stores / planners / orchestrators / ingestion / dependency graphs / repo scanning / source analysis.** [FACT] **All absent.** The only "graph" is the inter-story dependency matrix (text match over `Given:` lines, rule 10).
 
@@ -267,7 +266,7 @@ input (text|image|figma)
 [FACT] "No LLM in code" · thin installer · PM↔dev split (rule 3/3a) · 2-file parity (enforced by `tests/skills-shape.test.mjs`) · validator orphan check · Conventional Commits + semantic-release · **branch + PR always (never commit to `main`)**.
 
 ### 9.2 Explicit assumptions
-[FACT] Inputs are text/image/figma; output language = user's chat language; one story per invocation (unless split); composition is correct iff the linter passes.
+[FACT] Inputs are text/image; output language = user's chat language; one story per invocation (unless split); composition is correct iff the linter passes.
 
 ### 9.3 Implicit assumptions
 [INFERENCE] User has functional intent ready; technical detail is output; dev-file specifics needn't be real.
@@ -313,7 +312,7 @@ input (text|image|figma)
 - **Project** — a user's codebase/repository. Storywright has **no native concept** of one.
 - **Workspace** — the runtime's ambient view of an open repo. Available to the *agent* (and via injected context), not requested by *skills*.
 - **Project-aware** — generation grounded against an open repo. Not a designed feature; only emergent/accidental runtime behavior today.
-- **Project-less** — generation purely from text/image/figma intent. The current default and only designed mode.
+- **Project-less** — generation purely from text/image intent. The current default and only designed mode.
 - **Inferred (dev detail)** — `story.dev.md` specifics filled from the model's domain knowledge; plausible, unverified.
 - **Injected context** — repo facts the harness places in the agent's context automatically (project `CLAUDE.md`/`AGENTS.md`, open files); not a gated tool call.
 - **Context pipeline** — the per-run flow that reads/writes `.storywright-context.json` (decision memory only).

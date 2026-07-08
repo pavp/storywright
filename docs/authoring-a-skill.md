@@ -15,7 +15,7 @@ version: 1.0.0
 ```
 
 Optional fields:
-- `inputs:` — list of supported input types (text, image, figma-link, etc.)
+- `inputs:` — list of supported input types (text, image, etc.)
 - `outputs:` — list of artifacts the skill produces
 - `composes:` — list of `_components/<name>` referenced by this skill (validator checks each exists)
 

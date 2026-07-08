@@ -7,7 +7,6 @@ version: 2.3.0
 inputs:
   - text
   - image
-  - figma-link
 outputs:
   - epic.md
   - story-1.standard.md
@@ -37,7 +36,7 @@ When a story is an epic in disguise, splitting badly is worse than not splitting
 
 ## Source-specific differential
 
-- **Source:** an oversize story (any prior source — generate / refine / from-figma may all hand off here). The story has failed INVEST on I, E, or S — OR the deterministic pre-split count is ≥2.
+- **Source:** an oversize story (any prior source — generate / refine / batch may all hand off here). The story has failed INVEST on I, E, or S — OR the deterministic pre-split count is ≥2.
 - **What changes vs base:** the skill does NOT produce a single story. It ALWAYS produces an epic + N children. Each child obeys the base canonical block. The user must approve the split plan before children are written.
 
 ## Split behavior differential
@@ -184,7 +183,7 @@ Claiming children Independent without running the mechanical matrix (base rule 1
 - [[invest-checklist]]
 - [[story-generate]]
 - [[story-refine]]
-- [[story-from-figma]]
+- [[story-batch]]
 
 <claude-specific>
 - Read `[[storywright-base]]` before applying. Do not duplicate its rules in your reasoning.

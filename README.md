@@ -4,7 +4,7 @@
 [![CI](https://github.com/pavp/storywright/actions/workflows/ci.yml/badge.svg)](https://github.com/pavp/storywright/actions/workflows/ci.yml)
 [![License](https://img.shields.io/npm/l/@pavp/storywright.svg)](./LICENSE)
 
-Turn ambiguous inputs — vague prompts, half-baked stories, screenshots, Figma links, raw backlogs — into **Jira-ready user stories** for Claude Code. Every story comes out INVEST-checked, with Given/When/Then acceptance criteria, a Fibonacci estimate, and a clean split between what the PM reads and what the developer needs.
+Turn ambiguous inputs — vague prompts, half-baked stories, screenshots, raw backlogs — into **Jira-ready user stories** for Claude Code. Every story comes out INVEST-checked, with Given/When/Then acceptance criteria, a Fibonacci estimate, and a clean split between what the PM reads and what the developer needs.
 
 > Inspired by [`deanpeters/Product-Manager-Skills`](https://github.com/deanpeters/Product-Manager-Skills) (CC BY-NC-SA 4.0). Clean-room MIT rewrite — no copied content; only the frontmatter shape, body skeleton, and splitting-pattern selection draw on patterns from that repo. All prose, taxonomy, output model, and rubrics are this repo's own. Methodological credit: Bill Wake (INVEST), Mike Cohn (*User Stories Applied*), Dan North (BDD / Given-When-Then), Richard Lawrence & Peter Green (*Humanizing Work* splitting patterns).
 
@@ -56,9 +56,6 @@ Each skill has a slash command (installed as `/storywright-<skill>`), or you can
 <paste a story that visibly mixes flows>
 ```
 ```
-/storywright-story-from-figma https://www.figma.com/file/…
-```
-```
 /storywright-story-batch
 1. Show a cart summary before payment
 2. Apply a discount code at checkout
@@ -106,21 +103,20 @@ See the full committed examples under [`examples/outputs/`](./examples/outputs/)
 
 ## Skills
 
-Five top-level skills, each invokable as `/storywright-<name>`:
+Four top-level skills, each invokable as `/storywright-<name>`:
 
 | Skill | When to use |
 |---|---|
 | `story-generate` | An ambiguous prompt, screenshot, or fresh story request → one full story |
 | `story-refine` | An existing story that's incomplete or weakly specified → audit + fill gaps in place |
 | `story-split` | A story that fails INVEST on Independent / Estimable / Small → epic + child stories |
-| `story-from-figma` | A Figma file or frame URL → one story per user-goal flow |
 | `story-batch` | A multi-item backlog → one story per item in a single pass, plus a backlog summary |
 
 They never split silently — a split always waits for your approval. And no story is ever auto-grounded against your open repo.
 
 ### Components
 
-All five top-level skills compose the same eleven components:
+All four top-level skills compose the same eleven components:
 
 - `storywright-base` — the shared rulebook: canonical story shape, the PM↔dev split, language detection, the mechanical pre-split test, INVEST handling, and the project-less rule. Everything else inherits from it.
 - `clarification-questions` — the minimum critical questions to ask before drafting
@@ -140,9 +136,8 @@ All five top-level skills compose the same eleven components:
 |---|---|---|
 | Text | Native | Always available |
 | Images (PNG / JPG) | Claude vision | Drop the file into chat |
-| Figma | MCP Figma server | See `skills/story-from-figma/mcp-figma-notes.md` |
 
-When you pass several at once (text + image + Figma), storywright follows a source-priority matrix and surfaces genuine conflicts as blocking clarifications — it never silently picks a winner.
+When you pass both at once (text + image), storywright follows a source-priority matrix and surfaces genuine conflicts as blocking clarifications — it never silently picks a winner.
 
 ## CLI
 

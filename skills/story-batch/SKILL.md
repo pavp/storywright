@@ -39,7 +39,7 @@ A backlog input usually contains N discrete items — different features, improv
   - **Boundary confirmation is mandatory.** The skill presents the parsed item list and waits for user confirmation before proceeding (non-skippable).
   - **Cohesion gate runs before clarifications.** Items sharing persona or feature-area context are processed with a single shared clarification round; disparate items get per-item clarifications.
   - **Output uses story-N.* prefix** so all items share one flat batch folder without collisions.
-  - **backlog-summary.md replaces flow-summary.md.** Same structural role as figma's flow-summary; carries INVEST verdicts, dep matrix, V audit, build order, cohesion verdict, and SPLIT RECOMMENDED markers.
+  - **backlog-summary.md is the batch roll-up.** Carries INVEST verdicts, dep matrix, V audit, build order, cohesion verdict, and SPLIT RECOMMENDED markers across all items.
 
 ## Split behavior differential
 
@@ -230,7 +230,6 @@ Skipping the dependency matrix in `backlog-summary.md` when N>1 with DRAFTED ite
 - [[story-generate]]
 - [[story-refine]]
 - [[story-split]]
-- [[story-from-figma]]
 
 <claude-specific>
 - Read `[[storywright-base]]` before applying. Do not duplicate its rules in your reasoning.

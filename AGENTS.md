@@ -9,7 +9,7 @@ Skills pack for Claude Code. Markdown-driven. The npm package is a thin installe
 Two invariants govern everything the skills produce; internalize them before editing any skill:
 
 - **Two-file output (PM↔dev split).** Every story renders as `story.standard.md` (PM-facing — no technical detail) + `story.dev.md` (dev-facing — full detail). Never leak technical content into the PM file.
-- **Project-less.** Stories are inferred from the prompt/image/Figma input, never grounded in the open repo (see convention 7 below).
+- **Project-less.** Stories are inferred from the prompt/image input, never grounded in the open repo (see convention 7 below).
 
 > **Canonical context:** for architecture, the AI/agent model, story-generation internals, and the glossary, read [`docs/storywright-master-context.md`](docs/storywright-master-context.md) first.
 
@@ -21,7 +21,6 @@ storywright/
 │   ├── story-generate/
 │   ├── story-refine/
 │   ├── story-split/
-│   ├── story-from-figma/
 │   └── _components/          ← 11 components composed by top-level skills
 ├── commands/                 ← slash-command entrypoints for ~/.claude/commands/
 ├── bin/storywright.mjs       ← CLI
@@ -38,13 +37,13 @@ storywright/
 2. **Adding / editing a slash command**
    Create or edit `commands/<name>.md` with frontmatter `description` + `argument-hint`, body calling out to the corresponding skill. The CLI installs each as `storywright-<name>.md` under `~/.claude/commands/` (prefix avoids collisions).
 
-3. **Composition is enforced.** Validator (`scripts/validate-skills.mjs`) fails if `composes:` references a non-existent component **or if any component is orphaned** (referenced by no skill via `composes:` or a body `[[link]]`). All five top-level skills compose the same 11 components. The five enrichment components (`business-rules`, `edge-cases`, `analytics-events`, `risks-and-dependencies`, `definition-of-done`) feed `story.dev.md` per `storywright-base` rule 3 — never the PM body (except Business Rules, an optional PM section). The `estimation` component runs after INVEST and feeds `## Estimate` into `story.dev.md` only.
+3. **Composition is enforced.** Validator (`scripts/validate-skills.mjs`) fails if `composes:` references a non-existent component **or if any component is orphaned** (referenced by no skill via `composes:` or a body `[[link]]`). All four top-level skills compose the same 11 components. The five enrichment components (`business-rules`, `edge-cases`, `analytics-events`, `risks-and-dependencies`, `definition-of-done`) feed `story.dev.md` per `storywright-base` rule 3 — never the PM body (except Business Rules, an optional PM section). The `estimation` component runs after INVEST and feeds `## Estimate` into `story.dev.md` only.
 
 4. **Output language.** Skills must respond in the input language. Don't force English. Detect Spanish / English / other from the user message.
 
 5. **Never auto-split a story.** Splitting always waits for user approval via inline `AskUserQuestion` — never auto-splits silently. Pre-split INVEST gates also apply (V FAIL → not a story; T/N FAIL → refine; E unknowns → spike; I/E/S FAIL → split).
 
-6. **Multi-source inputs are first-class.** When user passes text + image + Figma simultaneously, follow the source-priority matrix in `skills/story-generate/SKILL.md` ("Mixed inputs" section). Surface conflicts as BLOCKING clarifications, never silently pick a winner.
+6. **Multi-source inputs are first-class.** When user passes text + image simultaneously, follow the source-priority matrix in `skills/story-generate/SKILL.md` ("Mixed inputs" section). Surface conflicts as BLOCKING clarifications, never silently pick a winner.
 
 7. **Project-less — never ground stories in the open repo.** storywright generates a forward contract, not a code analysis. When generating or refining a story, do NOT read, scan, or infer from the files of whatever repository is open in the session — even if they look relevant. All technical detail in `story.dev.md` is domain-knowledge inference, marked `⚠️ Assumed:`, never scraped from a codebase. This is `storywright-base` hard rule 14; grounding silently makes output non-deterministic and gives false confidence. (Editing the pack's OWN source — skills, scripts, tests — is normal repo work and unaffected; this rule is about the *generated stories*, not your edits.)
 
@@ -52,17 +51,16 @@ storywright/
 
 ## Skills surface
 
-The 5 top-level skills:
+The 4 top-level skills:
 
 | Skill | When | Slash command |
 |---|---|---|
-| `story-generate` | Ambiguous prompt / screenshot / Figma → full story | `/storywright-story-generate` |
+| `story-generate` | Ambiguous prompt / screenshot → full story | `/storywright-story-generate` |
 | `story-refine` | Existing story → audit + fill gaps in place | `/storywright-story-refine` |
 | `story-split` | Oversize story → INVEST-driven epic + children | `/storywright-story-split` |
-| `story-from-figma` | Figma URL → one story per flow | `/storywright-story-from-figma` |
 | `story-batch` | Multi-item backlog → one story per item in a single pass | `/storywright-story-batch` |
 
-The 11 components (composed by top-level skills). All 5 top-level skills compose all 11:
+The 11 components (composed by top-level skills). All 4 top-level skills compose all 11:
 - `storywright-base` — shared rulebook (hard rules, canonical shape, PM↔dev split, mechanical pre-split/deps, language detect). Every top-level skill inherits this.
 - `clarification-questions` — minimum critical questions across 9 axes (including multi-source conflicts)
 - `acceptance-criteria` — Given/When/Then ACs; splitting signal on multiple When/Then

@@ -1,6 +1,6 @@
 # Multimodal Guide
 
-`storywright` supports three input modes. The runtime is Claude Code; the skills only describe **how to extract requirements** from each modality.
+`storywright` supports two input modes. The runtime is Claude Code; the skills only describe **how to extract requirements** from each modality.
 
 ## Text
 
@@ -23,18 +23,6 @@ Claude uses native vision. The `story-generate` skill instructs Claude to:
 4. Score per-inference confidence: **HIGH** (visible in design), **MEDIUM** (implied), **LOW** (assumed).
 5. Surface MEDIUM/LOW inferences in `clarifications.md` and mark them `> ⚠️ Assumed:` in the story.
 
-## Figma links
-
-Two paths:
-
-### Path A — MCP Figma server (recommended)
-
-Set up a Figma MCP server (see `skills/story-from-figma/mcp-figma-notes.md`). The skill enumerates pages, frames, prototype links, and components programmatically.
-
-### Path B — Screenshot fallback
-
-If MCP is unavailable, the skill asks you to export the relevant frames as PNGs and drop them. Vision then runs the same inference pipeline as the Images path, but flow structure must come from your prompt.
-
 ## Confidence policy
 
 | Confidence | What happens |
@@ -46,6 +34,4 @@ If MCP is unavailable, the skill asks you to export the relevant frames as PNGs 
 ## Limits and known failure modes
 
 - Vision misreads small UI labels — verify text-heavy mockups in HIGH-DPI.
-- Figma prototype links are sometimes used decoratively; the skill assumes they reflect real navigation.
-- Large Figma files (>50 frames) are slow over MCP; pass a page URL instead of a file URL.
 - Empty/error/loading states are often missing from designs — the skill asks about them explicitly.
