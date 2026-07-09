@@ -1,3 +1,9 @@
+## [2.1.3](https://github.com/pavp/storywright/compare/v2.1.2...v2.1.3) (2026-07-09)
+
+### 📝 Docs
+
+* fix multimodal-guide drift and document vision degrade path ([#30](https://github.com/pavp/storywright/issues/30)) ([d1ee597](https://github.com/pavp/storywright/commit/d1ee59757e6e4d443590bd10a47332aab9ce34ac))
+
 ## [2.1.2](https://github.com/pavp/storywright/compare/v2.1.1...v2.1.2) (2026-07-09)
 
 ### 📝 Docs
