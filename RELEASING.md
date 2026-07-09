@@ -2,7 +2,7 @@
 
 ## How releases happen
 
-Push to `main` → `.github/workflows/release.yml` runs `semantic-release`. No manual version bump, no package registry publish. The output is a git tag, a `CHANGELOG.md` entry, and a GitHub Release — that's the entire distributable artifact. skills.sh/`ags` and git-clone consumers pin a version by pointing at that tag.
+Push to `main` → `.github/workflows/release.yml` runs `semantic-release`. No manual version bump, no package registry publish. The output is a git tag, a `CHANGELOG.md` entry, and a GitHub Release — that's the entire distributable artifact. skills.sh (`npx skills`) and git-clone consumers pin a version by pointing at that tag.
 
 ## Channels
 

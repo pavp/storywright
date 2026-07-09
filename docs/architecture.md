@@ -11,7 +11,7 @@
 │   scripts/validate-skills.mjs              │  ← lint only, no installer
 └────────────────────────────────────────────┘
                   │
-     git clone / skills.sh / ags install
+     git clone / skills.sh (npx skills)
                   │
                   ▼
         ~/.claude/skills/storywright/
