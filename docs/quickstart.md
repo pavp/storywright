@@ -2,9 +2,9 @@
 
 ## 1. Install
 
-Via skills.sh / `ags`:
+Via skills.sh:
 ```bash
-ags install storywright
+npx skills add pavp/storywright
 ```
 
 Or a direct git clone into your agent's skills directory:

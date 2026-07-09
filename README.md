@@ -18,14 +18,13 @@ Two design choices shape everything:
 
 ## Install
 
-storywright is a git repo of skills — no package to install, no CLI to run. Install it with **[skills.sh](https://skills.sh)**, the cross-agent skill installer (its command-line tool is `ags`, for *agent skills*). It works with Claude Code, Cursor, Codex, Copilot, and other SKILL.md-compatible agents.
+storywright is a git repo of skills — no package to install, no CLI to run. Install it with **[skills.sh](https://skills.sh)** (`npx skills`, the cross-agent skill installer from Vercel Labs). It works with Claude Code, Cursor, Codex, Copilot, and other SKILL.md-compatible agents.
 
-**With skills.sh / `ags`** — install the tool once, then add storywright:
+**With skills.sh** — no install step; `npx` fetches the tool on demand:
 ```bash
-# install the ags CLI (see https://skills.sh for your platform)
-ags install pavp/storywright
+npx skills add pavp/storywright
 ```
-`ags` detects your agent and drops the skills into the right place. `pavp/storywright` is the GitHub repo — [github.com/pavp/storywright](https://github.com/pavp/storywright) — not an npm package; storywright ships no npm package.
+This detects your agent and copies the skills into the right place. `pavp/storywright` is the GitHub repo — [github.com/pavp/storywright](https://github.com/pavp/storywright) — not an npm package; storywright ships no npm package. Use `--list` to see the skills first, or `-a claude-code -a cursor` to target specific agents.
 
 **Without skills.sh** — clone the repo straight into your agent's skills directory:
 ```bash

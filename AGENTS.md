@@ -4,7 +4,7 @@ Tells coding agents (Claude Code and any AGENTS.md-aware tool) how to behave whe
 
 ## Repo type
 
-Skills pack for Claude Code and any other SKILL.md-compatible agent (Cursor 2.4+, Copilot agent mode, Codex CLI). Markdown-driven. Distributed as pure Markdown skills via skills.sh/`ags` or a direct git clone — no npm package, no CLI, no runtime; all behavior lives in the Markdown skills.
+Skills pack for Claude Code and any other SKILL.md-compatible agent (Cursor 2.4+, Copilot agent mode, Codex CLI). Markdown-driven. Distributed as pure Markdown skills via skills.sh (`npx skills`) or a direct git clone — no npm package, no CLI, no runtime; all behavior lives in the Markdown skills.
 
 Two invariants govern everything the skills produce; internalize them before editing any skill:
 

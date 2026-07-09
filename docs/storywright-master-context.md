@@ -20,7 +20,7 @@ Terminology is normalized in §12 (Glossary).
 
 ## 1. Executive Summary
 
-**What Storywright is.** [FACT] A *skills pack* for Claude Code and any other SKILL.md-compatible agent that turns ambiguous product inputs — vague prompts, half-baked stories, screenshots — into Jira-ready user stories. It ships as 4 top-level skills (`story-generate`, `story-refine`, `story-split`, `story-batch`) composing 11 shared components under `skills/_components/`. Everything is Markdown with YAML frontmatter. Distribution is **pure git** (skills.sh/`ags` or a direct clone) — no npm package, no CLI, no installer script; the repo contains no runtime and makes no LLM calls.
+**What Storywright is.** [FACT] A *skills pack* for Claude Code and any other SKILL.md-compatible agent that turns ambiguous product inputs — vague prompts, half-baked stories, screenshots — into Jira-ready user stories. It ships as 4 top-level skills (`story-generate`, `story-refine`, `story-split`, `story-batch`) composing 11 shared components under `skills/_components/`. Everything is Markdown with YAML frontmatter. Distribution is **pure git** (skills.sh (`npx skills`) or a direct clone) — no npm package, no CLI, no installer script; the repo contains no runtime and makes no LLM calls.
 
 **Core product vision.** [INFERENCE] Be the PM-facing discovery layer that converts *intent* into a rigorous, INVEST-compliant, Gherkin-structured backlog artifact — without forcing the user through a heavy tool. Methodology-as-skill, not software-as-service.
 
@@ -90,7 +90,7 @@ Terminology is normalized in §12 (Glossary).
 └─────────────────────────────────────────────────────────────┘
 ```
 
-Distribution (getting the repo onto disk) is out-of-band: git clone, or skills.sh/`ags` reading the repo directly. No script in this repo performs installation.
+Distribution (getting the repo onto disk) is out-of-band: git clone, or skills.sh (`npx skills`) reading the repo directly. No script in this repo performs installation.
 
 ### 3.2 Main subsystems
 
@@ -218,7 +218,7 @@ input (text|image)
 
 ## 7. UX & Product Positioning
 
-**Onboarding.** [FACT] `git clone` (or `ags install` / skills.sh) into the agent's skills directory → restart the agent → slash commands available. [INFERENCE] A single clone/install step, no package registry hop. **A restart is required** for skill changes to take effect — installed-on-disk ≠ loaded-in-session.
+**Onboarding.** [FACT] `git clone` (or `npx skills add` / skills.sh) into the agent's skills directory → restart the agent → slash commands available. [INFERENCE] A single clone/install step, no package registry hop. **A restart is required** for skill changes to take effect — installed-on-disk ≠ loaded-in-session.
 
 **Friction points.** [INFERENCE]
 - Restart-to-reload is a mild papercut.
@@ -321,4 +321,4 @@ input (text|image)
 - **PM↔dev split** — rule 3 / 3a: PM files carry no technical detail; `story.dev.md` carries all of it.
 - **Dual output / 2-file parity** — every story emits `story.standard.md` + `story.dev.md` (CI-enforced).
 - **Banner** — single source-confidence line at the top of a block (rule 5).
-- **Git-only distribution** — how consumers get the repo onto disk: git clone or skills.sh/`ags`, reading the repo directly. No CLI, no package registry, no runtime, no LLM, no project scanning in this repo.
+- **Git-only distribution** — how consumers get the repo onto disk: git clone or skills.sh (`npx skills`), reading the repo directly. No CLI, no package registry, no runtime, no LLM, no project scanning in this repo.
