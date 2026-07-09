@@ -279,7 +279,7 @@ Only these three things vary:
 | `generate` | Raw prompt / ambiguous text + optional image | If pre-split count ≥2 → STOP, switch to the split intent. Otherwise draft 1 story. |
 | `refine` | Existing story text + optional image | If pre-split count ≥2 → STOP, switch to the split intent. Otherwise fix in place. |
 | `split` | Oversize story (any source) | Always produces epic + N children. Mechanical NxN matrix + per-child V audit MANDATORY. Recursive re-split per child if count ≥2. |
-| `batch` | Multi-item backlog (+ optional companion text) | One story per backlog item. Multi-item output → mandatory `backlog-summary.md` with mechanical matrix + V audit. Any item with count ≥2 → switch to the split intent per item. |
+| `batch` | Multi-item backlog (+ optional companion text) | One story per backlog item. Multi-item output → mandatory `backlog-summary.md` with mechanical matrix + V audit. Any item with count ≥2 → mark `SPLIT RECOMMENDED` in `backlog-summary.md` and continue; NEVER auto-switch to the split intent. |
 
 Everything else is identical and lives in this base.
 
