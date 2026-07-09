@@ -64,7 +64,8 @@ async function checkReferenceLinks(skill, errors) {
 }
 
 async function main() {
-  const files = await findSkillFiles();
+  const targetDir = process.argv[2];
+  const files = await findSkillFiles(targetDir);
   if (files.length === 0) {
     console.error("✗ No SKILL.md files found under skills/");
     process.exit(1);
