@@ -1,6 +1,6 @@
 # Architecture
 
-## Two layers
+## One layer, git-distributed
 
 ```
 ┌────────────────────────────────────────────┐
@@ -8,23 +8,26 @@
 │     story-generate, story-refine, ...      │
 │     _components/...                        │
 ├────────────────────────────────────────────┤
-│   bin/ + scripts/                          │  ← thin installer
-│     storywright install | validate | zip  │
+│   scripts/validate-skills.mjs              │  ← lint only, no installer
 └────────────────────────────────────────────┘
+                  │
+     git clone / skills.sh / ags install
                   │
                   ▼
         ~/.claude/skills/storywright/
+     (or ~/.cursor, ~/.codex, ~/.copilot, ~/.agents)
                   │
                   ▼
-              Claude Code (runtime)
+         Any SKILL.md-compatible agent
+      (Claude Code, Cursor 2.4+, Copilot, Codex CLI)
                   │
                   ▼
-           Anthropic API (provider)
+              LLM provider (per host)
 ```
 
-- **Skills** = Markdown files with YAML frontmatter. They are the deliverable.
-- **CLI/scripts** = file-system operations only. Zero LLM calls.
-- **Runtime** = Claude Code, supplied by Anthropic. Not in this repo.
+- **Skills** = Markdown files with YAML frontmatter. They are the deliverable, and the only thing this repo ships.
+- **scripts/** = validation/test tooling only (`validate-skills.mjs` + fixtures). File-system reads only, zero LLM calls, not an installer — consumers get the files onto disk via git or skills.sh, not this repo's tooling.
+- **Runtime** = whichever SKILL.md-compatible agent the consumer runs. Not in this repo.
 
 ## Composition
 

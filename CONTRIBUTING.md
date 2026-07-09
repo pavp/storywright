@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for considering a contribution. This repo holds Markdown skill files plus a thin npm installer. Most contributions are skill additions or edits — see the authoring guide.
+Thanks for considering a contribution. This repo holds pure Markdown skill files — no CLI, no npm package. Most contributions are skill additions or edits — see the authoring guide.
 
 ## Conventional Commits
 
@@ -19,7 +19,8 @@ feat!: rename CLI install command
 ## Local setup
 
 ```bash
-npm install         # installs husky + commitlint + semantic-release
+git clone git@github.com:pavp/storywright.git && cd storywright
+npm install         # installs husky + commitlint + semantic-release (dev tooling only)
 npm run validate    # lints all skills
 npm test            # runs node --test against tests/
 ```
@@ -43,8 +44,9 @@ Maintainers do not version manually. Push to `main` triggers `.github/workflows/
 1. Analyzes commits since last tag
 2. Bumps version in `package.json`
 3. Updates `CHANGELOG.md`
-4. Publishes to npm via Trusted Publishing (OIDC)
-5. Creates a GitHub Release with notes
+4. Tags the release and creates a GitHub Release with notes
+
+There is no package registry publish — the git tag is the distributable artifact that skills.sh/git consumers pin against.
 
 See [RELEASING.md](./RELEASING.md) for rollback procedure.
 

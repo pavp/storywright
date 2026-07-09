@@ -20,14 +20,14 @@ Terminology is normalized in §12 (Glossary).
 
 ## 1. Executive Summary
 
-**What Storywright is.** [FACT] A *skills pack* for Claude Code that turns ambiguous product inputs — vague prompts, half-baked stories, screenshots — into Jira-ready user stories. It ships as 4 top-level skills (`story-generate`, `story-refine`, `story-split`, `story-batch`) composing 11 shared components under `skills/_components/`. Everything is Markdown with YAML frontmatter. The npm package is a **thin installer**: it copies skill/command files into `~/.claude/`; it contains no runtime and makes no LLM calls.
+**What Storywright is.** [FACT] A *skills pack* for Claude Code and any other SKILL.md-compatible agent that turns ambiguous product inputs — vague prompts, half-baked stories, screenshots — into Jira-ready user stories. It ships as 4 top-level skills (`story-generate`, `story-refine`, `story-split`, `story-batch`) composing 11 shared components under `skills/_components/`. Everything is Markdown with YAML frontmatter. Distribution is **pure git** (skills.sh/`ags` or a direct clone) — no npm package, no CLI, no installer script; the repo contains no runtime and makes no LLM calls.
 
 **Core product vision.** [INFERENCE] Be the PM-facing discovery layer that converts *intent* into a rigorous, INVEST-compliant, Gherkin-structured backlog artifact — without forcing the user through a heavy tool. Methodology-as-skill, not software-as-service.
 
 **System philosophy.** [FACT] "No LLM in code." All AI behavior lives in Markdown prose executed by Claude Code's runtime. The repo owns *knowledge and rules*, not execution, auth, retry, caching, vision, or MCP plumbing — those ride Claude Code deliberately (`docs/architecture.md:62-64`).
 
 **Key architectural characteristics.**
-- [FACT] Two layers: **knowledge** (Markdown skills) + **thin installer** (Node ESM scripts).
+- [FACT] One layer, git-distributed: **knowledge** (Markdown skills) is the entire repo; the only Node ESM script left is `scripts/validate-skills.mjs` (lint tooling, not an installer).
 - [FACT] **Composition is lint-enforced, not runtime-enforced** (`scripts/validate-skills.mjs`): every `composes:` reference must exist and no component may be orphaned.
 - [FACT] **Dual output mandatory**: `story.standard.md` (PM-facing, no technical detail) + `story.dev.md` (dev-facing, full technical detail). The PM↔dev split is the central design invariant (`storywright-base` rule 3 / rule 3a).
 - [FACT] **Multimodal intake**: text + image (Claude vision).
@@ -73,7 +73,7 @@ Terminology is normalized in §12 (Glossary).
 
 ## 3. System Architecture
 
-### 3.1 High-level (two layers)
+### 3.1 High-level (one layer, git-distributed)
 
 [FACT]
 ```
@@ -81,23 +81,22 @@ Terminology is normalized in §12 (Glossary).
 │ KNOWLEDGE LAYER  (skills/, Markdown + YAML)                  │
 │   4 top-level skills ── compose ──► 11 _components/          │
 │   storywright-base = shared rulebook (every skill inherits)  │
-│   Read & executed by Claude Code's runtime (NOT this repo)   │
+│   Read & executed by any SKILL.md-compatible agent's         │
+│   runtime (NOT this repo)                                    │
 ├─────────────────────────────────────────────────────────────┤
-│ INSTALLER LAYER  (bin/ + scripts/, Node ESM, zero deps)      │
-│   install / uninstall / validate / zip / list               │
+│ TOOLING LAYER  (scripts/, Node ESM, zero deps)               │
+│   validate-skills.mjs only — lint, not an installer          │
 │   Pure filesystem ops. No LLM. No project scanning.          │
 └─────────────────────────────────────────────────────────────┘
 ```
 
+Distribution (getting the repo onto disk) is out-of-band: git clone, or skills.sh/`ags` reading the repo directly. No script in this repo performs installation.
+
 ### 3.2 Main subsystems
 
 [FACT]
-- **bin/storywright.mjs** — CLI dispatcher; spawns a script per subcommand (`bin/storywright.mjs:11-16`).
-- **scripts/install-skills.mjs** — copies `skills/` → `~/.claude/skills/storywright/`, copies `commands/*.md` → `~/.claude/commands/storywright-*.md`, appends output folder to `~/.gitignore_global`.
 - **scripts/validate-skills.mjs** — frontmatter + composition + orphan linter. Regex-matches `[[name]]` wiki-links in prose; parses no source code.
-- **scripts/{uninstall,zip,list}-skills.mjs** — delete installed files / zip one skill for claude.ai upload / list installed vs available.
 - **scripts/lib/skills.mjs** — hand-rolled frontmatter + minimal-YAML parser; recursive `SKILL.md` walker.
-- **.claude-plugin/plugin.json** — marketplace manifest; declarative list of skills + commands.
 
 ### 3.3 Agent orchestration
 
@@ -219,10 +218,10 @@ input (text|image)
 
 ## 7. UX & Product Positioning
 
-**Onboarding.** [FACT] `npm i -g` → `storywright install` → restart Claude Code → slash commands available. [INFERENCE] Two-step install is a mild papercut; the postinstall hint mitigates it. **A restart is required** for skill changes to take effect — installed-on-disk ≠ loaded-in-session.
+**Onboarding.** [FACT] `git clone` (or `ags install` / skills.sh) into the agent's skills directory → restart the agent → slash commands available. [INFERENCE] A single clone/install step, no package registry hop. **A restart is required** for skill changes to take effect — installed-on-disk ≠ loaded-in-session.
 
 **Friction points.** [INFERENCE]
-- Two-step install.
+- Restart-to-reload is a mild papercut.
 - Copy-paste-only output (no Jira/Linear API push).
 - Non-deterministic dev-file provenance when a repo is open (§5).
 
@@ -237,18 +236,14 @@ input (text|image)
 ## 8. Technical Deep Dive
 
 **Critical files.** [FACT]
-- `bin/storywright.mjs:11-16` — command→script map; CLI dispatcher.
-- `scripts/install-skills.mjs` — copy skills + commands, update global gitignore.
-- `scripts/validate-skills.mjs` — frontmatter/composition/orphan linter (the CI gate).
+- `scripts/validate-skills.mjs` — frontmatter/composition/orphan linter (the CI gate; only surviving script in the repo).
 - `scripts/lib/skills.mjs` — hand-rolled YAML/frontmatter parser + `SKILL.md` walker.
-- `scripts/{uninstall,zip,list}-skills.mjs`, `scripts/postinstall-hint.mjs`.
 - `skills/_components/storywright-base/SKILL.md` — the rulebook (hard rules, language 4a, rule D, pre-split test, canonical shape, Application skeleton).
 - `skills/_components/story-formatter/SKILL.md` — 2-file render + audience table.
-- `.claude-plugin/plugin.json` — manifest (15 skills, 4 commands).
 - `tests/skills-shape.test.mjs` — parity + no-leakage golden tests; `tests/validate.test.mjs`.
 - `examples/outputs/google-login/` — committed golden duo.
 
-**Pipelines / execution chains.** [FACT] CLI → spawn script → filesystem op (install layer). Runtime: slash command → skill+components → Anthropic API (knowledge layer; outside repo).
+**Pipelines / execution chains.** [FACT] No install pipeline in-repo — distribution is git/skills.sh, out-of-band. Runtime: slash command → skill+components → LLM provider (knowledge layer; outside repo).
 
 **Services / adapters / APIs.** [FACT] None in repo. Image intake is via the runtime's native vision, not repo code.
 
@@ -263,7 +258,7 @@ input (text|image)
 ## 9. Architectural Assumptions & Constraints
 
 ### 9.1 Invariants (must not break)
-[FACT] "No LLM in code" · thin installer · PM↔dev split (rule 3/3a) · 2-file parity (enforced by `tests/skills-shape.test.mjs`) · validator orphan check · Conventional Commits + semantic-release · **branch + PR always (never commit to `main`)**.
+[FACT] "No LLM in code" · git-only distribution (no CLI, no package registry) · PM↔dev split (rule 3/3a) · 2-file parity (enforced by `tests/skills-shape.test.mjs`) · validator orphan check · Conventional Commits + semantic-release · **branch + PR always (never commit to `main`)**.
 
 ### 9.2 Explicit assumptions
 [FACT] Inputs are text/image; output language = user's chat language; one story per invocation (unless split); composition is correct iff the linter passes.
@@ -304,7 +299,7 @@ input (text|image)
 
 [Normalized.]
 
-- **Storywright** — the Markdown skills pack + thin npm installer described here.
+- **Storywright** — the pure Markdown skills pack described here, distributed via git/skills.sh (no CLI, no package registry).
 - **Skill** — a `SKILL.md` file (frontmatter + prose) that Claude Code loads and executes. *Top-level skill* = user-triggered (4). *Component* = composed by skills, not directly triggered (10).
 - **Component** — reusable skill fragment under `skills/_components/`, pulled in via `composes:` or `[[links]]`.
 - **storywright-base** — the always-inherited component holding the shared rulebook.
@@ -326,4 +321,4 @@ input (text|image)
 - **PM↔dev split** — rule 3 / 3a: PM files carry no technical detail; `story.dev.md` carries all of it.
 - **Dual output / 2-file parity** — every story emits `story.standard.md` + `story.dev.md` (CI-enforced).
 - **Banner** — single source-confidence line at the top of a block (rule 5).
-- **Thin installer** — the npm package: copies files, no runtime, no LLM, no project scanning.
+- **Git-only distribution** — how consumers get the repo onto disk: git clone or skills.sh/`ags`, reading the repo directly. No CLI, no package registry, no runtime, no LLM, no project scanning in this repo.

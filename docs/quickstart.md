@@ -2,12 +2,17 @@
 
 ## 1. Install
 
+Via skills.sh / `ags`:
 ```bash
-npm install -g @pavp/storywright
-storywright install
+ags install storywright
 ```
 
-This copies the skill files to `~/.claude/skills/storywright/`. Restart Claude Code.
+Or a direct git clone into your agent's skills directory:
+```bash
+git clone git@github.com:pavp/storywright.git ~/.claude/skills/storywright
+```
+
+Restart Claude Code (or your agent) so the skill files are picked up.
 
 ## 2. Run your first story
 
@@ -46,11 +51,3 @@ this story is too big, split it:
 ```
 
 Claude proposes a split plan in a table. You approve / adjust / cancel. Children are only written after approval.
-
-## 5. ZIP for claude.ai upload
-
-```bash
-storywright zip story-generate
-```
-
-Upload `dist/story-generate.zip` via the claude.ai skills UI.

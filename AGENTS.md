@@ -4,7 +4,7 @@ Tells coding agents (Claude Code and any AGENTS.md-aware tool) how to behave whe
 
 ## Repo type
 
-Skills pack for Claude Code. Markdown-driven. The npm package is a thin installer; no runtime, no LLM calls in code — all behavior lives in the Markdown skills.
+Skills pack for Claude Code and any other SKILL.md-compatible agent (Cursor 2.4+, Copilot agent mode, Codex CLI). Markdown-driven. Distributed as pure Markdown skills via skills.sh/`ags` or a direct git clone — no npm package, no CLI, no runtime; all behavior lives in the Markdown skills.
 
 Two invariants govern everything the skills produce; internalize them before editing any skill:
 
@@ -18,14 +18,13 @@ Two invariants govern everything the skills produce; internalize them before edi
 ```
 storywright/
 ├── skills/                   ← knowledge (Markdown w/ YAML frontmatter)
+│   ├── story-batch/
 │   ├── story-generate/
 │   ├── story-refine/
 │   ├── story-split/
 │   └── _components/          ← 11 components composed by top-level skills
 ├── commands/                 ← slash-command entrypoints for ~/.claude/commands/
-├── bin/storywright.mjs       ← CLI
-├── scripts/                  ← install / uninstall / validate / zip / list
-├── .claude-plugin/           ← Claude marketplace manifest
+├── scripts/                  ← validate-skills.mjs + shared lib (no installer)
 └── .github/workflows/        ← CI + release pipeline
 ```
 
@@ -35,7 +34,7 @@ storywright/
    Edit the `.md` in `skills/<name>/` or `skills/_components/<name>/`. Keep frontmatter complete: `name`, `description` (≤200 chars), `trigger`, `intent`, `version`, `inputs`, `outputs`. Top-level skills must also list `composes:` referencing existing components. Run `npm run validate` before committing.
 
 2. **Adding / editing a slash command**
-   Create or edit `commands/<name>.md` with frontmatter `description` + `argument-hint`, body calling out to the corresponding skill. The CLI installs each as `storywright-<name>.md` under `~/.claude/commands/` (prefix avoids collisions).
+   Create or edit `commands/<name>.md` with frontmatter `description` + `argument-hint`, body calling out to the corresponding skill. Consumers get commands by cloning/pulling the repo (or via skills.sh) directly into their agent's commands directory (e.g. `~/.claude/commands/storywright-<name>.md`); the `storywright-` prefix in the filename avoids collisions with other packs.
 
 3. **Composition is enforced.** Validator (`scripts/validate-skills.mjs`) fails if `composes:` references a non-existent component **or if any component is orphaned** (referenced by no skill via `composes:` or a body `[[link]]`). All four top-level skills compose the same 11 components. The five enrichment components (`business-rules`, `edge-cases`, `analytics-events`, `risks-and-dependencies`, `definition-of-done`) feed `story.dev.md` per `storywright-base` rule 3 — never the PM body (except Business Rules, an optional PM section). The `estimation` component runs after INVEST and feeds `## Estimate` into `story.dev.md` only.
 
@@ -96,15 +95,20 @@ Both run in CI on every PR; both must pass to merge. Release workflow re-runs th
 
 ## Release flow
 
-Trunk-based: PR → merge `main` → `release.yml` runs semantic-release (computes version from Conventional Commits, updates CHANGELOG, tags, creates GitHub Release) → separate `publish` job uses npm Trusted Publishing (OIDC, no token) to push to npm with provenance.
-
-Channels: `latest` only (v1). Atomicity check: publish step verifies version is live on npm registry before exiting; phantom releases (tag exists but npm doesn't) fail loud.
+Trunk-based: PR → merge `main` → `release.yml` runs semantic-release (computes version from Conventional Commits, updates CHANGELOG, tags, creates GitHub Release). No package registry publish — the git tag is the distributable artifact; skills.sh/git consumers pin a version via that tag.
 
 Local dev:
 ```bash
-npm install            # installs devDeps + husky hook
-node scripts/install-skills.mjs   # symlink-equivalent into ~/.claude/skills/
+git clone git@github.com:pavp/storywright.git && cd storywright
+npm install            # installs devDeps + husky hook (validate/test/commitlint only)
+npm run validate && npm test
 ```
+
+To exercise skills against a live agent while developing, point the agent's skills directory at your clone (symlink or clone directly into it), e.g.:
+```bash
+ln -s "$(pwd)/skills" ~/.claude/skills/storywright
+```
+Restart the agent afterward — installed-on-disk does not hot-reload.
 
 ## Dogfooding
 
