@@ -1,3 +1,9 @@
+## [2.1.2](https://github.com/pavp/storywright/compare/v2.1.1...v2.1.2) (2026-07-09)
+
+### 📝 Docs
+
+* correct the skills.sh install command to npx skills add ([#29](https://github.com/pavp/storywright/issues/29)) ([1a3c8dd](https://github.com/pavp/storywright/commit/1a3c8dd305bdca3d4545b21ddd66396e0c6f68d8))
+
 ## [2.1.1](https://github.com/pavp/storywright/compare/v2.1.0...v2.1.1) (2026-07-09)
 
 ### 📝 Docs
