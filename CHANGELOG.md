@@ -1,3 +1,9 @@
+## [2.0.1](https://github.com/pavp/storywright/compare/v2.0.0...v2.0.1) (2026-07-09)
+
+### 📝 Docs
+
+* rewrite install and release docs for git-only distribution ([#26](https://github.com/pavp/storywright/issues/26)) ([ae14e41](https://github.com/pavp/storywright/commit/ae14e41ef25513f15ed7282ef2fe3c2fade923c1))
+
 ## [2.0.0](https://github.com/pavp/storywright/compare/v1.21.0...v2.0.0) (2026-07-09)
 
 ### ⚠ BREAKING CHANGES
