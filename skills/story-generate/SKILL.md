@@ -45,7 +45,7 @@ Take whatever the PM has — a one-liner, a half-baked story, a screenshot — a
 | UI Components / States | Image | Text |
 | AC observable outcomes | Triangulate | — |
 
-Conflicts → BLOCKING `AskUserQuestion` per base rule 1.
+Conflicts → BLOCKING question via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code) per base rule 1.
 
 ## Split behavior differential
 
@@ -53,11 +53,11 @@ If the base **deterministic pre-split test** returns count ≥2:
 - **STOP drafting.**
 - Output a terminal message listing candidate children + per-pair dep notes (base rule 10) + V audit (base rule 11).
 - Show candidate children + dep notes + V audit.
-- Ask via `AskUserQuestion`: "This story has [N] independent flows. Run split now?" with options:
+- Ask via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code): "This story has [N] independent flows. Run split now?" with options:
   - "Yes, split" → execute `[[story-split]]` inline (epic + children + .storywright-context.json).
   - "Continue without split" → proceed with single-story path (fill canonical block → INVEST → render both files).
   - "No, keep as-is" → stop. No output written.
-- Do NOT silently auto-split without the AskUserQuestion confirmation.
+- Do NOT silently auto-split without this confirmation (e.g. `AskUserQuestion` on Claude Code).
 
 If count ≤1:
 - Proceed with the base step-by-step Application skeleton (read context → language → persona → passive-goal → gap-check → siblings → fill canonical block → INVEST → render).
@@ -86,7 +86,7 @@ Input: *"As a user, I want to view list of customers, so that I find details."*
 - User: "Call them." → so-that strengthened.
 
 ### Bad
-Writing any sidecar question file (violates base rule 1).
+Writing a sidecar question file when the host has an interactive clarification mechanism (violates base rule 1).
 
 ### Bad
 Drafting a 15-section story when pre-split count ≥2 (violates split behavior differential).

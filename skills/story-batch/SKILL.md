@@ -69,7 +69,7 @@ Follow the **base Application** skeleton for per-item story production (steps 3�
 3. **N=0 guard:** if the parsed item list is empty (zero items after structural parsing and LLM fallback), emit: "No items found — paste a numbered list, bulleted list, or blank-line-separated blocks and try again." Stop. No further phases run.
 4. If structural parsing yields fewer than 2 items or ambiguous boundaries, invoke LLM segmentation: infer one item per distinct user goal expressed in the input.
 5. **N=1 abort:** if after parsing exactly 1 item is identified, emit: "Only one item found — use `/storywright-story-generate` for a single story." Stop.
-6. Present the parsed boundary list via `AskUserQuestion`: "I found N items — does this look right? Reply to confirm, merge two items, split one, or edit the list."
+6. Present the parsed boundary list via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code): "I found N items — does this look right? Reply to confirm, merge two items, split one, or edit the list."
 7. Apply any user corrections and re-present if the count changed. Proceed only after the user confirms.
 
 **Slug derivation (ONE rule, applied consistently):** derive the batch slug from the first item's inferred feature area. Lowercase, replace spaces with hyphens, truncate to ≤30 characters. No other slug rule applies.
@@ -179,11 +179,11 @@ Story pairs are already written by Phase 3 step 10. Emit:
    - Total row sums only numeric point values; excludes `—` and `Spike` rows.
    - Full justification table stays in `story-N.dev.md`; only Points + Key Driver appear here.
 
-2. **`.storywright-context.json`** updated per base rule 9 (one file per batch folder). No `clarifications.md`.
+2. **`.storywright-context.json`** updated per base rule 9 (one file per batch folder). No `clarifications.md` when the host has an interactive clarification mechanism.
 
 3. **Flat folder structure:** all files in `docs/storywright/YYYY-MM-DD-HHmm-batch-<slug>/` with no subdirectories. Slug derived per Phase 0 rule (first item's feature area, ≤30 chars, lowercase, hyphens).
 
-NO `clarifications.md`. NO Edge Cases / NFR sections **in PM files** (they live in `story-<N>.dev.md` per base rule 3a). NO per-claim visual tags.
+NO `clarifications.md` when the host has an interactive clarification mechanism. NO Edge Cases / NFR sections **in PM files** (they live in `story-<N>.dev.md` per base rule 3a). NO per-claim visual tags.
 
 ## Examples
 
@@ -221,7 +221,7 @@ Skipping the dependency matrix in `backlog-summary.md` when N>1 with DRAFTED ite
 - Including all items (including SPLIT RECOMMENDED and NOT A STORY) in the Phase 4 matrix — matrix is over DRAFTED items only.
 - Using nested subfolders: `batch-checkout/story-1/story-1.standard.md` — wrong. All files flat in the batch folder.
 - Applying the slug derivation rule inconsistently — one rule only: first item's feature area, ≤30 chars, lowercase, hyphens.
-- Emitting `clarifications.md` — violates base rule 1.
+- Emitting `clarifications.md` when the host has an interactive clarification mechanism — violates base rule 1.
 - All other pitfalls in `[[storywright-base]]` apply equally.
 
 ## References
@@ -233,7 +233,7 @@ Skipping the dependency matrix in `backlog-summary.md` when N>1 with DRAFTED ite
 
 <claude-specific>
 - Read `[[storywright-base]]` before applying. Do not duplicate its rules in your reasoning.
-- Phase 0 boundary confirmation is non-skippable — always use `AskUserQuestion`.
+- Phase 0 boundary confirmation is non-skippable — always ask via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code).
 - The cohesion-gate algorithm (Steps A–E) is deterministic: same items → same graph → same verdict regardless of order.
 - Phase 4 matrix is over DRAFTED items only. SPLIT RECOMMENDED and NOT A STORY items do not participate.
 - Slug rule is fixed: first item's feature area, ≤30 chars, lowercase, hyphens. Do not invent variations.

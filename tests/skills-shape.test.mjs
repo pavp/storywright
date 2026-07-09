@@ -465,9 +465,11 @@ test("story-refine-amendment golden: Refinement log records amendment within the
 });
 
 // (R4 scenarios 4.1–4.3) conflict-path golden — the user-declared delta
-// contradicts an existing AC's Given. One BLOCKING AskUserQuestion resolves
-// it; only the contradicted AC changes, the independent AC survives
-// byte-identical, and the Refinement log records the conflict + resolution.
+// contradicts an existing AC's Given. One BLOCKING question raised via the
+// host's interactive clarification mechanism (e.g. AskUserQuestion on Claude
+// Code) resolves it; only the contradicted AC changes, the independent AC
+// survives byte-identical, and the Refinement log records the conflict +
+// resolution.
 // No directory-exists guard — a missing golden fails loudly, consistent with
 // the amendment-golden tests above.
 
@@ -532,4 +534,30 @@ test("story-refine-amendment-conflict golden: Refinement log records conflict ma
     /Estimate:/i,
     "Refinement log must record the estimate note"
   );
+});
+
+// Axis-2 (clarification-mechanism spec) maintain-functionality invariant:
+// the agnostic-with-example rewording must keep the literal `AskUserQuestion`
+// token present as the parenthetical example at every site that named it as
+// the clarification mechanism, so Claude Code still receives the signal to
+// fire its interactive widget. Every file below had ≥1 occurrence before the
+// rewording (portability-level-b, Phase 6) and must retain ≥1 after it.
+const ASK_USER_QUESTION_SITES = [
+  "skills/_components/storywright-base/SKILL.md",
+  "skills/story-refine/SKILL.md",
+  "skills/story-generate/SKILL.md",
+  "skills/story-batch/SKILL.md",
+  "skills/story-split/SKILL.md",
+  "commands/story-refine.md",
+  "commands/story-generate.md",
+];
+
+test("AskUserQuestion signal token survives the agnostic-with-example rewording", async () => {
+  for (const relPath of ASK_USER_QUESTION_SITES) {
+    const content = await readFile(join(REPO, relPath), "utf8");
+    assert.ok(
+      /AskUserQuestion/.test(content),
+      `${relPath} must retain the literal AskUserQuestion token (Claude tool-activation signal)`
+    );
+  }
 });

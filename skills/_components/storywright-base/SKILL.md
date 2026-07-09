@@ -24,7 +24,7 @@ If you are reading this through a top-level skill, treat every rule below as non
 
 ## Hard rules (v2.2 — apply to all top-level storywright skills)
 
-1. **Terminal-only clarifications.** Never write any sidecar question file (no `clarifications.md`, no `questions.md`, nothing). All gap questions go through `AskUserQuestion`, batched ≤4 per call. Non-blocking gaps → mark `⚠️ Assumed: <text>` inline in the story body — do not ask. Do NOT announce the absence of a clarifications file ("Clarification resolved", "no clarifications.md needed", or any equivalent). Silence = no questions. Proceed directly.
+1. **Host-agnostic clarifications.** Ask clarification questions via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code), batched ≤4 per call. If the host has no interactive clarification mechanism, write `clarifications.md` as a fallback rather than dropping the questions. Non-blocking gaps → mark `⚠️ Assumed: <text>` inline in the story body — do not ask. Do NOT announce the presence or absence of a clarifications file ("Clarification resolved", "no clarifications.md needed", or any equivalent). Silence = no questions. Proceed directly.
 
 2. **Cohn + Gherkin canonical.** Every story (or child story) has:
    - ONE Use Case block (`As a / I want to / so that`).
@@ -40,14 +40,14 @@ If you are reading this through a top-level skill, treat every rule below as non
 
 3a. **Technical detail lives in `story.dev.md`.** The content rule 3 bans from the PM body is NOT discarded — it is rendered in the dev-facing file. Edge cases, analytics events, risks/dependencies, technical considerations, and the command-level DoD belong in `story.dev.md`, populated by the enrichment components (Application step 8b). The PM↔dev split is the home for this content; rule 3 governs the PM file, `story.dev.md` carries the technical detail. See `[[story-formatter]]` for the audience table.
 
-4. **Output language matches the user's chat language**, not the input's. Auto-detect first via rule 4a; only ask via `AskUserQuestion` if signals split.
+4. **Output language matches the user's chat language**, not the input's. Auto-detect first via rule 4a; only ask via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code) if signals split.
 
 5. **Visual inference confidence — single banner only.** Do NOT tag every visual claim. ONE banner at the top of the Design Reference block declares source type; all claims under it inherit:
    - Raster source (PNG/JPG) → `**Source: raster mockup → all visual specs are pixel-derived, not token-confirmed.**`
    - Design-token source → `**Source: design tokens → values are authoritative.**`
    Never assert hex / px / spacing from raster without the raster banner.
 
-6. **Sibling task IDs.** If the story references "next task / future task / another story / siblings" — check `<output-folder>/.storywright-context.json` first. If unresolved, ask via `AskUserQuestion`. If user has none yet, leave `TODO: link sibling` (unless rule F applies — invent slug per persisted naming pattern).
+6. **Sibling task IDs.** If the story references "next task / future task / another story / siblings" — check `<output-folder>/.storywright-context.json` first. If unresolved, ask via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code). If user has none yet, leave `TODO: link sibling` (unless rule F applies — invent slug per persisted naming pattern).
 
 7. **Mockup chrome detection — closed list.** Chrome = exactly:
    - left nav rail / sidebar
@@ -57,11 +57,11 @@ If you are reading this through a top-level skill, treat every rule below as non
    - persistent modal scrim
    - app-level tabs
 
-   If a companion image shows any of these AND the input does not mention them, ask via `AskUserQuestion` whether each is `in-scope`, `sibling-scope`, or `out-of-scope`. Anything not on this list (cards, section headers, in-flow buttons) is NOT chrome — do not surface as a chrome question.
+   If a companion image shows any of these AND the input does not mention them, ask via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code) whether each is `in-scope`, `sibling-scope`, or `out-of-scope`. Anything not on this list (cards, section headers, in-flow buttons) is NOT chrome — do not surface as a chrome question.
 
 8. **Anti-PRD is part of INVEST `Small`, not a separate step.** See `[[invest-checklist]]` Small criterion — line-count ceiling (~60 lines) lives there. Single source of truth.
 
-9. **Cross-skill context persistence.** When any storywright skill resolves a clarification via `AskUserQuestion`, write the **answer** to `<output-folder>/.storywright-context.json`. Read only from the exact output folder of the current invocation; never search siblings or parents. Schema:
+9. **Cross-skill context persistence.** When any storywright skill resolves a clarification via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code), write the **answer** to `<output-folder>/.storywright-context.json`. Read only from the exact output folder of the current invocation; never search siblings or parents. Schema:
 
    ```json
    {
@@ -93,7 +93,7 @@ If you are reading this through a top-level skill, treat every rule below as non
     - If no, useless until `<other>` ships → V = `WEAK · merge-upstream-candidate`. Recommend merging into the parent surface instead of keeping standalone.
     Do not let stylistic/UI-fragment children survive a split.
 
-12. **Passive-goal downstream prompt (rule G).** If the story's `I want to` verb is observational (`view, see, read, browse, look at, inspect, monitor`) AND the `so that` does not name a follow-up user action — ask once via `AskUserQuestion`: "What does the user do with this?". Strengthen the `so that` accordingly. Skip if `so that` already names a downstream action.
+12. **Passive-goal downstream prompt (rule G).** If the story's `I want to` verb is observational (`view, see, read, browse, look at, inspect, monitor`) AND the `so that` does not name a follow-up user action — ask once via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code): "What does the user do with this?". Strengthen the `so that` accordingly. Skip if `so that` already names a downstream action.
 
 13. **PM section whitelist (rule H).** Only these section names may appear in `story.standard.md`:
 
@@ -119,7 +119,7 @@ Run cheap detection before asking. Multi-signal weighted decision:
 
 **Decision:**
 - All high+medium signals agree on language M → adopt M silently. Mark inline `⚠️ Assumed: output language = <M> (auto-detected from <signals>)`.
-- Signals split → ask once via `AskUserQuestion`.
+- Signals split → ask once via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code).
 - User chat = L, story body = M, but high signals tie → prefer M (story body is contract).
 
 Persist via rule 9.
@@ -138,7 +138,7 @@ Examples:
 
 ### Rule F. Naming pattern — ask once, persist
 
-When any skill needs to invent a tentative ticket slug AND `.storywright-context.json` has no `naming_pattern` field, ask once via `AskUserQuestion`:
+When any skill needs to invent a tentative ticket slug AND `.storywright-context.json` has no `naming_pattern` field, ask once via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code):
 
 ```
 Which naming pattern do you use for tickets?
@@ -204,7 +204,7 @@ Mechanical counter. Apply the table — do NOT eyeball:
 - [other changes]
 ```
 
-NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No Assumptions block (assumptions get `⚠️ Assumed` inline or are resolved via `AskUserQuestion`). No standalone INVEST section — verdict belongs in the log only.
+NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No Assumptions block (assumptions get `⚠️ Assumed` inline or are resolved via the host's interactive clarification mechanism, e.g. `AskUserQuestion` on Claude Code). No standalone INVEST section — verdict belongs in the log only.
 
 **Title — no story-number prefix.** The title is the bare story name. NEVER prefix it with a story/sequence number (`Historia 00 —`, `Story 3:`, `HU-01 -`, or any equivalent). Sequence belongs in the ticket ID / filename, not the heading. One title heading, one scheme, every file.
 
@@ -212,18 +212,18 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
 
 ## Application (step-by-step — every skill follows this skeleton)
 
-0. **Detect companion sources** (image, accompanying text). Run conflict detection against the primary input. Run chrome detection using rule 7. Surface conflicts as BLOCKING `AskUserQuestion`.
+0. **Detect companion sources** (image, accompanying text). Run conflict detection against the primary input. Run chrome detection using rule 7. Surface conflicts as a BLOCKING question via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code).
 
 1. **Read prior context.** Load `<output-folder>/.storywright-context.json` if present (exact folder only). Apply resolved answers; skip the corresponding questions.
 
 2. **Language resolution** via rule 4 + 4a. Auto-detect using the expanded signal table; ask only if signals split. Persist via rule 9.
 
-3. **Persona sharpening.** If persona is "user" / "customer" / "person", ask via `AskUserQuestion` for a specific role. Generic personas hide motivation.
+3. **Persona sharpening.** If persona is "user" / "customer" / "person", ask via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code) for a specific role. Generic personas hide motivation.
 
 4. **Passive-goal check (rule G).** If `I want to` is observational AND `so that` lacks downstream action → ask once.
 
 5. **Gap-check.** For each weak/missing section:
-   - **Blocking** (changes scope, AC outcome, or persona) → `AskUserQuestion` immediately (batched ≤4).
+   - **Blocking** (changes scope, AC outcome, or persona) → ask immediately via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code), batched ≤4.
    - **Non-blocking** (additive detail) → fill inline marked `⚠️ Assumed: <text>`. Do not ask.
 
 6. **Sibling reference check.** If unlinked references found → ask once. If user opts for tentative slugs, apply rule F. Persist via rule 9.
@@ -299,10 +299,10 @@ Everything else is identical and lives in this base.
 
 - Running step 8c (Estimate) before step 9 INVEST — E verdict not yet available; always run INVEST first.
 - Matching bare `###` headings in dev.md for estimation signal extraction — use depth-agnostic `^#{2,3}` pattern; rendered goldens use H2 sections.
-- Writing any sidecar question file (clarifications.md, questions.md, etc).
+- Writing a sidecar question file (clarifications.md, questions.md, etc) when the host has an interactive clarification mechanism — the file is only the no-interactive-mechanism fallback.
 - Announcing "Clarification resolved" or "no clarifications.md needed" instead of proceeding silently.
-- Offering to save a clarifications file to disk after resolving gaps.
-- Skipping rule 1 (terminal-only) "because the user is async".
+- Offering to save a clarifications file to disk after resolving gaps on a host that has an interactive clarification mechanism — the file is only the no-interactive-mechanism fallback, never an opt-in prompt.
+- Skipping rule 1 (host-agnostic clarifications) "because the user is async".
 - Eyeballing outcome counts instead of running the mechanical table.
 - Renumbering ACs the team may already reference externally.
 - Adding NFR/edge-cases sections "to be thorough".
@@ -327,7 +327,7 @@ Everything else is identical and lives in this base.
 <claude-specific>
 - Treat every rule above as load-bearing across all top-level skills.
 - Use extended thinking when applying rule 10 (parse Given lines) and rule 11 (V audit per child).
-- Never call Write for any sidecar question file. Use `AskUserQuestion`.
+- If the host has an interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code), use it — do not call Write for a sidecar question file when one is available.
 - Read `.storywright-context.json` ONLY from the exact target output folder.
 - When you find yourself about to add an NFR / edge-cases / dependencies prose section to a story body, STOP — rule 3 forbids it.
 </claude-specific>

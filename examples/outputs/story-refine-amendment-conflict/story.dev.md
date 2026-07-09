@@ -55,5 +55,5 @@
 
 *Refinement log*
 - INVEST Verdict: READY
-- Amendment: delta "guests can also check out" contradicted AC-1's original authenticated-only Given — Conflict: resolved as "guests allowed, supersedes the authenticated-only precondition" via BLOCKING AskUserQuestion; AC-1 Given updated in place, AC-2 unchanged.
+- Amendment: delta "guests can also check out" contradicted AC-1's original authenticated-only Given — Conflict: resolved as "guests allowed, supersedes the authenticated-only precondition" via a BLOCKING question raised through the host's interactive clarification mechanism (e.g. AskUserQuestion on Claude Code); AC-1 Given updated in place, AC-2 unchanged.
 - Estimate: changed 5 (pre-conflict, authenticated-only scope) → 2 (post-resolution, guest path reuses the existing checkout endpoint).
