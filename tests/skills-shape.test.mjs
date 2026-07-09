@@ -11,6 +11,13 @@ const { findSkillFiles, loadSkill } = await import(
   join(REPO, "scripts/lib/skills.mjs")
 );
 
+// NOTE (install-unit-shape PR1, additive): the new `storywright` router skill
+// composes via body links to `references/*.md` instead of `composes:`
+// frontmatter (see design.md ADR-4 — composes:/orphan checks are replaced by
+// reference-link integrity, landed for real in PR2's validator + test flip).
+// This PR1-only carve-out lets the additive skill coexist without weakening
+// the original guarantee for the 4 still-present legacy top-level skills,
+// which still must declare `composes:` exactly as before.
 test("all top-level skills compose at least one component", async () => {
   const files = await findSkillFiles();
   const topLevel = [];
@@ -22,6 +29,12 @@ test("all top-level skills compose at least one component", async () => {
     const composes = Array.isArray(s.frontmatter.composes)
       ? s.frontmatter.composes
       : [];
+    if (composes.length === 0) {
+      const hasReferencesDir = await stat(join(dirname(s.path), "references"))
+        .then((st) => st.isDirectory())
+        .catch(() => false);
+      if (hasReferencesDir) continue; // composes via references/ links (install-unit-shape PR1) — PR2 replaces this test outright
+    }
     assert.ok(
       composes.length > 0,
       `top-level skill '${s.frontmatter.name}' should compose ≥1 component`
