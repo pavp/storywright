@@ -1,8 +1,7 @@
 # storywright
 
-[![npm](https://img.shields.io/npm/v/@pavp/storywright.svg)](https://www.npmjs.com/package/@pavp/storywright)
 [![CI](https://github.com/pavp/storywright/actions/workflows/ci.yml/badge.svg)](https://github.com/pavp/storywright/actions/workflows/ci.yml)
-[![License](https://img.shields.io/npm/l/@pavp/storywright.svg)](./LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 Turn ambiguous inputs — vague prompts, half-baked stories, screenshots, raw backlogs — into **Jira-ready user stories** for Claude Code. Every story comes out INVEST-checked, with Given/When/Then acceptance criteria, a Fibonacci estimate, and a clean split between what the PM reads and what the developer needs.
 
@@ -10,7 +9,7 @@ Turn ambiguous inputs — vague prompts, half-baked stories, screenshots, raw ba
 
 ## What it is
 
-A **skills pack for Claude Code** — not a runtime, no LLM inside, no API calls in code. The skills are Markdown files Claude Code reads as instructions; the npm package is a thin installer that copies them into `~/.claude/skills/`. All the behavior lives in the prose.
+A **pure Markdown skills pack** — not a runtime, no LLM inside, no API calls in code, no npm package to install. The skills are `SKILL.md` files any SKILL.md-compatible agent (Claude Code, Cursor 2.4+, Copilot agent mode, Codex CLI) reads as instructions directly from disk. All the behavior lives in the prose.
 
 Two design choices shape everything:
 
@@ -19,26 +18,21 @@ Two design choices shape everything:
 
 ## Install
 
+storywright is a git repo of skills — no package to install, no CLI to run.
+
+**Direct git clone** into your agent's skills directory (works everywhere, no catalog required):
 ```bash
-npm install -g @pavp/storywright
-storywright install
+git clone git@github.com:pavp/storywright.git ~/.claude/skills/storywright
 ```
+Swap `~/.claude/skills/` for whatever your agent uses — `~/.cursor/skills/`, `~/.codex/skills/`, `~/.copilot/skills/`, or the universal `~/.agents/skills/`.
 
-Restart Claude Code so the skills and slash commands are picked up.
+**Optional — skills.sh / `ags`**, if you use that catalog:
+```bash
+ags install storywright
+```
+`pavp/storywright` above is the GitHub repo — [github.com/pavp/storywright](https://github.com/pavp/storywright) — not an npm package; storywright ships no npm package.
 
-<details>
-<summary>Other install paths</summary>
-
-- **Git clone + symlink** (contributors):
-  ```bash
-  git clone git@github.com:pavp/storywright.git && cd storywright
-  ln -s "$(pwd)/skills" ~/.claude/skills/storywright
-  ```
-- **ZIP upload to claude.ai**:
-  ```bash
-  storywright zip story-generate   # → dist/story-generate.zip, upload via the claude.ai UI
-  ```
-</details>
+Restart your agent so the skills and slash commands are picked up.
 
 ## Use
 
@@ -139,23 +133,13 @@ All four top-level skills compose the same eleven components:
 
 When you pass both at once (text + image), storywright follows a source-priority matrix and surfaces genuine conflicts as blocking clarifications — it never silently picks a winner.
 
-## CLI
-
-```bash
-storywright install            # copy skills + slash commands into ~/.claude/
-storywright list               # show available + installed skills
-storywright validate           # lint skill files (frontmatter + composition)
-storywright zip <skill-name>   # build a ZIP for claude.ai upload
-storywright uninstall          # remove from ~/.claude/
-```
-
 ## Multi-provider stance
 
 Skills are written in **format-neutral Markdown** with optional `<claude-specific>` blocks. Non-Claude LLMs ignore those blocks; Claude reads them. No adapters are shipped — that's a downstream concern.
 
 ## Releases
 
-`semantic-release` + Conventional Commits + GitHub Actions + npm Trusted Publishing (OIDC). Merge to `main` → version bump → publish, on a single `latest` channel. See [CONTRIBUTING.md](./CONTRIBUTING.md) and [AGENTS.md](./AGENTS.md) (the guide for coding agents working in this repo).
+`semantic-release` + Conventional Commits + GitHub Actions. Merge to `main` → version computed from commit history → git tag + GitHub Release + `CHANGELOG.md` update. No package registry involved — skills.sh/git consumers pin a version via the git tag. See [CONTRIBUTING.md](./CONTRIBUTING.md) and [AGENTS.md](./AGENTS.md) (the guide for coding agents working in this repo).
 
 ## License
 
