@@ -1,3 +1,9 @@
+## [2.1.1](https://github.com/pavp/storywright/compare/v2.1.0...v2.1.1) (2026-07-09)
+
+### 📝 Docs
+
+* lead the install section with skills.sh and explain ags ([#28](https://github.com/pavp/storywright/issues/28)) ([0ce3b07](https://github.com/pavp/storywright/commit/0ce3b078012be36bba2cec65ccd7ed383cb8becc))
+
 ## [2.1.0](https://github.com/pavp/storywright/compare/v2.0.1...v2.1.0) (2026-07-09)
 
 ### ✨ Features
