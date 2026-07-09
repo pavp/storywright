@@ -31,20 +31,34 @@ async function checkReferenceLinks(skill, errors) {
   // catching a stale link left inside a reference file, not only in
   // SKILL.md — install-unit-shape scenario "fails on a stale inter-skill
   // link inside a reference body").
-  const bodies = [{ label: skill.relPath, text: skill.body }];
+  const ROOT = Symbol("root");
+  const bodies = [{ label: skill.relPath, node: ROOT, text: skill.body }];
   for (const name of refFiles) {
     const refPath = join(refDir, `${name}.md`);
     const text = await readFile(refPath, "utf8");
-    bodies.push({ label: `skills/${basename(skillDir)}/references/${name}.md`, text });
+    bodies.push({ label: `skills/${basename(skillDir)}/references/${name}.md`, node: name, text });
   }
 
-  const linked = new Set();
+  // Build a directed link graph: edge X -> Y when body X contains a link to
+  // reference Y. The root node (SKILL.md body) is the traversal start.
+  // Reachability from the root — not flat "is it linked by anything" —
+  // is what actually proves a reference is wired into the skill: a
+  // self-link (A -> A) or a mutual-only pair (A -> B -> A) forms a cycle
+  // that is never reachable from ROOT, so both cases correctly stay
+  // unreachable and get flagged as orphaned, while a legitimate transitive
+  // chain (SKILL.md -> A -> B) still marks B reachable.
+  const graph = new Map();
   const LINK_RES = [/\[\[([a-z0-9-]+)\]\]/g, /references\/([a-z0-9-]+)\.md/g];
-  for (const { label, text } of bodies) {
+  for (const { label, node, text } of bodies) {
+    let edges = graph.get(node);
+    if (!edges) {
+      edges = new Set();
+      graph.set(node, edges);
+    }
     for (const re of LINK_RES) {
       for (const m of text.matchAll(re)) {
         const name = m[1];
-        linked.add(name);
+        edges.add(name);
         if (!refFiles.has(name)) {
           errors.push(`${label}: link to 'references/${name}.md' does not resolve — no such reference file`);
         }
@@ -52,11 +66,25 @@ async function checkReferenceLinks(skill, errors) {
     }
   }
 
-  // Orphan check: every reference file must be linked by SKILL.md or by
-  // another reference file's body.
+  // BFS from ROOT to find every reference actually reachable from SKILL.md.
+  const reachable = new Set();
+  const queue = [ROOT];
+  while (queue.length) {
+    const current = queue.shift();
+    for (const next of graph.get(current) ?? []) {
+      if (!reachable.has(next)) {
+        reachable.add(next);
+        queue.push(next);
+      }
+    }
+  }
+
+  // Orphan check: every reference file must be reachable from SKILL.md,
+  // directly or transitively — merely being mentioned by another
+  // unreachable body (itself included) doesn't count.
   for (const name of refFiles) {
-    if (!linked.has(name)) {
-      errors.push(`skills/${basename(skillDir)}/references/${name}.md: orphaned — linked by no body`);
+    if (!reachable.has(name)) {
+      errors.push(`skills/${basename(skillDir)}/references/${name}.md: orphaned — unreachable from SKILL.md`);
     }
   }
 

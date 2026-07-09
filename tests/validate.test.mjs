@@ -100,3 +100,99 @@ test("validate-skills rejects an orphaned reference file", async () => {
     if (tempRoot) await rm(tempRoot, { recursive: true, force: true });
   }
 });
+
+test("validate-skills rejects a reference file that only links itself", async () => {
+  let tempRoot;
+  try {
+    let tempSkillsDir, tempSkillDir;
+    ({ tempRoot, tempSkillsDir, tempSkillDir } = await makeTempSkillCopy());
+    const selfLinkPath = join(tempSkillDir, "references", "self-link-fixture.md");
+    await writeFile(
+      selfLinkPath,
+      "## Purpose\n\nSelf-referencing fixture reference.\n\nSee references/self-link-fixture.md for details.\n"
+    );
+    const r = runValidator(tempSkillsDir);
+    assert.notEqual(
+      r.status,
+      0,
+      "validator must reject a reference file whose only inbound link is itself"
+    );
+    assert.match(r.stderr, /orphaned/, "error message must say 'orphaned'");
+    assert.match(
+      r.stderr,
+      /self-link-fixture/,
+      "error message must name the self-linking orphaned file"
+    );
+  } finally {
+    if (tempRoot) await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
+// This is a REACHABILITY hole distinct from the self-link case above: A
+// links B and B links A, but neither is linked from SKILL.md. A flat
+// "linked by some other body" membership test (the pre-BFS implementation)
+// marks both as "linked" (each is named by the other) and passes — even
+// though neither is reachable from the router, so both are dead weight.
+// Only true reachability-from-SKILL.md catches this.
+test("validate-skills rejects a mutual-only pair of reference files unreachable from SKILL.md", async () => {
+  let tempRoot;
+  try {
+    let tempSkillsDir, tempSkillDir;
+    ({ tempRoot, tempSkillsDir, tempSkillDir } = await makeTempSkillCopy());
+    const refDir = join(tempSkillDir, "references");
+    await writeFile(
+      join(refDir, "mutual-a-fixture.md"),
+      "## Purpose\n\nA.\n\nSee references/mutual-b-fixture.md for details.\n"
+    );
+    await writeFile(
+      join(refDir, "mutual-b-fixture.md"),
+      "## Purpose\n\nB.\n\nSee references/mutual-a-fixture.md for details.\n"
+    );
+    const r = runValidator(tempSkillsDir);
+    assert.notEqual(
+      r.status,
+      0,
+      "validator must reject a mutual-only pair unreachable from SKILL.md"
+    );
+    assert.match(r.stderr, /orphaned/, "error message must say 'orphaned'");
+    assert.match(
+      r.stderr,
+      /mutual-a-fixture|mutual-b-fixture/,
+      "error message must name at least one orphaned mutual-pair file"
+    );
+  } finally {
+    if (tempRoot) await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test("validate-skills accepts a reference only reachable transitively (SKILL.md -> A -> B)", async () => {
+  let tempRoot;
+  try {
+    let tempSkillsDir, tempSkillDir;
+    ({ tempRoot, tempSkillsDir, tempSkillDir } = await makeTempSkillCopy());
+    const skillMd = join(tempSkillDir, "SKILL.md");
+    const refDir = join(tempSkillDir, "references");
+    const original = await readFile(skillMd, "utf8");
+    await writeFile(skillMd, `${original}\n\nSee [[transitive-a-fixture]] for details.\n`);
+    await writeFile(
+      join(refDir, "transitive-a-fixture.md"),
+      "## Purpose\n\nA.\n\nSee [[transitive-b-fixture]] for details.\n"
+    );
+    await writeFile(
+      join(refDir, "transitive-b-fixture.md"),
+      "## Purpose\n\nB, reachable only transitively through A.\n"
+    );
+    const r = runValidator(tempSkillsDir);
+    if (r.status !== 0) {
+      console.log("STDOUT:", r.stdout);
+      console.log("STDERR:", r.stderr);
+    }
+    assert.equal(
+      r.status,
+      0,
+      "validator must accept a reference reachable only transitively through another reference"
+    );
+  } finally {
+    if (tempRoot) await rm(tempRoot, { recursive: true, force: true });
+  }
+});
