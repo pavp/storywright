@@ -1,3 +1,26 @@
+## [2.0.0](https://github.com/pavp/storywright/compare/v1.21.0...v2.0.0) (2026-07-09)
+
+### ⚠ BREAKING CHANGES
+
+* the `storywright` CLI (install/uninstall/list/zip) is removed,
+the npm package no longer ships an installer, and the Claude plugin marketplace
+manifest is dropped. Install is now via skills.sh/ags or a direct git clone into
+the host's skills directory. Docs are rewritten in a follow-up slice.
+
+- Delete bin/storywright.mjs and the install/uninstall/list/postinstall/zip/
+  sync-plugin-version scripts
+- Delete .claude-plugin/plugin.json and its release-time version sync
+- Remove the npm `publish` job from release.yml (the git-tag + GitHub Release +
+  CHANGELOG `release` job stays); drop bin/files/publishConfig/postinstall from
+  package.json
+- Keep @semantic-release/npm with npmPublish:false so the package.json version
+  bump still drives release detection
+- Remove the now-dead CLI and marketplace tests
+
+### ✨ Features
+
+* remove CLI, npm publishing, and Claude marketplace channel ([#25](https://github.com/pavp/storywright/issues/25)) ([94fdc74](https://github.com/pavp/storywright/commit/94fdc74197592f0ac63ea7eb443a3f3d6cad3051))
+
 ## [1.21.0](https://github.com/pavp/storywright/compare/v1.20.0...v1.21.0) (2026-07-08)
 
 ### ✨ Features
