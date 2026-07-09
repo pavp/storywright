@@ -17,12 +17,11 @@ Two invariants govern everything the skills produce; internalize them before edi
 
 ```
 storywright/
-├── skills/                   ← knowledge (Markdown w/ YAML frontmatter)
-│   ├── story-batch/
-│   ├── story-generate/
-│   ├── story-refine/
-│   ├── story-split/
-│   └── _components/          ← 11 components composed by top-level skills
+├── skills/
+│   └── storywright/          ← the ONLY install unit (picker sees exactly one)
+│       ├── SKILL.md          ← router: intent dispatch (generate/refine/split/batch)
+│       ├── references/       ← 11 reference files, read on demand (not a picker unit)
+│       └── templates/        ← story.standard.md / story.dev.md render templates
 ├── commands/                 ← slash-command entrypoints for ~/.claude/commands/
 ├── scripts/                  ← validate-skills.mjs + shared lib (no installer)
 └── .github/workflows/        ← CI + release pipeline
@@ -30,19 +29,19 @@ storywright/
 
 ## When working in this repo
 
-1. **Adding / editing a skill**
-   Edit the `.md` in `skills/<name>/` or `skills/_components/<name>/`. Keep frontmatter complete: `name`, `description` (≤200 chars), `trigger`, `intent`, `version`, `inputs`, `outputs`. Top-level skills must also list `composes:` referencing existing components. Run `npm run validate` before committing.
+1. **Adding / editing the skill**
+   There is one install unit: `skills/storywright/SKILL.md` (the router) plus its `references/<name>.md` files. Keep frontmatter complete: `name`, `description` (≤200 chars), `trigger`, `intent`, `version`, `inputs`, `outputs`. The router has no `composes:` — instead its body links each `references/<name>.md` it depends on. A `references/*.md` file has no frontmatter and is never a separate picker unit; it travels atomically with `SKILL.md` because skills.sh's `copyDirectory` copies the whole `skills/storywright/` folder recursively. Run `npm run validate` before committing.
 
 2. **Adding / editing a slash command**
-   Create or edit `commands/<name>.md` with frontmatter `description` + `argument-hint`, body calling out to the corresponding skill. Consumers get commands by cloning/pulling the repo (or via skills.sh) directly into their agent's commands directory (e.g. `~/.claude/commands/storywright-<name>.md`); the `storywright-` prefix in the filename avoids collisions with other packs.
+   Create or edit `commands/<name>.md` with frontmatter `description` + `argument-hint`, body invoking the single `storywright` skill with an explicit `Intent: generate|refine|split|batch` instruction (the router honors this as the highest-precedence routing signal and does not re-derive intent from the input). Consumers get commands by cloning/pulling the repo (or via skills.sh) directly into their agent's commands directory (e.g. `~/.claude/commands/storywright-<name>.md`); the `storywright-` prefix in the filename avoids collisions with other packs.
 
-3. **Composition is enforced.** Validator (`scripts/validate-skills.mjs`) fails if `composes:` references a non-existent component **or if any component is orphaned** (referenced by no skill via `composes:` or a body `[[link]]`). All four top-level skills compose the same 11 components. The five enrichment components (`business-rules`, `edge-cases`, `analytics-events`, `risks-and-dependencies`, `definition-of-done`) feed `story.dev.md` per `storywright-base` rule 3 — never the PM body (except Business Rules, an optional PM section). The `estimation` component runs after INVEST and feeds `## Estimate` into `story.dev.md` only.
+3. **Reference-link integrity is enforced.** Validator (`scripts/validate-skills.mjs`) fails if the router body (or any `references/*.md` body) links a `references/<name>.md` that does not exist, **or if any `references/*.md` file is orphaned** (linked by nothing). There is no `composes:`/orphan-component check anymore — the single skill's own reference graph is the whole composition surface. The five enrichment references (`business-rules`, `edge-cases`, `analytics-events`, `risks-and-dependencies`, `definition-of-done`) feed `story.dev.md` per `storywright-base` rule 3 — never the PM body (except Business Rules, an optional PM section). The `estimation` reference runs after INVEST and feeds `## Estimate` into `story.dev.md` only.
 
 4. **Output language.** Skills must respond in the input language. Don't force English. Detect Spanish / English / other from the user message.
 
 5. **Never auto-split a story.** Splitting always waits for user approval via inline `AskUserQuestion` — never auto-splits silently. Pre-split INVEST gates also apply (V FAIL → not a story; T/N FAIL → refine; E unknowns → spike; I/E/S FAIL → split).
 
-6. **Multi-source inputs are first-class.** When user passes text + image simultaneously, follow the source-priority matrix in `skills/story-generate/SKILL.md` ("Mixed inputs" section). Surface conflicts as BLOCKING clarifications, never silently pick a winner.
+6. **Multi-source inputs are first-class.** When user passes text + image simultaneously, follow the source-priority matrix in `skills/storywright/SKILL.md` (the `#### generate` routing subsection's "Mixed-input source priority" table). Surface conflicts as BLOCKING clarifications, never silently pick a winner.
 
 7. **Project-less — never ground stories in the open repo.** storywright generates a forward contract, not a code analysis. When generating or refining a story, do NOT read, scan, or infer from the files of whatever repository is open in the session — even if they look relevant. All technical detail in `story.dev.md` is domain-knowledge inference, marked `⚠️ Assumed:`, never scraped from a codebase. This is `storywright-base` hard rule 14; grounding silently makes output non-deterministic and gives false confidence. (Editing the pack's OWN source — skills, scripts, tests — is normal repo work and unaffected; this rule is about the *generated stories*, not your edits.)
 
@@ -50,17 +49,17 @@ storywright/
 
 ## Skills surface
 
-The 4 top-level skills:
+One install unit, `storywright`, routed by intent. The picker shows exactly one entry; each slash command below is a thin wrapper that pins the intent explicitly:
 
-| Skill | When | Slash command |
+| Intent | When | Slash command |
 |---|---|---|
-| `story-generate` | Ambiguous prompt / screenshot → full story | `/storywright-story-generate` |
-| `story-refine` | Existing story → audit + fill gaps in place | `/storywright-story-refine` |
-| `story-split` | Oversize story → INVEST-driven epic + children | `/storywright-story-split` |
-| `story-batch` | Multi-item backlog → one story per item in a single pass | `/storywright-story-batch` |
+| generate | Ambiguous prompt / screenshot → full story | `/storywright-story-generate` |
+| refine | Existing story → audit + fill gaps in place | `/storywright-story-refine` |
+| split | Oversize story → INVEST-driven epic + children | `/storywright-story-split` |
+| batch | Multi-item backlog → one story per item in a single pass | `/storywright-story-batch` |
 
-The 11 components (composed by top-level skills). All 4 top-level skills compose all 11:
-- `storywright-base` — shared rulebook (hard rules, canonical shape, PM↔dev split, mechanical pre-split/deps, language detect). Every top-level skill inherits this.
+The 11 reference files under `skills/storywright/references/`, read on demand by the router for every intent (progressive disclosure — never separate picker units):
+- `storywright-base` — shared rulebook (hard rules, canonical shape, PM↔dev split, mechanical pre-split/deps, language detect). Every intent reads this.
 - `clarification-questions` — minimum critical questions across 9 axes (including multi-source conflicts)
 - `acceptance-criteria` — Given/When/Then ACs; splitting signal on multiple When/Then
 - `invest-checklist` — INVEST self-check with verdict mapping to next action
@@ -82,7 +81,7 @@ The 11 components (composed by top-level skills). All 4 top-level skills compose
 - **Pure ESM** (`"type": "module"` + `.mjs`). No CommonJS.
 - **No build step.** Scripts are runnable directly via `node`.
 - **No LLM in code.** All AI behavior lives in the Markdown skills.
-- **Dual output mandatory.** Every story-producing skill emits two files per story: `story.standard.md` (PM-facing, no technical detail) + `story.dev.md` (dev-facing, full technical detail). This includes children produced by `story-split` (one pair per child; `epic.md` is the single exception — epic metadata, not a story). Core PM sections always; optional PM sections only when populated; technical detail (edge cases, risks, analytics, command-level DoD) lives in `story.dev.md` only.
+- **Dual output mandatory.** Every story-producing intent emits two files per story: `story.standard.md` (PM-facing, no technical detail) + `story.dev.md` (dev-facing, full technical detail). This includes children produced by the split intent (one pair per child; `epic.md` is the single exception — epic metadata, not a story). Core PM sections always; optional PM sections only when populated; technical detail (edge cases, risks, analytics, command-level DoD) lives in `story.dev.md` only.
 
 ## Validation
 
@@ -106,15 +105,16 @@ npm run validate && npm test
 
 To exercise skills against a live agent while developing, point the agent's skills directory at your clone (symlink or clone directly into it), e.g.:
 ```bash
-ln -s "$(pwd)/skills" ~/.claude/skills/storywright
+ln -s "$(pwd)/skills/storywright" ~/.claude/skills/storywright
 ```
 Restart the agent afterward — installed-on-disk does not hot-reload.
 
 ## Dogfooding
 
-When iterating on a skill, invoke it against fixtures:
-- `tests/fixtures/prompt-google-login.md` — text prompt
+When iterating on the skill, invoke it against fixtures:
+- `tests/fixtures/prompt-google-login.md` — generate target
 - `tests/fixtures/half-baked-story.md` — refine target
 - `tests/fixtures/oversized-story.md` — split target
+- `tests/fixtures/backlog-checkout-grooming.md` — batch target
 
-Committed golden outputs live under `examples/outputs/<slug>/` (the duo: `story.standard.md` + `story.dev.md`). `tests/skills-shape.test.mjs` asserts the PM file carries no technical leakage. If you change a skill's behavior, also update its golden outputs and the matching slash command body in `commands/<name>.md`.
+Committed golden outputs live under `examples/outputs/<slug>/` (the duo: `story.standard.md` + `story.dev.md`; the split golden additionally emits `epic.md` + one duo per child). `tests/skills-shape.test.mjs` asserts the PM file carries no technical leakage. If you change the skill's behavior, also update its golden outputs and the matching slash command body in `commands/<name>.md`.

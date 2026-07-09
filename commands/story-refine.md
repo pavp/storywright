@@ -3,7 +3,7 @@ description: Audit an existing story and fill gaps in place — or amend it with
 argument-hint: <paste existing story> [+ new requirement to add | + image]
 ---
 
-Invoke the `story-refine` skill from the storywright pack to audit and improve this story:
+Invoke the `storywright` skill. Intent: refine (explicit intent instruction — honor as the highest-precedence routing signal; do NOT re-derive intent from the input). Audit and improve this story:
 
 $ARGUMENTS
 

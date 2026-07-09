@@ -4,9 +4,10 @@
 
 ```
 ┌────────────────────────────────────────────┐
-│   skills/                                  │  ← knowledge (Markdown)
-│     story-generate, story-refine, ...      │
-│     _components/...                        │
+│   skills/storywright/                      │  ← knowledge (Markdown), ONE install unit
+│     SKILL.md          ← router (dispatch)  │
+│     references/*.md   ← 11 files, on-demand│
+│     templates/*.md                         │
 ├────────────────────────────────────────────┤
 │   scripts/validate-skills.mjs              │  ← lint only, no installer
 └────────────────────────────────────────────┘
@@ -25,34 +26,36 @@
               LLM provider (per host)
 ```
 
-- **Skills** = Markdown files with YAML frontmatter. They are the deliverable, and the only thing this repo ships.
+- **Skills** = Markdown files with YAML frontmatter. They are the deliverable, and the only thing this repo ships. There is exactly one install unit — a directory is only a picker entry if it contains a `SKILL.md`; `references/*.md` and `templates/*.md` have no frontmatter, so they are invisible to the picker and travel atomically with the one `SKILL.md` (skills.sh's `copyDirectory` copies the whole folder recursively).
 - **scripts/** = validation/test tooling only (`validate-skills.mjs` + fixtures). File-system reads only, zero LLM calls, not an installer — consumers get the files onto disk via git or skills.sh, not this repo's tooling.
 - **Runtime** = whichever SKILL.md-compatible agent the consumer runs. Not in this repo.
 
 ## Composition
 
-Top-level skills name their components in `composes:` frontmatter. The validator confirms every referenced component exists **and that no component is orphaned** (referenced by zero skills). Composition is enforced at lint time, not at runtime — Claude reads the skill body and follows the references naturally.
+The single `skills/storywright/SKILL.md` is a router: its `## Application` → `### Routing (dispatch)` section detects one of four intents (generate / refine / split / batch) from the input, then reads only the matching `references/*.md` files on demand. There is no `composes:` frontmatter and no per-skill picker units anymore — the validator instead enforces **reference-link integrity**: every `[[name]]` link or `references/<name>.md` mention in the SKILL.md body or in any reference body must resolve to a real file, and every reference file must be linked by at least one body (no orphans).
 
-All four top-level skills (`story-generate`, `story-refine`, `story-split`, `story-batch`) compose the **same 11 components**:
+All four intents read the **same 11 references**:
 
 ```
-story-generate / story-refine / story-split / story-batch
-├─ storywright-base          ← shared rulebook (inherited by all)
-├─ clarification-questions
-├─ business-rules            ← optional PM section + dev.md
-├─ acceptance-criteria
-├─ edge-cases                ← dev.md only (rule 3a)
-├─ analytics-events          ← dev.md only
-├─ risks-and-dependencies    ← dev.md only
-├─ definition-of-done        ← acceptance-only in PM, full in dev.md
-├─ invest-checklist
-├─ story-formatter           ← renders the 2-file duo
-└─ estimation                ← Fibonacci ## Estimate → dev.md only (after INVEST)
+storywright (router, one install unit)
+├─ references/storywright-base.md          ← shared rulebook (read by every intent)
+├─ references/clarification-questions.md
+├─ references/business-rules.md             ← optional PM section + dev.md
+├─ references/acceptance-criteria.md
+├─ references/edge-cases.md                 ← dev.md only (rule 3a)
+├─ references/analytics-events.md           ← dev.md only
+├─ references/risks-and-dependencies.md     ← dev.md only
+├─ references/definition-of-done.md         ← acceptance-only in PM, full in dev.md
+├─ references/invest-checklist.md
+├─ references/story-formatter.md            ← renders the 2-file duo
+└─ references/estimation.md                 ← Fibonacci ## Estimate → dev.md only (after INVEST)
 ```
+
+The per-intent order differs only for split (`invest-checklist` is read first, as the pre-split gate); every other intent reads the same set in the same order.
 
 ### PM ↔ dev split
 
-The PM-facing file (`story.standard.md`) carries only what a PM needs — no file paths, imports, or commands (`storywright-base` rule 3). Technical detail produced by the enrichment components (edge cases, analytics events, risks/dependencies, command-level DoD) is **not discarded** — it is rendered into `story.dev.md` (rule 3a). This is why the enrichment components are composed but never emit sections into the PM body.
+The PM-facing file (`story.standard.md`) carries only what a PM needs — no file paths, imports, or commands (`storywright-base` rule 3). Technical detail produced by the enrichment references (edge cases, analytics events, risks/dependencies, command-level DoD) is **not discarded** — it is rendered into `story.dev.md` (rule 3a). This is why the enrichment references are always read but never emit sections into the PM body.
 
 ## Multi-provider stance
 
@@ -63,7 +66,7 @@ Skills are written in format-neutral Markdown. Each skill ends with an optional 
 | Risk | How the design responds |
 |---|---|
 | Hallucinated requirements | Every assumed value is wrapped in `> ⚠️ Assumed:` blockquotes |
-| Over-splitting | `story-split` proposes; never auto-acts |
+| Over-splitting | the split intent proposes; never auto-acts |
 | Vision misread | Per-inference confidence; LOW/MEDIUM surfaced as clarifications |
 | Context drift | Each skill ends with a fresh summary section |
 | Locale mismatch | Output language matches input language |
