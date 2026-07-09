@@ -18,19 +18,20 @@ Two design choices shape everything:
 
 ## Install
 
-storywright is a git repo of skills — no package to install, no CLI to run.
+storywright is a git repo of skills — no package to install, no CLI to run. Install it with **[skills.sh](https://skills.sh)**, the cross-agent skill installer (its command-line tool is `ags`, for *agent skills*). It works with Claude Code, Cursor, Codex, Copilot, and other SKILL.md-compatible agents.
 
-**Direct git clone** into your agent's skills directory (works everywhere, no catalog required):
+**With skills.sh / `ags`** — install the tool once, then add storywright:
 ```bash
-git clone git@github.com:pavp/storywright.git ~/.claude/skills/storywright
+# install the ags CLI (see https://skills.sh for your platform)
+ags install pavp/storywright
+```
+`ags` detects your agent and drops the skills into the right place. `pavp/storywright` is the GitHub repo — [github.com/pavp/storywright](https://github.com/pavp/storywright) — not an npm package; storywright ships no npm package.
+
+**Without skills.sh** — clone the repo straight into your agent's skills directory:
+```bash
+git clone https://github.com/pavp/storywright.git ~/.claude/skills/storywright
 ```
 Swap `~/.claude/skills/` for whatever your agent uses — `~/.cursor/skills/`, `~/.codex/skills/`, `~/.copilot/skills/`, or the universal `~/.agents/skills/`.
-
-**Optional — skills.sh / `ags`**, if you use that catalog:
-```bash
-ags install storywright
-```
-`pavp/storywright` above is the GitHub repo — [github.com/pavp/storywright](https://github.com/pavp/storywright) — not an npm package; storywright ships no npm package.
 
 Restart your agent so the skills and slash commands are picked up.
 
