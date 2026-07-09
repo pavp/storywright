@@ -3,7 +3,7 @@ description: Split an oversize story into an epic + child stories using INVEST +
 argument-hint: <paste oversize story> [+ optional image for flow inventory]
 ---
 
-Invoke the `story-split` skill from the storywright pack to split this story:
+Invoke the `storywright` skill. Intent: split (explicit intent instruction — honor as the highest-precedence routing signal; do NOT re-derive intent from the input). Split this story:
 
 $ARGUMENTS
 
