@@ -1,21 +1,35 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { readFile, writeFile, rm } from "node:fs/promises";
+import { mkdtemp, rm, mkdir, readFile, writeFile, cp } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { tmpdir } from "node:os";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO = join(__dirname, "..");
-const SKILL_MD = join(REPO, "skills/storywright/SKILL.md");
-const REF_DIR = join(REPO, "skills/storywright/references");
+const SKILL_SRC = join(REPO, "skills/storywright");
 
-function runValidator() {
-  return spawnSync(
-    process.execPath,
-    [join(REPO, "scripts/validate-skills.mjs")],
-    { cwd: REPO, encoding: "utf8" }
-  );
+function runValidator(targetDir) {
+  const args = [join(REPO, "scripts/validate-skills.mjs")];
+  if (targetDir) args.push(targetDir);
+  return spawnSync(process.execPath, args, { cwd: REPO, encoding: "utf8" });
+}
+
+// Fail-path tests below must never mutate the real skills/storywright/ tree:
+// tests/skills-shape.test.mjs reads that same tree concurrently (node --test
+// runs test files in parallel), so a transient in-place mutation here caused
+// an intermittent CI race (shape test read corrupted content mid-mutation).
+// Each fail-path test instead copies skills/storywright/ into a fresh temp
+// dir, mutates ONLY the copy, and points the validator at that temp dir via
+// its optional target-dir argv[2] (scripts/validate-skills.mjs).
+async function makeTempSkillCopy() {
+  const tempRoot = await mkdtemp(join(tmpdir(), "storywright-validate-"));
+  const tempSkillsDir = join(tempRoot, "skills");
+  const tempSkillDir = join(tempSkillsDir, "storywright");
+  await mkdir(tempSkillsDir, { recursive: true });
+  await cp(SKILL_SRC, tempSkillDir, { recursive: true });
+  return { tempRoot, tempSkillsDir, tempSkillDir };
 }
 
 test("validate-skills exits 0 on the current repo", () => {
@@ -27,17 +41,15 @@ test("validate-skills exits 0 on the current repo", () => {
   assert.equal(r.status, 0, "validator must pass on the repo's own skills");
 });
 
-// The three fail-path tests below mutate the real skills/storywright/ tree
-// temporarily (validate-skills.mjs hardcodes SKILLS_DIR and has no target-dir
-// arg — see scripts/lib/skills.mjs). Each test snapshots the exact original
-// content/state before mutating and restores it in a finally block so the
-// tree is left byte-identical regardless of test outcome.
-
 test("validate-skills rejects a stale [[link]] in the router SKILL.md body", async () => {
-  const original = await readFile(SKILL_MD, "utf8");
+  let tempRoot;
   try {
-    await writeFile(SKILL_MD, `${original}\n\nSee [[ghost-reference]] for details.\n`);
-    const r = runValidator();
+    let tempSkillsDir, tempSkillDir;
+    ({ tempRoot, tempSkillsDir, tempSkillDir } = await makeTempSkillCopy());
+    const skillMd = join(tempSkillDir, "SKILL.md");
+    const original = await readFile(skillMd, "utf8");
+    await writeFile(skillMd, `${original}\n\nSee [[ghost-reference]] for details.\n`);
+    const r = runValidator(tempSkillsDir);
     assert.notEqual(r.status, 0, "validator must reject a stale [[link]] in SKILL.md");
     assert.match(
       r.stderr,
@@ -45,16 +57,19 @@ test("validate-skills rejects a stale [[link]] in the router SKILL.md body", asy
       "error message must name the unresolved reference"
     );
   } finally {
-    await writeFile(SKILL_MD, original);
+    if (tempRoot) await rm(tempRoot, { recursive: true, force: true });
   }
 });
 
 test("validate-skills rejects a stale [[link]] inside a references/*.md body", async () => {
-  const refPath = join(REF_DIR, "estimation.md");
-  const original = await readFile(refPath, "utf8");
+  let tempRoot;
   try {
+    let tempSkillsDir, tempSkillDir;
+    ({ tempRoot, tempSkillsDir, tempSkillDir } = await makeTempSkillCopy());
+    const refPath = join(tempSkillDir, "references", "estimation.md");
+    const original = await readFile(refPath, "utf8");
     await writeFile(refPath, `${original}\n\nSee [[ghost-reference]] for details.\n`);
-    const r = runValidator();
+    const r = runValidator(tempSkillsDir);
     assert.notEqual(
       r.status,
       0,
@@ -66,19 +81,22 @@ test("validate-skills rejects a stale [[link]] inside a references/*.md body", a
       "error message must name the unresolved reference"
     );
   } finally {
-    await writeFile(refPath, original);
+    if (tempRoot) await rm(tempRoot, { recursive: true, force: true });
   }
 });
 
 test("validate-skills rejects an orphaned reference file", async () => {
-  const orphanPath = join(REF_DIR, "orphan-fixture.md");
+  let tempRoot;
   try {
+    let tempSkillsDir, tempSkillDir;
+    ({ tempRoot, tempSkillsDir, tempSkillDir } = await makeTempSkillCopy());
+    const orphanPath = join(tempSkillDir, "references", "orphan-fixture.md");
     await writeFile(orphanPath, "## Purpose\n\nUnlinked fixture reference.\n");
-    const r = runValidator();
+    const r = runValidator(tempSkillsDir);
     assert.notEqual(r.status, 0, "validator must reject an orphaned reference file");
     assert.match(r.stderr, /orphaned/, "error message must say 'orphaned'");
     assert.match(r.stderr, /orphan-fixture/, "error message must name the orphaned file");
   } finally {
-    await rm(orphanPath, { force: true });
+    if (tempRoot) await rm(tempRoot, { recursive: true, force: true });
   }
 });
