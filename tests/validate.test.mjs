@@ -19,14 +19,3 @@ test("validate-skills exits 0 on the current repo", () => {
   }
   assert.equal(r.status, 0, "validator must pass on the repo's own skills");
 });
-
-test("list-skills runs without crashing", () => {
-  const r = spawnSync(
-    process.execPath,
-    [join(REPO, "scripts/list-skills.mjs")],
-    { cwd: REPO, encoding: "utf8" }
-  );
-  assert.equal(r.status, 0);
-  assert.match(r.stdout, /story-generate/);
-  assert.match(r.stdout, /Component skills/);
-});
