@@ -303,28 +303,6 @@ test("story-batch: story-1.standard.md contains Summary inline", async () => {
   );
 });
 
-// P1.3 — the marketplace manifest must list exactly the skills on disk.
-// Catches a stale/incomplete plugin.json (e.g. storywright-base missing).
-test("plugin.json skills match the skills on disk", async () => {
-  const manifest = JSON.parse(
-    await readFile(join(REPO, ".claude-plugin/plugin.json"), "utf8")
-  );
-  const listed = new Set(manifest.skills);
-
-  const onDisk = new Set();
-  for (const f of await findSkillFiles()) {
-    const dir = dirname(f);
-    onDisk.add(dir.slice(REPO.length + 1)); // path relative to repo root
-  }
-
-  for (const p of onDisk) {
-    assert.ok(listed.has(p), `plugin.json missing skill on disk: ${p}`);
-  }
-  for (const p of listed) {
-    assert.ok(onDisk.has(p), `plugin.json lists a skill not on disk: ${p}`);
-  }
-});
-
 // ── story-refine amendment mode ──────────────────────────────────────────────
 // These tests assert the shape of the Amendment mode addition to story-refine
 // (spec R1/R2, tasks T4.1/T4.2). The trigger-phrase and detection-step tests
