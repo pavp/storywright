@@ -1,3 +1,13 @@
+## [3.0.0](https://github.com/pavp/storywright/compare/v2.1.3...v3.0.0) (2026-07-09)
+
+### ⚠ BREAKING CHANGES
+
+* the 4 top-level story-* skills and _components/ are removed; storywright is now a single skills/storywright/ install unit routed by intent. Consumers installing individual story-* units must switch to the single storywright unit.
+
+### ✨ Features
+
+* collapse storywright into a single install unit ([1dc58eb](https://github.com/pavp/storywright/commit/1dc58eb8932d0fa0280657693f7dba8d71369879))
+
 ## [2.1.3](https://github.com/pavp/storywright/compare/v2.1.2...v2.1.3) (2026-07-09)
 
 ### 📝 Docs
