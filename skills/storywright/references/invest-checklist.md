@@ -1,23 +1,11 @@
----
-name: invest-checklist
-description: Run an INVEST self-check on a drafted user story. Flag failures with concrete diagnosis. Used by story-generate after drafting and by story-split as the split trigger.
-trigger: "internal use by story-* skills"
-intent: Component skill that scores a story across the six INVEST dimensions and emits a pass/fail diagnosis with reasons. Never auto-splits.
-version: 1.0.0
-inputs:
-  - story-draft
-outputs:
-  - invest-report-block
----
-
 ## Purpose
 
 INVEST is the gate that separates ready stories from epics in disguise. Score honestly. Failures here are signals, not opinions.
 
 ## When to use
 
-- After `story-generate` drafts a story → run to confirm readiness.
-- At the start of `story-split` → use the failure reasons as the split rationale.
+- After the generate intent drafts a story → run to confirm readiness.
+- At the start of the split intent → use the failure reasons as the split rationale.
 
 ## Inputs & interpretation
 
@@ -70,10 +58,10 @@ For each dimension, mark PASS / FAIL and write one sentence of evidence.
 8. **Verdict logic:**
    - All PASS → `READY`
    - **V FAILS → `NOT A STORY`**. Hard stop. This is a tech task or infrastructure work, not a user story. Do not refine, do not split — reframe with user-visible value or combine with related user-facing work.
-   - **T FAILS → `NEEDS REFINEMENT`**. Fix ACs in place via `[[story-refine]]`. Do NOT split — splitting untestable input produces untestable children.
+   - **T FAILS → `NEEDS REFINEMENT`**. Fix ACs in place via the refine intent. Do NOT split — splitting untestable input produces untestable children.
    - **N FAILS → `NEEDS REFINEMENT`**. The story over-prescribes implementation; rewrite to focus on outcome, not solution.
    - **E FAILS due to unknowns → `RUN A SPIKE`**. Recommend a 1–2 day time-boxed investigation before splitting.
-   - **I, E (size-driven), or S FAIL → `SPLIT RECOMMENDED`**. Hand off to `[[story-split]]`.
+   - **I, E (size-driven), or S FAIL → `SPLIT RECOMMENDED`**. Switch to the split intent.
 
 9. Never auto-split here. Output is advisory only.
 
@@ -105,9 +93,9 @@ For each dimension, mark PASS / FAIL and write one sentence of evidence.
 
 ## References
 
-- [[story-split]]
-- [[acceptance-criteria]]
-- [[definition-of-done]]
+- the split intent (this skill)
+- `references/acceptance-criteria.md`
+- `references/definition-of-done.md`
 
 <claude-specific>
 Use extended thinking. The dimensions interact (small often forces independent). Resolve all six before emitting verdict.

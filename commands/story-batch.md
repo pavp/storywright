@@ -3,7 +3,7 @@ description: Generate N user stories from a multi-item backlog in one pass (one 
 argument-hint: <multi-item backlog>
 ---
 
-Invoke the `story-batch` skill from the storywright pack to process:
+Invoke the `storywright` skill. Intent: batch (explicit intent instruction — honor as the highest-precedence routing signal; do NOT re-derive intent from the input). Process:
 
 $ARGUMENTS
 

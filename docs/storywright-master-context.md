@@ -2,7 +2,7 @@
 
 > **Status:** Canonical long-term context. Read this first for any Storywright work.
 > **Audience:** future AI agents, engineers, architects, PMs, founders.
-> **Last reconciled:** 2026-05-29 against `main`.
+> **Last reconciled:** 2026-07-09 against `feat/install-unit-shape-pr3-docs` (single-install-unit shape; supersedes the 2026-05-29 reconciliation's 4-skill/11-component description).
 
 ---
 
@@ -20,7 +20,7 @@ Terminology is normalized in §12 (Glossary).
 
 ## 1. Executive Summary
 
-**What Storywright is.** [FACT] A *skills pack* for Claude Code and any other SKILL.md-compatible agent that turns ambiguous product inputs — vague prompts, half-baked stories, screenshots — into Jira-ready user stories. It ships as 4 top-level skills (`story-generate`, `story-refine`, `story-split`, `story-batch`) composing 11 shared components under `skills/_components/`. Everything is Markdown with YAML frontmatter. Distribution is **pure git** (skills.sh (`npx skills`) or a direct clone) — no npm package, no CLI, no installer script; the repo contains no runtime and makes no LLM calls.
+**What Storywright is.** [FACT] A *skills pack* for Claude Code and any other SKILL.md-compatible agent that turns ambiguous product inputs — vague prompts, half-baked stories, screenshots — into Jira-ready user stories. It ships as **one** install unit (`skills/storywright/SKILL.md`, a router) that dispatches to one of four intents (generate / refine / split / batch) and reads 11 shared `references/*.md` files on demand from `skills/storywright/references/`. Everything is Markdown; only the one `SKILL.md` carries YAML frontmatter. Distribution is **pure git** (skills.sh (`npx skills`) or a direct clone) — no npm package, no CLI, no installer script; the repo contains no runtime and makes no LLM calls.
 
 **Core product vision.** [INFERENCE] Be the PM-facing discovery layer that converts *intent* into a rigorous, INVEST-compliant, Gherkin-structured backlog artifact — without forcing the user through a heavy tool. Methodology-as-skill, not software-as-service.
 
@@ -28,7 +28,7 @@ Terminology is normalized in §12 (Glossary).
 
 **Key architectural characteristics.**
 - [FACT] One layer, git-distributed: **knowledge** (Markdown skills) is the entire repo; the only Node ESM script left is `scripts/validate-skills.mjs` (lint tooling, not an installer).
-- [FACT] **Composition is lint-enforced, not runtime-enforced** (`scripts/validate-skills.mjs`): every `composes:` reference must exist and no component may be orphaned.
+- [FACT] **Reference-link integrity is lint-enforced, not runtime-enforced** (`scripts/validate-skills.mjs`): every `[[name]]`/`references/<name>.md` link in the router or a reference body must resolve to a real reference file, and no reference file may be orphaned (linked by nothing).
 - [FACT] **Dual output mandatory**: `story.standard.md` (PM-facing, no technical detail) + `story.dev.md` (dev-facing, full technical detail). The PM↔dev split is the central design invariant (`storywright-base` rule 3 / rule 3a).
 - [FACT] **Multimodal intake**: text + image (Claude vision).
 
@@ -43,14 +43,14 @@ Terminology is normalized in §12 (Glossary).
 
 **Purpose.** [FACT] Transform ambiguous inputs into Jira-ready stories with acceptance criteria, INVEST validation, and a dev-facing technical supplement.
 
-**Main workflows / skills surface.** [FACT]
+**Main workflows / intent surface.** [FACT] One install unit, routed by intent:
 
-| Skill | Trigger condition | Slash command |
+| Intent | Trigger condition | Slash command |
 |---|---|---|
-| `story-generate` | Ambiguous prompt / screenshot / fresh story request | `/storywright-story-generate` |
-| `story-refine` | Existing but incomplete/weak story → audit & fill in place | `/storywright-story-refine` |
-| `story-split` | Oversize story failing INVEST on I/E/S → epic + children | `/storywright-story-split` |
-| `story-batch` | Multi-item backlog → one story per item in a single pass | `/storywright-story-batch` |
+| generate | Ambiguous prompt / screenshot / fresh story request | `/storywright-story-generate` |
+| refine | Existing but incomplete/weak story → audit & fill in place | `/storywright-story-refine` |
+| split | Oversize story failing INVEST on I/E/S → epic + children | `/storywright-story-split` |
+| batch | Multi-item backlog → one story per item in a single pass | `/storywright-story-batch` |
 
 **Target users.** [INFERENCE] Product managers and PM-adjacent roles who live in Claude Code or claude.ai; secondarily engineers who consume `story.dev.md`. Not a coding-agent audience.
 
@@ -78,9 +78,9 @@ Terminology is normalized in §12 (Glossary).
 [FACT]
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ KNOWLEDGE LAYER  (skills/, Markdown + YAML)                  │
-│   4 top-level skills ── compose ──► 11 _components/          │
-│   storywright-base = shared rulebook (every skill inherits)  │
+│ KNOWLEDGE LAYER  (skills/storywright/, ONE install unit)     │
+│   SKILL.md (router) ── dispatch ──► 11 references/*.md       │
+│   storywright-base.md = shared rulebook (every intent reads) │
 │   Read & executed by any SKILL.md-compatible agent's         │
 │   runtime (NOT this repo)                                    │
 ├─────────────────────────────────────────────────────────────┤
@@ -95,16 +95,16 @@ Distribution (getting the repo onto disk) is out-of-band: git clone, or skills.s
 ### 3.2 Main subsystems
 
 [FACT]
-- **scripts/validate-skills.mjs** — frontmatter + composition + orphan linter. Regex-matches `[[name]]` wiki-links in prose; parses no source code.
-- **scripts/lib/skills.mjs** — hand-rolled frontmatter + minimal-YAML parser; recursive `SKILL.md` walker.
+- **scripts/validate-skills.mjs** — frontmatter + reference-link-integrity linter. Regex-matches `[[name]]` wiki-links and `references/<name>.md` path mentions in the router body AND every reference body; parses no source code.
+- **scripts/lib/skills.mjs** — hand-rolled frontmatter + minimal-YAML parser; recursive `SKILL.md` walker (only ever finds one file — `skills/storywright/SKILL.md`).
 
 ### 3.3 Agent orchestration
 
-[INFERENCE] Orchestration is *prose-driven*, not code-driven. A slash-command Markdown file says "Invoke the `<skill>` skill"; Claude Code resolves it, loads the skill + composed components, fuses with user input, and calls the Anthropic API. There is no router, planner, or state machine in this repo — those concepts live as **instructions** inside `storywright-base`'s step-by-step Application skeleton.
+[INFERENCE] Orchestration is *prose-driven*, not code-driven. A slash-command Markdown file says "Invoke the `storywright` skill. Intent: `<generate|refine|split|batch>`"; Claude Code resolves the one skill, the router's `### Routing` dispatch table confirms or re-derives the intent, reads the matching `references/*.md` files on demand, fuses with user input, and calls the Anthropic API. There is no router *process*, planner, or state machine in this repo — "router" here means the dispatch table inside `SKILL.md`, itself **instructions**, not code; the step-by-step production logic lives in `storywright-base.md`'s Application skeleton.
 
 ### 3.4 Skills/tools architecture
 
-[FACT] All 4 top-level skills compose all 11 components. The 11:
+[FACT] The one router reads all 11 references for every intent (split reorders `invest-checklist` first, as the pre-split gate). The 11:
 - `storywright-base` — shared rulebook (hard rules, canonical shape, PM↔dev split, mechanical pre-split/deps, language detect).
 - `clarification-questions`, `acceptance-criteria`, `invest-checklist`, `definition-of-done`, `business-rules` — story-shaping.
 - `edge-cases`, `analytics-events`, `risks-and-dependencies` — **enrichment → `story.dev.md` only** (rule 3a).
@@ -149,7 +149,7 @@ input (text|image)
 
 **Agent roles.** [INFERENCE] Single agent (Claude Code) playing PM-analyst, executing a fixed skill procedure. No multi-agent fan-out in the product itself.
 
-**Prompt orchestration.** [FACT] Composition by reference: a top-level skill's `composes:` + body `[[links]]` pull component prose into the active prompt. `storywright-base` is the always-inherited spine.
+**Prompt orchestration.** [FACT] Composition by reference: the router's `### Routing` dispatch table + body `[[links]]`/`references/<name>.md` paths pull reference prose into the active prompt on demand, per intent. `storywright-base` is the always-inherited spine — every intent reads it.
 
 **Context management.** [FACT] Stateless across runs except `.storywright-context.json`. No long-term memory; no cross-folder reads.
 
@@ -236,12 +236,13 @@ input (text|image)
 ## 8. Technical Deep Dive
 
 **Critical files.** [FACT]
-- `scripts/validate-skills.mjs` — frontmatter/composition/orphan linter (the CI gate; only surviving script in the repo).
+- `scripts/validate-skills.mjs` — frontmatter/reference-link-integrity linter (the CI gate; only surviving script in the repo).
 - `scripts/lib/skills.mjs` — hand-rolled YAML/frontmatter parser + `SKILL.md` walker.
-- `skills/_components/storywright-base/SKILL.md` — the rulebook (hard rules, language 4a, rule D, pre-split test, canonical shape, Application skeleton).
-- `skills/_components/story-formatter/SKILL.md` — 2-file render + audience table.
+- `skills/storywright/SKILL.md` — the router (intent dispatch table + per-intent delta subsections).
+- `skills/storywright/references/storywright-base.md` — the rulebook (hard rules, language 4a, rule D, pre-split test, canonical shape, Application skeleton).
+- `skills/storywright/references/story-formatter.md` — 2-file render + audience table.
 - `tests/skills-shape.test.mjs` — parity + no-leakage golden tests; `tests/validate.test.mjs`.
-- `examples/outputs/google-login/` — committed golden duo.
+- `examples/outputs/google-login/` — committed golden duo. `examples/outputs/story-split-oversized/` — committed split golden (`epic.md` + 2 child duos).
 
 **Pipelines / execution chains.** [FACT] No install pipeline in-repo — distribution is git/skills.sh, out-of-band. Runtime: slash command → skill+components → LLM provider (knowledge layer; outside repo).
 
@@ -258,10 +259,10 @@ input (text|image)
 ## 9. Architectural Assumptions & Constraints
 
 ### 9.1 Invariants (must not break)
-[FACT] "No LLM in code" · git-only distribution (no CLI, no package registry) · PM↔dev split (rule 3/3a) · 2-file parity (enforced by `tests/skills-shape.test.mjs`) · validator orphan check · Conventional Commits + semantic-release · **branch + PR always (never commit to `main`)**.
+[FACT] "No LLM in code" · git-only distribution (no CLI, no package registry) · PM↔dev split (rule 3/3a) · 2-file parity (enforced by `tests/skills-shape.test.mjs`) · validator reference-link-integrity + orphan check · single install unit (`skills/storywright/` — no other `SKILL.md` in the repo) · Conventional Commits + semantic-release · **branch + PR always (never commit to `main`)**.
 
 ### 9.2 Explicit assumptions
-[FACT] Inputs are text/image; output language = user's chat language; one story per invocation (unless split); composition is correct iff the linter passes.
+[FACT] Inputs are text/image; output language = user's chat language; one story per invocation (unless split); routing/reference-linking is correct iff the linter passes.
 
 ### 9.3 Implicit assumptions
 [INFERENCE] User has functional intent ready; technical detail is output; dev-file specifics needn't be real.
@@ -300,10 +301,10 @@ input (text|image)
 [Normalized.]
 
 - **Storywright** — the pure Markdown skills pack described here, distributed via git/skills.sh (no CLI, no package registry).
-- **Skill** — a `SKILL.md` file (frontmatter + prose) that Claude Code loads and executes. *Top-level skill* = user-triggered (4). *Component* = composed by skills, not directly triggered (10).
-- **Component** — reusable skill fragment under `skills/_components/`, pulled in via `composes:` or `[[links]]`.
-- **storywright-base** — the always-inherited component holding the shared rulebook.
-- **Composition** — the `composes:`/`[[link]]` mechanism; lint-enforced (no orphans, no missing refs), not runtime-enforced.
+- **Skill** — a `SKILL.md` file (frontmatter + prose) that Claude Code loads and executes. There is exactly ONE in this repo: `skills/storywright/SKILL.md` (the router). *Intent* = one of the four dispatch branches (generate/refine/split/batch) inside it, not a separate skill.
+- **Reference** — a `references/<name>.md` file under `skills/storywright/references/`, read on demand by the router. Carries no frontmatter and is never an install unit (skills.sh's `copyDirectory` copies it recursively with the one `SKILL.md`). 11 exist.
+- **storywright-base** — `references/storywright-base.md`, the always-inherited reference holding the shared rulebook.
+- **Reference-link integrity** — the mechanism replacing the old `composes:`/`[[link]]` composition: every `[[name]]`/`references/<name>.md` mention in the router or a reference body must resolve to a real reference file, and every reference file must be linked at least once (no orphans). Lint-enforced (`scripts/validate-skills.mjs`), not runtime-enforced.
 - **Project** — a user's codebase/repository. Storywright has **no native concept** of one.
 - **Workspace** — the runtime's ambient view of an open repo. Available to the *agent* (and via injected context), not requested by *skills*.
 - **Project-aware** — generation grounded against an open repo. Not a designed feature; only emergent/accidental runtime behavior today.
@@ -313,7 +314,7 @@ input (text|image)
 - **Context pipeline** — the per-run flow that reads/writes `.storywright-context.json` (decision memory only).
 - **`.storywright-context.json`** — per-run, output-folder-scoped decision cache (language, chrome scope, naming pattern, design source, etc.).
 - **Retrieval / indexing / embeddings / ingestion / vector store** — **absent** in Storywright; defined here only to state their non-existence.
-- **Orchestration** — prose-driven conditional flow (pre-split routing, split hand-off); no code router.
+- **Orchestration** — prose-driven conditional flow (the router's intent dispatch table, pre-split routing, split hand-off); no code router process.
 - **Agent** — Claude Code's runtime executing the skill prose; the only "agent" involved.
 - **Memory** — only `.storywright-context.json`; no long-term store.
 - **Dependency matrix** — inter-*story* dependency map from text-matching `Given:` lines (rule 10); **not** a code dependency graph.

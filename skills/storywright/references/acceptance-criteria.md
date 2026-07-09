@@ -1,23 +1,10 @@
----
-name: acceptance-criteria
-description: Write acceptance criteria for a user story in Given/When/Then style. Covers happy path, edge cases, and explicit non-goals. Returns only the AC block, never a full story.
-trigger: "internal use by story-* skills"
-intent: Component skill that produces a complete, testable acceptance-criteria block. Pure renderer — does not ask the user questions; relies on context already gathered upstream.
-version: 1.1.0
-inputs:
-  - story-context
-  - edge-cases-block
-outputs:
-  - acceptance-criteria-block
----
-
 ## Purpose
 
-Generate ACs that are **independently testable** and map directly to QA cases. Use Given/When/Then phrasing. Include negative cases. Pair with `[[edge-cases]]` so each edge case has at least one matching AC.
+Generate ACs that are **independently testable** and map directly to QA cases. Use Given/When/Then phrasing. Include negative cases. Pair with `references/edge-cases.md` so each edge case has at least one matching AC.
 
 ## When to use
 
-Invoked by `story-generate` and `story-refine` after the body of the story is drafted.
+Invoked by the generate and refine intents after the body of the story is drafted.
 
 ## Inputs & interpretation
 
@@ -28,7 +15,7 @@ Invoked by `story-generate` and `story-refine` after the body of the story is dr
 
 1. Start with the happy path: one AC for the primary success scenario.
 2. Add one AC per failure mode (auth failure, network error, validation error, permission denied).
-3. Add one AC per explicit edge case from `[[edge-cases]]`.
+3. Add one AC per explicit edge case from `references/edge-cases.md`.
 4. Add one negative AC: "When [precondition not met], Then [no-op or error UX]."
 5. Each AC follows the pattern:
    ```
@@ -39,7 +26,7 @@ Invoked by `story-generate` and `story-refine` after the body of the story is dr
    - And <secondary observable outcome>  (optional)
    ```
 6. Number ACs `AC-1`, `AC-2`, …. This is the ONLY allowed scheme, in every language — never `CA-01`, `Criterio 1`, `Escenario 1`, or any localized variant. The `AC` label is fixed; translate only the scenario title after it. Stable numbering — never renumber when adding new ones in iterations.
-7. Emit only the AC block. Do NOT include explanations, a section heading above the ACs, or surrounding prose. The host renderer (`[[story-formatter]]`) owns the `## Acceptance Criteria` heading.
+7. Emit only the AC block. Do NOT include explanations, a section heading above the ACs, or surrounding prose. The host renderer (`references/story-formatter.md`) owns the `## Acceptance Criteria` heading.
 
 ## Examples
 
@@ -75,7 +62,7 @@ Invoked by `story-generate` and `story-refine` after the body of the story is dr
 
 ## Splitting signal
 
-**Multiple When/Then pairs in one AC ⇒ story needs splitting.** Each `When` and each `Then` should be singular. If you find yourself writing AC-1 with three `When`s, that's not a story with rich ACs — it's three stories collapsed into one. Stop and hand off to `[[story-split]]`.
+**Multiple When/Then pairs in one AC ⇒ story needs splitting.** Each `When` and each `Then` should be singular. If you find yourself writing AC-1 with three `When`s, that's not a story with rich ACs — it's three stories collapsed into one. Stop and switch to the split intent.
 
 Multiple `Given`s are fine — preconditions stack.
 
@@ -90,9 +77,9 @@ Multiple `Given`s are fine — preconditions stack.
 
 ## References
 
-- [[edge-cases]]
-- [[definition-of-done]]
-- [[business-rules]]
+- `references/edge-cases.md`
+- `references/definition-of-done.md`
+- `references/business-rules.md`
 
 <claude-specific>
 Use extended thinking to enumerate failure modes before drafting. Cache the Given/When/Then template.

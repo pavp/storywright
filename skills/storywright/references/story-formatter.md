@@ -1,23 +1,10 @@
----
-name: story-formatter
-description: Render a story into two files: story.standard.md (PM-facing CommonMark, no technical detail) and story.dev.md (dev-facing CommonMark, full technical detail).
-trigger: "internal use by story-* skills"
-intent: Component skill that takes a structured story and produces two output files following the templates in story-generate/templates.
-version: 3.0.0
-inputs:
-  - structured-story
-outputs:
-  - story.standard.md
-  - story.dev.md
----
-
 ## Purpose
 
 Stories need to live in Jira Cloud, Notion, Linear, GitHub Issues, and any other Markdown surface. Generate a portable CommonMark PM file and a full developer-facing file from the same source.
 
 ## When to use
 
-Final step in `story-generate` and `story-refine`. Always last.
+Final step in the generate and refine intents. Always last.
 
 ## Inputs & interpretation
 
@@ -73,7 +60,7 @@ Apply silently — no log entry needed for heading-level corrections.
    7. Business Rules
 
 4. **Drop any section with no real content.** An empty heading is noise.
-5. Emit `story.standard.md` as a fenced code block in chat (PM-facing). Do NOT emit `story.dev.md` in chat — write to disk only. File persistence is handled by the calling skill via the `Write` tool.
+5. Emit `story.standard.md` as a fenced code block in chat (PM-facing). Do NOT emit `story.dev.md` in chat — write to disk only. File persistence is handled by the calling intent via the `Write` tool.
 
 ## Examples
 
@@ -105,12 +92,12 @@ Permitir a usuarios autenticarse mediante OAuth con Google.
 - Emitting `- [ ]` checkboxes in PM-file DoD — use plain `- ` bullets in `story.standard.md`; keep `- [ ]` only in `story.dev.md`.
 - Including pipe tables in PM files — render tabular content as lists instead.
 - Empty headings. Drop.
-- Wrong heading levels: CommonMark output uses `#` (H1) for title, `##` (H2) for sections. The canonical block in `[[storywright-base]]` uses `###`/`####` as taxonomy shorthand only — do not copy those levels into the rendered artifact.
+- Wrong heading levels: CommonMark output uses `#` (H1) for title, `##` (H2) for sections. The canonical block in `references/storywright-base.md` uses `###`/`####` as taxonomy shorthand only — do not copy those levels into the rendered artifact.
 - Emitting INVEST as a section: INVEST is a process step. Its verdict belongs in the log line only (`INVEST Verdict: READY`), never as a standalone section in the output file.
 
 ## References
 
-- [[story-generate]] (templates live under `story-generate/templates/`)
+- see `templates/` (templates live under `templates/`, a sibling of `references/` in this skill)
 
 <claude-specific>
 Cache the CommonMark syntax table — it's stable. Remember: PM file DoD uses plain `- ` bullets; dev file DoD uses `- [ ]` checkboxes. PM files must not contain pipe tables.

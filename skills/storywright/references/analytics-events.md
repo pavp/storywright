@@ -1,23 +1,10 @@
----
-name: analytics-events
-description: Propose analytics/event tracking for a story. Names events, payloads, and trigger points. Returns only the analytics block, ready for ProductOps to map.
-trigger: "internal use by story-* skills"
-intent: Component skill that drafts a small, opinionated set of analytics events using a consistent naming convention.
-version: 2.0.0
-inputs:
-  - story-context
-  - acceptance-criteria
-outputs:
-  - analytics-events-block (dev.md only)
----
-
 ## Purpose
 
 Stories without analytics are stories without feedback. Propose the minimum set of events to measure adoption, funnel, and failure rate of the new behavior.
 
 ## When to use
 
-**Dev-file only.** Invoked while rendering `story.dev.md`, after acceptance criteria are drafted; events align to observable AC outcomes. Event names, payloads, and PII boundaries are technical detail — they belong in `story.dev.md`, never the PM-facing files (`[[storywright-base]]` rule 3).
+**Dev-file only.** Invoked while rendering `story.dev.md`, after acceptance criteria are drafted; events align to observable AC outcomes. Event names, payloads, and PII boundaries are technical detail — they belong in `story.dev.md`, never the PM-facing files (`references/storywright-base.md` rule 3).
 
 ## Inputs & interpretation
 
@@ -82,8 +69,8 @@ See above — minimal funnel, clear taxonomy, PII note included.
 
 ## References
 
-- [[acceptance-criteria]]
-- [[definition-of-done]]
+- `references/acceptance-criteria.md`
+- `references/definition-of-done.md`
 
 <claude-specific>
 Cache the 4 required payload fields and the 3 tag emojis.

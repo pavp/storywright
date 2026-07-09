@@ -3,7 +3,7 @@ description: Transform an ambiguous prompt or screenshot into a Jira-ready user 
 argument-hint: <prompt | paste story | attach image>
 ---
 
-Invoke the `story-generate` skill from the storywright pack to handle the following input:
+Invoke the `storywright` skill. Intent: generate (explicit intent instruction — honor as the highest-precedence routing signal; do NOT re-derive intent from the input). Input:
 
 $ARGUMENTS
 

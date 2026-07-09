@@ -1,23 +1,10 @@
----
-name: definition-of-done
-description: Produce a Definition of Done block for a user story. Covers code, tests, analytics, docs, accessibility, and release gates. Returns only the DoD block.
-trigger: "internal use by story-* skills"
-intent: Component skill that emits a baseline DoD aligned to common product/eng standards. Customizable via project-level overrides documented in the story.
-version: 2.0.0
-inputs:
-  - story-context
-  - technical-considerations
-outputs:
-  - definition-of-done-block
----
-
 ## Purpose
 
 A Definition of Done is the contract for "shippable". It must be **checkable, observable, and binary** — never aspirational.
 
 ## When to use
 
-Invoked after acceptance criteria and technical considerations are drafted. DoD is **dual-rendered** (see `[[story-formatter]]`): `story.standard.md` carries the **acceptance-only** DoD projection (no CLI commands, no file-level criteria, plain `- ` bullets — no `- [ ]` checkboxes); `story.dev.md` carries the **full** DoD including CLI commands (`npm run test`), file-level lines, and `- [ ]` checkboxes. Produce both projections from the baseline below: PM projection = drop command/file lines AND strip `[ ]` to plain `- `; dev projection = keep everything including `- [ ]`.
+Invoked after acceptance criteria and technical considerations are drafted. DoD is **dual-rendered** (see `references/story-formatter.md`): `story.standard.md` carries the **acceptance-only** DoD projection (no CLI commands, no file-level criteria, plain `- ` bullets — no `- [ ]` checkboxes); `story.dev.md` carries the **full** DoD including CLI commands (`npm run test`), file-level lines, and `- [ ]` checkboxes. Produce both projections from the baseline below: PM projection = drop command/file lines AND strip `[ ]` to plain `- `; dev projection = keep everything including `- [ ]`.
 
 ## Inputs & interpretation
 
@@ -68,8 +55,8 @@ A backend-only story drops the WCAG line, keeps unit/integration tests, adds a m
 
 ## References
 
-- [[acceptance-criteria]]
-- [[analytics-events]]
+- `references/acceptance-criteria.md`
+- `references/analytics-events.md`
 
 <claude-specific>
 Cache the baseline DoD block across calls in the session.

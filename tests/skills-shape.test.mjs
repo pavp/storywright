@@ -1,8 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFile, stat } from "node:fs/promises";
+import { readFile, readdir, stat } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
+import { dirname, join, basename } from "node:path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO = join(__dirname, "..");
@@ -11,22 +11,99 @@ const { findSkillFiles, loadSkill } = await import(
   join(REPO, "scripts/lib/skills.mjs")
 );
 
-test("all top-level skills compose at least one component", async () => {
+// install-unit-shape PR2 (ADR-4): the `storywright` router skill composes via
+// body links to `references/*.md` instead of `composes:` frontmatter. This
+// test independently mirrors the validator's reference-link integrity check
+// (deliberately reimplemented, not imported, so the test does not merely
+// exercise the implementation with itself) — every references/*.md file must
+// be linked ≥1 time by SKILL.md or by another reference body, and the skill
+// must link ≥1 reference overall.
+test("the storywright skill links at least one reference, and no reference is orphaned", async () => {
   const files = await findSkillFiles();
-  const topLevel = [];
-  for (const f of files) {
-    const s = await loadSkill(f);
-    if (!s.relPath.includes("_components/")) topLevel.push(s);
+  assert.equal(files.length, 1, "expected exactly one SKILL.md under skills/");
+  const skill = await loadSkill(files[0]);
+  const refDir = join(dirname(skill.path), "references");
+  const refEntries = await readdir(refDir, { withFileTypes: true });
+  const refNames = refEntries
+    .filter((e) => e.isFile() && e.name.endsWith(".md"))
+    .map((e) => basename(e.name, ".md"));
+  assert.ok(refNames.length > 0, "storywright skill should have ≥1 reference file");
+
+  const bodies = [skill.body];
+  for (const name of refNames) {
+    bodies.push(await readFile(join(refDir, `${name}.md`), "utf8"));
   }
-  for (const s of topLevel) {
-    const composes = Array.isArray(s.frontmatter.composes)
-      ? s.frontmatter.composes
-      : [];
+  const linked = new Set();
+  for (const body of bodies) {
+    for (const m of body.matchAll(/\[\[([a-z0-9-]+)\]\]/g)) linked.add(m[1]);
+    for (const m of body.matchAll(/references\/([a-z0-9-]+)\.md/g)) linked.add(m[1]);
+  }
+
+  assert.ok(linked.size > 0, "storywright skill should link ≥1 reference");
+  for (const name of refNames) {
     assert.ok(
-      composes.length > 0,
-      `top-level skill '${s.frontmatter.name}' should compose ≥1 component`
+      linked.has(name),
+      `references/${name}.md is orphaned — linked by no body`
     );
   }
+});
+
+// install-unit-shape PR2 (T4.6, design.md ADR-6 Tier 2 belt #2, DEF-009) —
+// routing-fidelity: the router must dispatch to exactly the four intents,
+// each story-producing intent's reference-loading list in the dispatch table
+// must include all 11 references (dev.md audience preserved), and the
+// canonical base hard-rules block must NOT be duplicated inline in the
+// router (enforces ADR-3's no-inline rule + the DEF-009 line-budget signal —
+// a leaked hard-rules block would blow the budget and re-introduce drift).
+test("storywright router: routing-fidelity — dispatch table names all 4 intents, each lists all 11 references", async () => {
+  const skill = await loadStorywrightSkill();
+  const routingMatch = skill.body.match(/^### Routing[\s\S]*?(?=^## |^#### \w)/m);
+  assert.ok(routingMatch, "router body must contain a '### Routing' dispatch section");
+  const routingText = routingMatch[0];
+
+  for (const intent of ["generate", "refine", "split", "batch"]) {
+    assert.match(
+      routingText,
+      new RegExp(`\\|\\s*${intent}\\s*\\|`, "i"),
+      `Routing dispatch table must name the '${intent}' intent`
+    );
+  }
+
+  // "storywright-base" is written as the shorthand "base" in the dispatch
+  // table's own prose ("Base is always read" below the table spells this
+  // out) — check for the shorthand there, the full name everywhere else.
+  const REFERENCE_NAMES = [
+    "clarification-questions",
+    "acceptance-criteria",
+    "invest-checklist",
+    "business-rules",
+    "edge-cases",
+    "analytics-events",
+    "risks-and-dependencies",
+    "definition-of-done",
+    "story-formatter",
+    "estimation",
+  ];
+  // The dispatch table rows for generate/refine/batch state "(same set as
+  // generate)" rather than repeating the 11-name list — resolve that pointer
+  // before asserting full coverage per row.
+  const generateRow = routingText.match(/^\|.*\bgenerate\b.*\|$/m)?.[0] ?? "";
+  const splitRow = routingText.match(/^\|.*\bsplit\b.*\|$/m)?.[0] ?? "";
+  for (const row of [generateRow, splitRow]) {
+    assert.match(row, /\bbase\b/, "reference-loading list must include the base rulebook ('base')");
+    for (const name of REFERENCE_NAMES) {
+      assert.ok(
+        row.includes(name),
+        `reference-loading list must include '${name}': ${row}`
+      );
+    }
+  }
+  assert.match(routingText, /same set as generate/, "refine/batch rows must point at the generate row's full reference set");
+
+  assert.ok(
+    !skill.body.includes("## Hard rules"),
+    "router body must NOT inline the base hard-rules block (ADR-3 no-inline rule) — it must live only in references/storywright-base.md"
+  );
 });
 
 test("every skill has a kebab-case name matching its folder", async () => {
@@ -66,7 +143,6 @@ test("all story-producing skills declare the standard/dev duo", async () => {
   const SUFFIXES = ["standard.md", "dev.md"];
   for (const f of files) {
     const s = await loadSkill(f);
-    if (s.relPath.includes("_components/")) continue;
     const outputs = Array.isArray(s.frontmatter.outputs) ? s.frontmatter.outputs : [];
     const storyOutputs = outputs.filter((o) => /\.(standard|dev)\.md$/.test(o));
     for (const suffix of SUFFIXES) {
@@ -304,21 +380,33 @@ test("story-batch: story-1.standard.md contains Summary inline", async () => {
 });
 
 // ── story-refine amendment mode ──────────────────────────────────────────────
-// These tests assert the shape of the Amendment mode addition to story-refine
-// (spec R1/R2, tasks T4.1/T4.2). The trigger-phrase and detection-step tests
-// run against the skill file directly, independent of the golden.
+// These tests assert the shape of the Amendment mode addition, now living
+// inside the single storywright router's `#### refine` delta subsection
+// (install-unit-shape PR2, design.md "Test-suite migration" — the router's
+// `## Application` section now carries all four intents, so the Step R
+// assertions must scope to the `#### refine` subsection specifically, not
+// the whole `## Application` section).
 
-async function loadStoryRefineSkill() {
+async function loadStorywrightSkill() {
   const files = await findSkillFiles();
-  const path = files.find((f) => f.includes("story-refine/SKILL.md"));
-  assert.ok(path, "skills/story-refine/SKILL.md not found");
+  const path = files.find((f) => f.includes("storywright/SKILL.md"));
+  assert.ok(path, "skills/storywright/SKILL.md not found");
   return loadSkill(path);
 }
 
+// Extract the `#### refine` delta subsection body: from its own heading up
+// to (not including) the next `#### <intent>` heading.
+function extractRefineSubsection(body) {
+  const match = body.match(/^#### refine\n([\s\S]*?)(?=^#### \w|^## )/m);
+  assert.ok(match, "router body must contain a '#### refine' delta subsection");
+  return match[1];
+}
+
 // (T4.1) trigger frontmatter must carry the 5 pre-existing plain-refine
-// phrases AND the 5 new amendment phrases (spec R1 scenario 1.1).
-test("story-refine: trigger frontmatter carries plain-refine and amendment phrases", async () => {
-  const skill = await loadStoryRefineSkill();
+// phrases AND the 5 amendment phrases (spec R1 scenario 1.1), now on the
+// single router's trigger union.
+test("storywright router: trigger frontmatter carries plain-refine and amendment phrases", async () => {
+  const skill = await loadStorywrightSkill();
   const trigger = skill.frontmatter.trigger ?? "";
   const PLAIN_REFINE_PHRASES = [
     "/story-refine",
@@ -337,28 +425,29 @@ test("story-refine: trigger frontmatter carries plain-refine and amendment phras
   for (const phrase of [...PLAIN_REFINE_PHRASES, ...AMENDMENT_PHRASES]) {
     assert.ok(
       trigger.includes(phrase),
-      `story-refine trigger frontmatter missing phrase: "${phrase}"`
+      `storywright router trigger frontmatter missing phrase: "${phrase}"`
     );
   }
 });
 
 // (T4.1 / R2 scenario 2.4) a numbered amendment-detection step (Step R) must
-// exist in the Application section, distinguishable from the "Amendment
-// differential" prose section header, and it must precede references to base
-// steps 2+. R2 also mandates the classification rule itself be STATED in this
-// numbered step (not just referenced) — assert the two-path predicate and all
-// three accepted existing-story sources are present in the step's own text,
-// and that the step appears before any reference to base steps 5/7/11.
-test("story-refine: numbered amendment-detection step exists in Application section", async () => {
-  const skill = await loadStoryRefineSkill();
-  const applicationSection = skill.body.split(/^## Application/m)[1] ?? "";
+// exist in the router's `#### refine` delta subsection, distinguishable from
+// the "Amendment differential" prose section header, and it must precede
+// references to base steps 2+. R2 also mandates the classification rule
+// itself be STATED in this numbered step (not just referenced) — assert the
+// two-path predicate and all three accepted existing-story sources are
+// present in the step's own text, and that the step appears before any
+// reference to base steps 5/7/11.
+test("storywright router: numbered amendment-detection step exists in the refine subsection", async () => {
+  const skill = await loadStorywrightSkill();
+  const refineSubsection = extractRefineSubsection(skill.body);
   assert.match(
-    applicationSection,
+    refineSubsection,
     /^\d+\.\s.*Step R.*[Aa]mendment/m,
-    "Application section must contain a numbered detection-step line referencing Step R / amendment"
+    "refine subsection must contain a numbered detection-step line referencing Step R / amendment"
   );
-  const stepRMatch = applicationSection.match(/^\d+\.\s.*Step R[\s\S]*?(?=\n- Step \d|\n\d+\.\s|$)/m);
-  assert.ok(stepRMatch, "Step R numbered entry must be extractable from the Application section");
+  const stepRMatch = refineSubsection.match(/^\d+\.\s.*Step R[\s\S]*?(?=\n- Step \d|\n\d+\.\s|$)/m);
+  assert.ok(stepRMatch, "Step R numbered entry must be extractable from the refine subsection");
   const stepRText = stepRMatch[0];
   assert.match(
     stepRText,
@@ -380,9 +469,9 @@ test("story-refine: numbered amendment-detection step exists in Application sect
     /\.storywright-context\.json/,
     "Step R must enumerate story source (c): a reference resolvable via .storywright-context.json"
   );
-  const stepRIndex = applicationSection.indexOf(stepRText);
+  const stepRIndex = refineSubsection.indexOf(stepRText);
   for (const laterRef of [/Step 5/, /Step 7/, /Step 11/]) {
-    const m = applicationSection.match(laterRef);
+    const m = refineSubsection.match(laterRef);
     if (m) {
       assert.ok(
         m.index > stepRIndex,
@@ -542,12 +631,14 @@ test("story-refine-amendment-conflict golden: Refinement log records conflict ma
 // the clarification mechanism, so Claude Code still receives the signal to
 // fire its interactive widget. Every file below had ≥1 occurrence before the
 // rewording (portability-level-b, Phase 6) and must retain ≥1 after it.
+// install-unit-shape PR2 (T4.7): the 4 per-skill SKILL.md paths + the
+// _components base path collapse to the single router path + its relocated
+// base reference. commands/story-refine.md and commands/story-generate.md
+// keep their repo filenames unchanged (the storywright- prefix is applied
+// only at install time — AGENTS.md convention 2 / design ADR-5).
 const ASK_USER_QUESTION_SITES = [
-  "skills/_components/storywright-base/SKILL.md",
-  "skills/story-refine/SKILL.md",
-  "skills/story-generate/SKILL.md",
-  "skills/story-batch/SKILL.md",
-  "skills/story-split/SKILL.md",
+  "skills/storywright/SKILL.md",
+  "skills/storywright/references/storywright-base.md",
   "commands/story-refine.md",
   "commands/story-generate.md",
 ];
@@ -559,5 +650,66 @@ test("AskUserQuestion signal token survives the agnostic-with-example rewording"
       /AskUserQuestion/.test(content),
       `${relPath} must retain the literal AskUserQuestion token (Claude tool-activation signal)`
     );
+  }
+});
+
+// ── story-split golden fixture tests ─────────────────────────────────────────
+// The golden lives at examples/outputs/story-split-oversized/ (epic.md +
+// story-{1,2}.standard.md + story-{1,2}.dev.md). Mirrors the amendment/
+// conflict golden tests above: same PM-leakage guard, same duo-parity check,
+// same AC-numbering scheme. epic.md is metadata, not a story pair, so it only
+// gets the PM-leakage guard (per AGENTS.md convention: "epic.md is the single
+// exception — epic metadata, not a story").
+
+const SPLIT_GOLDEN = join(REPO, "examples/outputs/story-split-oversized");
+
+test("story-split-oversized golden: epic.md and both PM files carry no technical leakage", async () => {
+  const epic = await readFile(join(SPLIT_GOLDEN, "epic.md"), "utf8");
+  assertNoPmLeakage(epic, "split golden epic.md");
+  for (const n of [1, 2]) {
+    const text = await readFile(join(SPLIT_GOLDEN, `story-${n}.standard.md`), "utf8");
+    assertNoPmLeakage(text, `split golden story-${n}.standard.md`);
+  }
+});
+
+test("story-split-oversized golden: duo parity for story-1 and story-2", async () => {
+  const SUFFIXES = ["standard.md", "dev.md"];
+  for (const n of [1, 2]) {
+    for (const suffix of SUFFIXES) {
+      await stat(join(SPLIT_GOLDEN, `story-${n}.${suffix}`));
+    }
+  }
+});
+
+test("story-split-oversized golden: story-1 and story-2 use AC-N numbering scheme", async () => {
+  const FORBIDDEN_AC_LABELS = [/\bCA-\d/, /\bCriterio\s+\d/i, /\bEscenario\s+\d/i];
+  for (const n of [1, 2]) {
+    const content = await readFile(join(SPLIT_GOLDEN, `story-${n}.standard.md`), "utf8");
+    assert.ok(
+      /\*\*AC-\d+:/.test(content),
+      `story-${n}.standard.md must label acceptance criteria as **AC-N:**`
+    );
+    for (const re of FORBIDDEN_AC_LABELS) {
+      assert.ok(
+        !re.test(content),
+        `story-${n}.standard.md uses a forbidden AC label matching ${re}`
+      );
+    }
+    const acNumbers = [...content.matchAll(/\*\*AC-(\d+):/g)]
+      .map((m) => Number(m[1]))
+      .sort((a, b) => a - b);
+    assert.deepEqual(
+      acNumbers,
+      [1],
+      `split children carry a single AC-1 each (split narrows scope to one flow per child); story-${n}.standard.md found ${JSON.stringify(acNumbers)}`
+    );
+  }
+});
+
+test("story-split-oversized golden: story-1 and story-2 dev files carry technical detail and Estimate", async () => {
+  for (const n of [1, 2]) {
+    const dev = await readFile(join(SPLIT_GOLDEN, `story-${n}.dev.md`), "utf8");
+    assert.match(dev, /npm run /, `story-${n}.dev.md should contain command-level DoD`);
+    assert.match(dev, /## Estimate/, `story-${n}.dev.md should contain ## Estimate`);
   }
 });

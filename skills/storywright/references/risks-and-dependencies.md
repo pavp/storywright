@@ -1,24 +1,10 @@
----
-name: risks-and-dependencies
-description: Surface technical, product, and organizational risks plus blocking dependencies for a story. Each item has owner, likelihood, mitigation. Returns only the risks+deps block.
-trigger: "internal use by story-* skills"
-intent: Component skill that turns hidden assumptions into tracked risks and dependencies so PMs and tech leads can act on them.
-version: 2.0.0
-inputs:
-  - story-context
-  - business-rules
-  - technical-considerations
-outputs:
-  - risks-and-dependencies-block (dev.md only)
----
-
 ## Purpose
 
 Risks and dependencies that aren't written down end up as outages or missed launches. Make them visible at story time.
 
 ## When to use
 
-**Dev-file only.** Invoked while rendering `story.dev.md`, after business rules and technical considerations are drafted — those inform what's risky. Risks and dependencies reference infra, SDKs, env vars, and ownership — technical/delivery detail that belongs in `story.dev.md`, not the PM-facing files (`[[storywright-base]]` rule 3 bans Dependencies-as-prose in the PM body; PM files link Jira tickets only).
+**Dev-file only.** Invoked while rendering `story.dev.md`, after business rules and technical considerations are drafted — those inform what's risky. Risks and dependencies reference infra, SDKs, env vars, and ownership — technical/delivery detail that belongs in `story.dev.md`, not the PM-facing files (`references/storywright-base.md` rule 3 bans Dependencies-as-prose in the PM body; PM files link Jira tickets only).
 
 ## Inputs & interpretation
 
@@ -79,8 +65,8 @@ See above — owners named, statuses observable, mitigations actionable.
 
 ## References
 
-- [[business-rules]]
-- [[invest-checklist]] (Independent check often surfaces dependencies)
+- `references/business-rules.md`
+- `references/invest-checklist.md` (Independent check often surfaces dependencies)
 
 <claude-specific>
 Use extended thinking. Risks cluster — surfacing one often reveals others in the same category.

@@ -97,20 +97,20 @@ See the full committed examples under [`examples/outputs/`](./examples/outputs/)
 
 ## Skills
 
-Four top-level skills, each invokable as `/storywright-<name>`:
+One install unit — `storywright` — routed by intent. Each intent is reachable via its own slash command, `/storywright-<name>`:
 
-| Skill | When to use |
+| Intent | When to use |
 |---|---|
-| `story-generate` | An ambiguous prompt, screenshot, or fresh story request → one full story |
-| `story-refine` | An existing story that's incomplete or weakly specified → audit + fill gaps in place |
-| `story-split` | A story that fails INVEST on Independent / Estimable / Small → epic + child stories |
-| `story-batch` | A multi-item backlog → one story per item in a single pass, plus a backlog summary |
+| generate | An ambiguous prompt, screenshot, or fresh story request → one full story |
+| refine | An existing story that's incomplete or weakly specified → audit + fill gaps in place |
+| split | A story that fails INVEST on Independent / Estimable / Small → epic + child stories |
+| batch | A multi-item backlog → one story per item in a single pass, plus a backlog summary |
 
 They never split silently — a split always waits for your approval. And no story is ever auto-grounded against your open repo.
 
-### Components
+### References
 
-All four top-level skills compose the same eleven components:
+The router reads the same eleven reference files for every intent, on demand:
 
 - `storywright-base` — the shared rulebook: canonical story shape, the PM↔dev split, language detection, the mechanical pre-split test, INVEST handling, and the project-less rule. Everything else inherits from it.
 - `clarification-questions` — the minimum critical questions to ask before drafting
@@ -123,6 +123,8 @@ All four top-level skills compose the same eleven components:
 - `risks-and-dependencies` — risks and blocking dependencies with owner + status → dev file only
 - `estimation` — relative Fibonacci story points from countable signals (ACs, edge cases, deps, risks) → dev file only
 - `story-formatter` — renders the two-file output
+
+A reference file has no frontmatter and is never a separate install unit — it travels atomically with the one `SKILL.md` because skills.sh copies the whole `skills/storywright/` folder recursively.
 
 ## Multimodal input
 

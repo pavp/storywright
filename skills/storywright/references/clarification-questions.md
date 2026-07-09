@@ -1,23 +1,10 @@
----
-name: clarification-questions
-description: Surface only the critical questions blocking a complete user story. Ask the minimum needed; never quiz the user. Used by every top-level story skill.
-trigger: "internal use by story-* skills"
-intent: Component skill that runs a gap analysis on an input and emits ordered, high-leverage clarifying questions. Asks zero questions when the input is already complete.
-version: 1.0.0
-inputs:
-  - text
-  - image
-outputs:
-  - clarifying-questions-block
----
-
 ## Purpose
 
 Turn vague inputs into a short, prioritized question list. The goal is **minimal friction**: ask only what blocks writing a usable story. Many prompts are answerable with reasonable assumptions — favor making the assumption (and marking it) over asking.
 
 ## When to use
 
-Invoked by `story-generate`, `story-refine`, `story-split`, and `story-batch` after intake.
+Invoked by every intent (generate, refine, split, batch) after intake.
 
 ## Inputs & interpretation
 
@@ -69,9 +56,9 @@ Asking 8 questions including UX color, button copy, and analytics naming. That's
 
 ## References
 
-- [[story-generate]]
-- [[story-refine]]
-- [[clarification-questions-output-format]] (in story-generate templates)
+- the generate intent (this skill)
+- the refine intent (this skill)
+- see `templates/` for the output-format template referenced by clarifying-questions rendering
 
 <claude-specific>
 Use a structured-thinking pass to enumerate the 8 axes before deciding which are BLOCKING. Cache the axes list across invocations within the same session.

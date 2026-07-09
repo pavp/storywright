@@ -1,22 +1,10 @@
----
-name: edge-cases
-description: Enumerate edge cases for a story. Covers boundary, concurrency, network, data, permission, and UX-state failures. Returns only the edge-cases block.
-trigger: "internal use by story-* skills"
-intent: Component skill that systematically generates edge cases across known failure axes so acceptance criteria can cover them.
-version: 2.0.0
-inputs:
-  - story-context
-outputs:
-  - edge-cases-block (dev.md only)
----
-
 ## Purpose
 
 Edge cases are how engineers find latent risk. Generate them **before** acceptance criteria so each one pairs to an AC.
 
 ## When to use
 
-**Dev-file only.** Invoked while rendering `story.dev.md` (the dev-facing file), never the PM-facing `story.standard.md`. `[[storywright-base]]` rule 3 forbids an Edge Cases section in the PM story body — this output lands exclusively in `story.dev.md`. It still informs AC failure paths (`[[acceptance-criteria]]`): the AC covers the observable behavior in the PM file; the enumerated technical edge detail lives in dev.md.
+**Dev-file only.** Invoked while rendering `story.dev.md` (the dev-facing file), never the PM-facing `story.standard.md`. `references/storywright-base.md` rule 3 forbids an Edge Cases section in the PM story body — this output lands exclusively in `story.dev.md`. It still informs AC failure paths (`references/acceptance-criteria.md`): the AC covers the observable behavior in the PM file; the enumerated technical edge detail lives in dev.md.
 
 ## Inputs & interpretation
 
@@ -66,8 +54,8 @@ See above — concrete, observable, mappable to ACs.
 
 ## References
 
-- [[acceptance-criteria]]
-- [[risks-and-dependencies]]
+- `references/acceptance-criteria.md`
+- `references/risks-and-dependencies.md`
 
 <claude-specific>
 Cache the 8 axes. Use extended thinking when surface is novel.

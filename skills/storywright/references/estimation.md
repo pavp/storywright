@@ -1,24 +1,12 @@
----
-name: estimation
-description: Estimate a user story in Fibonacci story points using a deterministic weighted formula calibrated on real goldens. Output lives in story.dev.md only.
-trigger: "internal use by story-* skills"
-intent: Component skill that computes a Fibonacci story-point estimate from six countable signals (ACs, edge cases, dependencies, high-severity risks, business rules, INVEST E verdict). Produces ## Estimate in story.dev.md only — never in PM files.
-version: 1.0.0
-inputs:
-  - story-context
-outputs:
-  - estimate-block (dev.md only)
----
-
 ## Purpose
 
 Estimation gives the team a planning anchor grounded in story complexity signals — not gut feel or velocity. This component reads six structural signals from the completed story drafts and the INVEST result, runs a deterministic weighted formula, maps the raw score to a Fibonacci bucket, then allows a bounded ±1 LLM adjustment when a named signal justifies it.
 
-Output lives **exclusively** in `story.dev.md`. PM files (`story.standard.md`, `backlog-summary.md`) must never contain the full estimation table. `backlog-summary.md` may carry a lightweight `## Backlog Estimate` planning aid (Points + Key Driver only) — that is a batch-skill concern, not this component's output.
+Output lives **exclusively** in `story.dev.md`. PM files (`story.standard.md`, `backlog-summary.md`) must never contain the full estimation table. `backlog-summary.md` may carry a lightweight `## Backlog Estimate` planning aid (Points + Key Driver only) — that is a batch-intent concern, not this component's output.
 
 ## When to use
 
-Invoked as step 8c of `[[storywright-base]]` — **after step 9 (INVEST)** so the E verdict is available, **before step 10 (render)**. Never run before INVEST; the E verdict is a required input.
+Invoked as step 8c of `references/storywright-base.md` — **after step 9 (INVEST)** so the E verdict is available, **before step 10 (render)**. Never run before INVEST; the E verdict is a required input.
 
 ## Inputs & interpretation
 
@@ -148,17 +136,17 @@ Final: **Story Points: 5**
 - **Counting ACs or rules from dev.md** — they are PM-file signals only; dev.md has none.
 - **Counting edge/dep/risk from standard.md** — they are dev-file signals only; standard.md has none.
 - **Applying ±1 without a named signal citation** — if you cannot cite a specific signal, retain the deterministic bucket.
-- **Auto-splitting a 13-point story** — the advisory is informational; splitting requires user approval via `[[story-split]]`.
+- **Auto-splitting a 13-point story** — the advisory is informational; splitting requires user approval via the split intent.
 - **Emitting ## Estimate in story.standard.md** — estimation lives in dev.md only; Rule H bans it from PM files.
 
 ## References
 
-- [[storywright-base]]
-- [[invest-checklist]]
-- [[edge-cases]]
-- [[risks-and-dependencies]]
-- [[business-rules]]
-- [[acceptance-criteria]]
+- `references/storywright-base.md`
+- `references/invest-checklist.md`
+- `references/edge-cases.md`
+- `references/risks-and-dependencies.md`
+- `references/business-rules.md`
+- `references/acceptance-criteria.md`
 
 <claude-specific>
 Respond in the user's detected language (auto-detected per storywright-base rule 4). The computation and table structure are language-neutral; translate labels (Signal, Value, Weight, Contribution, Planning note) to match.

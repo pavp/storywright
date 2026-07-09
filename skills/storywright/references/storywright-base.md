@@ -1,15 +1,3 @@
----
-name: storywright-base
-description: Shared base behavior for all storywright top-level skills. Hard rules, canonical output, terminal-only Q, context schema, mechanical deps, V audit, language detect.
-trigger: "internal use by story-* skills"
-intent: Component skill that holds the v2.2 baseline. Top-level skills (story-generate, story-refine, story-split, story-batch) compose this and add only their source-specific behavior on top.
-version: 2.6.0
-inputs:
-  - none
-outputs:
-  - none
----
-
 ## Purpose
 
 Every top-level storywright skill must behave identically except for three things:
@@ -20,16 +8,16 @@ Every top-level storywright skill must behave identically except for three thing
 
 Everything else (how to ask questions, what shape the output takes, how to detect language, how to count outcomes, how to flag dependencies, how to persist context) lives here.
 
-If you are reading this through a top-level skill, treat every rule below as non-negotiable for that skill too.
+If you are reading this through the router skill, treat every rule below as non-negotiable for every intent too.
 
-## Hard rules (v2.2 — apply to all top-level storywright skills)
+## Hard rules (v2.2 — apply to all storywright intents)
 
 1. **Host-agnostic clarifications.** Ask clarification questions via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code), batched ≤4 per call. If the host has no interactive clarification mechanism, write `clarifications.md` as a fallback rather than dropping the questions. Non-blocking gaps → mark `⚠️ Assumed: <text>` inline in the story body — do not ask. Do NOT announce the presence or absence of a clarifications file ("Clarification resolved", "no clarifications.md needed", or any equivalent). Silence = no questions. Proceed directly.
 
 2. **Cohn + Gherkin canonical.** Every story (or child story) has:
    - ONE Use Case block (`As a / I want to / so that`).
    - ONE AC Scenario (one Given chain + one `When` + one `Then`).
-   If the input naturally needs >1 `When`/`Then`, the skill MUST stop the single-story path and route to `[[story-split]]`.
+   If the input naturally needs >1 `When`/`Then`, the skill MUST stop the single-story path and route to the split intent.
 
 3. **No mini-PRDs in the PM story body.** PROHIBITED in `story.standard.md`:
    - Non-Functional Requirements blocks (a11y/i18n/perf/tokens) — DoD only.
@@ -38,7 +26,7 @@ If you are reading this through a top-level skill, treat every rule below as non
    - Per-claim visual specs (pixel measurements, hex inferences) inline — use single banner (rule 5).
    - Logs >3 lines (>5 if SPLIT verdict).
 
-3a. **Technical detail lives in `story.dev.md`.** The content rule 3 bans from the PM body is NOT discarded — it is rendered in the dev-facing file. Edge cases, analytics events, risks/dependencies, technical considerations, and the command-level DoD belong in `story.dev.md`, populated by the enrichment components (Application step 8b). The PM↔dev split is the home for this content; rule 3 governs the PM file, `story.dev.md` carries the technical detail. See `[[story-formatter]]` for the audience table.
+3a. **Technical detail lives in `story.dev.md`.** The content rule 3 bans from the PM body is NOT discarded — it is rendered in the dev-facing file. Edge cases, analytics events, risks/dependencies, technical considerations, and the command-level DoD belong in `story.dev.md`, populated by the enrichment components (Application step 8b). The PM↔dev split is the home for this content; rule 3 governs the PM file, `story.dev.md` carries the technical detail. See `references/story-formatter.md` for the audience table.
 
 4. **Output language matches the user's chat language**, not the input's. Auto-detect first via rule 4a; only ask via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code) if signals split.
 
@@ -59,9 +47,9 @@ If you are reading this through a top-level skill, treat every rule below as non
 
    If a companion image shows any of these AND the input does not mention them, ask via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code) whether each is `in-scope`, `sibling-scope`, or `out-of-scope`. Anything not on this list (cards, section headers, in-flow buttons) is NOT chrome — do not surface as a chrome question.
 
-8. **Anti-PRD is part of INVEST `Small`, not a separate step.** See `[[invest-checklist]]` Small criterion — line-count ceiling (~60 lines) lives there. Single source of truth.
+8. **Anti-PRD is part of INVEST `Small`, not a separate step.** See `references/invest-checklist.md` Small criterion — line-count ceiling (~60 lines) lives there. Single source of truth.
 
-9. **Cross-skill context persistence.** When any storywright skill resolves a clarification via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code), write the **answer** to `<output-folder>/.storywright-context.json`. Read only from the exact output folder of the current invocation; never search siblings or parents. Schema:
+9. **Cross-skill context persistence.** When any storywright intent resolves a clarification via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code), write the **answer** to `<output-folder>/.storywright-context.json`. Read only from the exact output folder of the current invocation; never search siblings or parents. Schema:
 
    ```json
    {
@@ -77,9 +65,9 @@ If you are reading this through a top-level skill, treat every rule below as non
    }
    ```
 
-   Every skill MUST read this file BEFORE asking any question. Every skill MUST write this file when it resolves a question.
+   Every intent MUST read this file BEFORE asking any question. Every intent MUST write this file when it resolves a question.
 
-10. **Children independence — mechanical detection (rule A).** When any skill produces multiple stories or children (story-split, story-batch multi-item, story-refine recommending split):
+10. **Children independence — mechanical detection (rule A).** When any intent produces multiple stories or children (split, batch multi-item, refine recommending split):
     - For each child Cj, parse its `Given:` and `and Given:` lines.
     - If any Given text contains a surface noun owned by child Ci (Ci's title/scope owns "grid" and Cj's Given mentions "the grid") → mark `DEP(Cj → Ci)`.
     - The dependency map IS the union of those text matches. **Do not add deps "you sense" without a Given citation.**
@@ -138,7 +126,7 @@ Examples:
 
 ### Rule F. Naming pattern — ask once, persist
 
-When any skill needs to invent a tentative ticket slug AND `.storywright-context.json` has no `naming_pattern` field, ask once via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code):
+When any intent needs to invent a tentative ticket slug AND `.storywright-context.json` has no `naming_pattern` field, ask once via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code):
 
 ```
 Which naming pattern do you use for tickets?
@@ -148,9 +136,9 @@ Which naming pattern do you use for tickets?
 - Jira prefix + numeric           → "CSB-001"
 ```
 
-Persist in `naming_pattern`. Use for all sibling slugs in this run AND future skills reading the same context file.
+Persist in `naming_pattern`. Use for all sibling slugs in this run AND future intents reading the same context file.
 
-### Deterministic pre-split test (used by all skills)
+### Deterministic pre-split test (used by all intents)
 
 Mechanical counter. Apply the table — do NOT eyeball:
 
@@ -167,11 +155,11 @@ Mechanical counter. Apply the table — do NOT eyeball:
 
 **Decision:**
 - Count ≤1 → proceed with single-story path.
-- Count ≥2 → STOP single-story path. Route to split behavior per the host skill (recommend `/story-split`, produce epic+children, or recurse).
+- Count ≥2 → STOP single-story path. Route to split behavior per the host intent (switch to the split intent, produce epic+children, or recurse).
 
 ## Canonical output shape (this is the WHOLE story — no exceptions)
 
-> **Note:** This block shows the *section taxonomy and rules* — not heading levels or exact markup. The rendered artifact must follow the `story-generate/templates/` files exactly: `#` for title, `##` for sections (CommonMark). INVEST is a **process step** — it informs the Verdict line in the log but is NOT emitted as a section in the output artifact.
+> **Note:** This block shows the *section taxonomy and rules* — not heading levels or exact markup. The rendered artifact must follow the `templates/` files exactly: `#` for title, `##` for sections (CommonMark). INVEST is a **process step** — it informs the Verdict line in the log but is NOT emitted as a section in the output artifact.
 
 ```markdown
 ### [Title]
@@ -208,9 +196,9 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
 
 **Title — no story-number prefix.** The title is the bare story name. NEVER prefix it with a story/sequence number (`Historia 00 —`, `Story 3:`, `HU-01 -`, or any equivalent). Sequence belongs in the ticket ID / filename, not the heading. One title heading, one scheme, every file.
 
-**AC numbering — one scheme only: `AC-N`.** Every acceptance criterion is labelled `**AC-1:**`, `**AC-2:**`, … in ALL output files and ALL languages — never `CA-01`, `Criterio 1`, `Escenario 1`, or any localized variant. The label `AC` is fixed; only the scenario title after it is translated. Numbering is stable: append, never renumber existing ACs across iterations (see `[[acceptance-criteria]]`).
+**AC numbering — one scheme only: `AC-N`.** Every acceptance criterion is labelled `**AC-1:**`, `**AC-2:**`, … in ALL output files and ALL languages — never `CA-01`, `Criterio 1`, `Escenario 1`, or any localized variant. The label `AC` is fixed; only the scenario title after it is translated. Numbering is stable: append, never renumber existing ACs across iterations (see `references/acceptance-criteria.md`).
 
-## Application (step-by-step — every skill follows this skeleton)
+## Application (step-by-step — every intent follows this skeleton)
 
 0. **Detect companion sources** (image, accompanying text). Run conflict detection against the primary input. Run chrome detection using rule 7. Surface conflicts as a BLOCKING question via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code).
 
@@ -230,7 +218,7 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
 
 7. **Deterministic pre-split test.** Apply the table above mechanically.
    - Count ≤1 → continue to step 8 (single-story path).
-   - Count ≥2 → execute the **host skill's split behavior** (see Source-specific differential in each top-level skill).
+   - Count ≥2 → execute the **host intent's split behavior** (see Source-specific differential in each `#### <intent>` subsection).
 
 8. **Fill the canonical block** (Use Case + AC + Design Ref + INVEST). Preserve original wording where it was already good. NEVER invent NFR/edge-case/deps sections **in the PM story body** — rule 3 still holds for `story.standard.md`.
 
@@ -240,28 +228,28 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
 
    **For enabling / infra / platform stories this is mandatory and load-bearing.** When the deliverable is plumbing (publishing packages, provisioning a registry, setting up a pipeline, wiring shared config), describing only the process (publish / setup / install) is INSUFFICIENT — a PM reading it must understand what each artifact is FOR and what breaks downstream without it. State the consumer value, not the mechanics. Example: "publish 2 shared packages to a private registry" → the Summary explains what each package does and what stops working if it is missing, never just the publish/install cycle.
 
-8.5. **PM section self-audit (rule H).** Before calling [[story-formatter]], enumerate every section drafted for the PM file. For each section name:
+8.5. **PM section self-audit (rule H).** Before calling `references/story-formatter.md`, enumerate every section drafted for the PM file. For each section name:
      - In Rule H ALLOWED list → keep.
      - In Rule H BANNED list → move its content to `story.dev.md`.
      - Not in either list → treat as BANNED, move to `story.dev.md`.
      Log any moves in the Refinement Log: "Moved <Section> to dev (rule H)."
      Do not proceed to step 8b until the PM draft contains only ALLOWED sections.
 
-8b. **Gather dev-file enrichment** (feeds `story.dev.md` only — see rule 3a). Invoke the enrichment components to populate the technical sections of the dev file:
-   - `[[edge-cases]]` → `### Edge Cases` (technical failure axes)
-   - `[[risks-and-dependencies]]` → `### Dependencias` + `### Riesgos`
-   - `[[analytics-events]]` → `### Analytics / Eventos`
-   - `[[definition-of-done]]` → full DoD with CLI commands (PM files get the acceptance-only projection)
-   - `[[business-rules]]` → policy invariants (also an *optional* PM section per `[[story-formatter]]` when non-empty)
+8b. **Gather dev-file enrichment** (feeds `story.dev.md` only — see rule 3a). Invoke the enrichment references to populate the technical sections of the dev file:
+   - `references/edge-cases.md` → `### Edge Cases` (technical failure axes)
+   - `references/risks-and-dependencies.md` → `### Dependencias` + `### Riesgos`
+   - `references/analytics-events.md` → `### Analytics / Eventos`
+   - `references/definition-of-done.md` → full DoD with CLI commands (PM files get the acceptance-only projection)
+   - `references/business-rules.md` → policy invariants (also an *optional* PM section per `references/story-formatter.md` when non-empty)
    None of these may appear in the PM story body except the optional Business Rules section (see Rule H for the full PM section whitelist). Skip any component whose output is empty (drop empty sections — rule 3).
 
-9. **Run INVEST** via `[[invest-checklist]]`.
+9. **Run INVEST** via `references/invest-checklist.md`.
    - `READY` → render.
-   - `SPLIT RECOMMENDED` → host-skill split behavior + rule 10 matrix + rule 11 V audit.
+   - `SPLIT RECOMMENDED` → host-intent split behavior + rule 10 matrix + rule 11 V audit.
    - `NEEDS REFINEMENT` → iterate failing dimension, max 1 cycle, then STOP.
    - `NOT A STORY` → tell user it's a tech task and stop.
 
-8c. **Estimate** via `[[estimation]]`. (Runs AFTER step 9 — requires the INVEST E verdict.)
+8c. **Estimate** via `references/estimation.md`. (Runs AFTER step 9 — requires the INVEST E verdict.)
     1. Read the step-9 INVEST E verdict.
     2. If `E — FAIL` → emit Spike block in `story.dev.md`; skip formula.
     3. Else: read 6 signals across both drafts (`ac_count` + `rule_count` from `story.standard.md`; `edge_count` + `dep_count` + `risk_hh_count` from `story.dev.md`).
@@ -271,7 +259,7 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
     7. Emit `## Estimate` section in `story.dev.md` only (after DoD, before generation log).
     8. If points = 13 → append `> ⚠️ Consider splitting:` advisory (advisory only; never auto-split).
 
-10. **Render** via `[[story-formatter]]`.
+10. **Render** via `references/story-formatter.md`.
     - Derive the output folder: `docs/storywright/YYYY-MM-DD-HHmm-<title-slug>/` where `YYYY-MM-DD-HHmm` is the current local date+time and `<title-slug>` is the story title in kebab-case (max 5 words, drop articles/prepositions).
     - Use the `Write` tool to persist both files to that folder (create it if it does not exist):
       - `story.standard.md` — PM-facing CommonMark, no technical detail
@@ -282,20 +270,20 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
 
 11. **Log** ≤3 bullets (≤5 if SPLIT) appended at story end. Log type label is host-specific (Generation / Refinement / Split).
 
-## What each top-level skill adds on top of this base
+## What each intent adds on top of this base
 
 Only these three things vary:
 
-| Skill | Source | Split behavior |
+| Intent | Source | Split behavior |
 |---|---|---|
-| `story-generate` | Raw prompt / ambiguous text + optional image | If pre-split count ≥2 → STOP, recommend `/story-split`. Otherwise draft 1 story. |
-| `story-refine` | Existing story text + optional image | If pre-split count ≥2 → STOP, recommend `/story-split`. Otherwise fix in place. |
-| `story-split` | Oversize story (any source) | Always produces epic + N children. Mechanical NxN matrix + per-child V audit MANDATORY. Recursive re-split per child if count ≥2. |
-| `story-batch` | Multi-item backlog (+ optional companion text) | One story per backlog item. Multi-item output → mandatory `backlog-summary.md` with mechanical matrix + V audit. Any item with count ≥2 → hand off to `[[story-split]]`. |
+| `generate` | Raw prompt / ambiguous text + optional image | If pre-split count ≥2 → STOP, switch to the split intent. Otherwise draft 1 story. |
+| `refine` | Existing story text + optional image | If pre-split count ≥2 → STOP, switch to the split intent. Otherwise fix in place. |
+| `split` | Oversize story (any source) | Always produces epic + N children. Mechanical NxN matrix + per-child V audit MANDATORY. Recursive re-split per child if count ≥2. |
+| `batch` | Multi-item backlog (+ optional companion text) | One story per backlog item. Multi-item output → mandatory `backlog-summary.md` with mechanical matrix + V audit. Any item with count ≥2 → mark `SPLIT RECOMMENDED` in `backlog-summary.md` and continue; NEVER auto-switch to the split intent. |
 
 Everything else is identical and lives in this base.
 
-## Common Pitfalls (all skills)
+## Common Pitfalls (all intents)
 
 - Running step 8c (Estimate) before step 9 INVEST — E verdict not yet available; always run INVEST first.
 - Matching bare `###` headings in dev.md for estimation signal extraction — use depth-agnostic `^#{2,3}` pattern; rendered goldens use H2 sections.
@@ -315,17 +303,17 @@ Everything else is identical and lives in this base.
 
 ## References
 
-- [[invest-checklist]]
-- [[acceptance-criteria]]
-- [[clarification-questions]]
-- [[story-formatter]]
-- [[story-generate]]
-- [[story-refine]]
-- [[story-split]]
-- [[story-batch]]
+- `references/invest-checklist.md`
+- `references/acceptance-criteria.md`
+- `references/clarification-questions.md`
+- `references/story-formatter.md`
+- the generate intent (this skill)
+- the refine intent (this skill)
+- the split intent (this skill)
+- the batch intent (this skill)
 
 <claude-specific>
-- Treat every rule above as load-bearing across all top-level skills.
+- Treat every rule above as load-bearing across all intents.
 - Use extended thinking when applying rule 10 (parse Given lines) and rule 11 (V audit per child).
 - If the host has an interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code), use it — do not call Write for a sidecar question file when one is available.
 - Read `.storywright-context.json` ONLY from the exact target output folder.
