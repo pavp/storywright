@@ -112,7 +112,7 @@ Follow the **base Application** skeleton for the front-end behaviors (context lo
    - Does the split reveal low-value work we can deprioritize?
    - Are children roughly equal in size?
 
-5. **STOP and ask the user to approve via `AskUserQuestion`.**
+5. **STOP and ask the user to approve via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code).**
 
 6. **For each approved child, write the base canonical block, then render via `[[story-formatter]]` to both files** (`story-<N>.standard.md` + `story-<N>.dev.md`). The child's enrichment (edge cases, risks, analytics) populates its `story-<N>.dev.md` per base step 8b.
 
