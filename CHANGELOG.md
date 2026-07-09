@@ -1,3 +1,9 @@
+## [2.1.0](https://github.com/pavp/storywright/compare/v2.0.1...v2.1.0) (2026-07-09)
+
+### ✨ Features
+
+* make clarification mechanism host-agnostic ([#27](https://github.com/pavp/storywright/issues/27)) ([e97fd0e](https://github.com/pavp/storywright/commit/e97fd0e4e8d3cb9e401397b3762d7a2142687ec4))
+
 ## [2.0.1](https://github.com/pavp/storywright/compare/v2.0.0...v2.0.1) (2026-07-09)
 
 ### 📝 Docs
