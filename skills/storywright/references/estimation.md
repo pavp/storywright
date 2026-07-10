@@ -114,7 +114,7 @@ These real fixtures ground the scale. Use them to sanity-check your estimates be
 | Synthetic simple | 1 | 0 | 0 | 0 | 0 | 1.0 | 1 | Single AC, no risk |
 | Synthetic small | 1 | 1 | 1 | 0 | 1 | 2.6 | 2 | Minimal enrichment |
 | Synthetic medium | 2 | 2 | 1 | 0 | 2 | 5.7 | 3 | Moderate AC/edge |
-| google-login | 1 | 5 | 3 | 1 | 3 | 12.0 | 5 | Auth flow, real golden |
+| login-google | 1 | 5 | 3 | 1 | 3 | 12.0 | 5 | Auth flow, real golden |
 | backlog story-1 | 3 | 5 | 3 | 0 | 2 | 11.5 | 5 | Cart summary, real golden |
 | backlog story-2 (pre-adj) | 3 | 5 | 4 | 0 | 3 | 13.5 | 8 | Discount code, real golden |
 | Synthetic large | >9 | >5 | >5 | >1 | >3 | >18.0 | 13 | Split advisory fires |

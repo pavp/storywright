@@ -251,7 +251,7 @@ Each item names the exact file and the concrete change. **Nothing here has been 
 
 ### P2 — Depth & polish
 
-**P2.1 — Golden outputs (Finding D).** Commit one real generated output per skill under `examples/outputs/` (e.g. `examples/outputs/google-login/story.standard.md`). Add a doc snapshot test that the templates still produce the documented section taxonomy.
+**P2.1 — Golden outputs (Finding D).** Commit one real generated output per skill under `examples/outputs/` (e.g. `examples/outputs/login-google/story.standard.md`). Add a doc snapshot test that the templates still produce the documented section taxonomy.
 
 **P2.2 — Tooling hardening (Finding E).** `zip-skill.mjs`: detect `zip` or fall back to a Node zip lib; remove redundant path check. `install-skills.mjs`: full `~/` expansion + verify copy count. `release.yml`: add jitter to the npm poll. `README.md:29`: correct the `ln -s` path or switch to an absolute-from-repo-root example.
 

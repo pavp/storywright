@@ -11,9 +11,10 @@ inputs:
 outputs:
   - story.standard.md
   - story.dev.md
-  - story-1.standard.md
-  - story-1.dev.md
-  - epic.md
+  - NN-<slug>.standard.md
+  - NN-<slug>.dev.md
+  - epic.standard.md
+  - epic.dev.md
   - backlog-summary.md
   - .storywright-context.json
 ---
@@ -118,11 +119,14 @@ Follow the base Application skeleton in `references/storywright-base.md` exactly
 - **What changes vs base:** the skill does NOT produce a single story. It ALWAYS produces an epic + N children. Each child obeys the base canonical block. The user must approve the split plan before children are written.
 
 **Split behavior differential.** This intent IS the split behavior. It always emits multiple files:
-- `epic.md` — title, why-split, INVEST failure reasons, mechanical NxN matrix, build order, V audit per child, list of children. Single file (epic metadata, not a user story).
-- Per child: both files `story-<N>.standard.md` + `story-<N>.dev.md`, rendered via `references/story-formatter.md` — same contract as every other intent. Each child is a canonical user story (per base shape).
+- **Epic duo** (title carries no story-number prefix, per the canonical title rule):
+  - `epic.standard.md` — PM-facing: Objective/Hypothesis (1-3 sentence value-proposition statement), Business Outcome(s) (each `⚠️ Assumed:`, each labeled with a stable identifier — Outcome A/B or 1/2), In/Out of scope (the PM face of Deferred), Core complexity (business language only). Zero technical detail — same PM audience rules as `story.standard.md`, rendered per the epic-duo note in `references/story-formatter.md`.
+  - `epic.dev.md` — dev-facing: Why split, Patterns applied, Cynefin domain, children table (+Pattern +V audit columns), mechanical NxN dependency matrix, build order, V audit per child, Notes (recursive re-split check, coherence check), and the dev↔value bridge (each child links to the Business Outcome it moves, cited by identifier only — e.g. "moves Outcome A" — never transcribing the outcome text).
+  - **The duo ALWAYS emits once split starts — even with a single drafted child.** There is no ≥2-children precondition for the epic files; a round may draft one child and defer the rest to `epic.standard.md`'s In/Out-of-scope section.
+- Per child: both files `NN-<slug>.standard.md` + `NN-<slug>.dev.md` (`NN` = zero-padded build-order ordinal; `<slug>` = the child title slugged per Rule I), rendered via `references/story-formatter.md` — same contract as every other intent. Each child is a canonical user story (per base shape).
 - `.storywright-context.json` — persisted answers.
 
-NO `split-plan.md`. The plan lives inside `epic.md`.
+NO `split-plan.md`. The plan lives inside `epic.dev.md`.
 
 **Pre-split gate (STOP conditions) — run BEFORE pattern selection.** Run `references/invest-checklist.md` first:
 - **V FAILS** → STOP. Not a story. Combine with related user-facing work.
@@ -175,12 +179,12 @@ NO `split-plan.md`. The plan lives inside `epic.md`.
    ```
 4. **Strategic check before approval:** does the split reveal low-value work we can deprioritize? Are children roughly equal in size?
 5. **STOP and ask the user to approve via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code).**
-6. **For each approved child, write the base canonical block, then render via `references/story-formatter.md` to both files** (`story-<N>.standard.md` + `story-<N>.dev.md`). The child's enrichment (edge cases, risks, analytics) populates its `story-<N>.dev.md` per base step 8b.
-7. **Build dependency matrix mechanically (base rule 10).** Render in `epic.md`.
-8. **V audit per child (base rule 11).** Flag merge-upstream candidates in `epic.md`.
-9. **Recursive re-split check.** For each child, run the base deterministic counter. If count ≥2 → recursive split of that child. Surface the tree in `epic.md`.
+6. **For each approved child, write the base canonical block, then render via `references/story-formatter.md` to both files** (`NN-<slug>.standard.md` + `NN-<slug>.dev.md`, `NN` = zero-padded build-order ordinal, `<slug>` = the child title per Rule I). The child's enrichment (edge cases, risks, analytics) populates its `NN-<slug>.dev.md` per base step 8b.
+7. **Build dependency matrix mechanically (base rule 10).** Render in `epic.dev.md`.
+8. **V audit per child (base rule 11).** Flag merge-upstream candidates in `epic.dev.md`.
+9. **Recursive re-split check.** For each child, run the base deterministic counter. If count ≥2 → recursive split of that child. Surface the tree in `epic.dev.md`.
 10. **Coherence check** — children together cover the original scope. Flag gaps or overlaps.
-11. **Write `epic.md`** with: why-split, Cynefin, matrix, build order, V audit, list of children.
+11. **Write `epic.dev.md`** with: why-split, Patterns, Cynefin, children table (+Pattern +V audit), matrix, build order, V audit, Notes (recursive re-split check, coherence check). **Write `epic.standard.md`** with: Objective/Hypothesis, Business Outcome(s) (`⚠️ Assumed:`, each with a stable identifier), In/Out of scope (from Deferred), Core complexity (business language, migrated — `epic.dev.md` keeps at most a one-line pointer, never the full section). **Emit the dev↔value bridge** in `epic.dev.md`'s children table or V-audit section — each child references the Business Outcome it moves, by identifier only.
 12. **Persist context** to `.storywright-context.json` (`extra.split_pattern`, `extra.core_complexity`).
 
 **Validate every child (must pass all 6):**
@@ -200,7 +204,7 @@ Follow the base Application skeleton in `references/storywright-base.md` exactly
   - **Input is N items, not one item.** Structural parsing identifies item boundaries first; LLM fallback infers boundaries when structural signals are absent or ambiguous.
   - **Boundary confirmation is mandatory.** The skill presents the parsed item list and waits for user confirmation before proceeding (non-skippable).
   - **Cohesion gate runs before clarifications.** Items sharing persona or feature-area context are processed with a single shared clarification round; disparate items get per-item clarifications.
-  - **Output uses story-N.* prefix** so all items share one flat batch folder without collisions.
+  - **Output uses `NN-<slug>.` prefix** (zero-padded 1-based item index + the per-item title slug per Rule I, applied to that item's own title) so all items share one flat batch folder without collisions.
   - **backlog-summary.md is the batch roll-up.** Carries INVEST verdicts, dep matrix, V audit, build order, cohesion verdict, and SPLIT RECOMMENDED markers across all items.
 
 **Split behavior differential.** This intent produces **multiple stories in one invocation** (one per confirmed item). When N>1:
@@ -223,7 +227,7 @@ If N=1 after boundary confirmation → abort and instruct the user to use the ge
 6. Present the parsed boundary list via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code): "I found N items — does this look right? Reply to confirm, merge two items, split one, or edit the list."
 7. Apply any user corrections and re-present if the count changed. Proceed only after the user confirms.
 
-**Slug derivation (ONE rule, applied consistently):** derive the batch slug from the first item's inferred feature area. Lowercase, replace spaces with hyphens, truncate to ≤30 characters. No other slug rule applies.
+**Folder-slug derivation (scoped to the batch FOLDER only):** derive the batch folder slug from the first item's inferred feature area. Lowercase, replace spaces with hyphens, truncate to ≤30 characters. No other slug rule applies to the folder slug — this is a separate, folder-only rule from the per-item filename slug below (Phase 3 step 2), which is a distinct rule introduced by this change and cites Rule I.
 
 Example: first item "Add checkout summary page" → feature area "checkout" → slug `checkout`.
 
@@ -248,7 +252,7 @@ If the PM replies with an override, honor it and re-announce the new mode before
 
 **Phase 3 — Per-item pipeline.** For each confirmed item (1-based index N):
 1. Run base Application steps 3–11 verbatim (persona, passive-goal check, gap-check, pre-split count, canonical block, rule H audit, dev enrichment, INVEST, render duo, log).
-2. Use filename prefix `story-<N>.` (all items share one flat batch folder).
+2. **Per-item filename slug (NEW — batch has no per-item slug before this rule).** Derive `<slug>` by applying Rule I to THIS item's own title (not the folder slug from Phase 0, which stays feature-area-only). Use filename prefix `NN-<slug>.` where `NN` is the zero-padded 1-based item index (all items share one flat batch folder).
 3. **Pre-split ≥2:** mark item as `SPLIT RECOMMENDED`, skip drafting the canonical block, emit no files. Continue to the next item.
 4. **INVEST V = FAIL:** mark item as `NOT A STORY`, emit no files. Continue to the next item.
 5. **INVEST other failures (T, N, E, I, S):** flag inline with `⚠️` in `backlog-summary.md` but still emit both files (base behavior).
@@ -312,12 +316,12 @@ Only items in `DRAFTED` status (step 10 logged) proceed to the Phase 4 matrix.
    - SPLIT RECOMMENDED items → `— (split first)` in Points column; `SPLIT RECOMMENDED` in Key Driver.
    - Spike items (INVEST E = FAIL) → `Spike` in Points; `E = FAIL` in Key Driver.
    - Total row sums only numeric point values; excludes `—` and `Spike` rows.
-   - Full justification table stays in `story-N.dev.md`; only Points + Key Driver appear here.
+   - Full justification table stays in `NN-<slug>.dev.md`; only Points + Key Driver appear here.
 
 2. **`.storywright-context.json`** updated per base rule 9 (one file per batch folder). No `clarifications.md` when the host has an interactive clarification mechanism.
 3. **Flat folder structure:** all files in `docs/storywright/YYYY-MM-DD-HHmm-batch-<slug>/` with no subdirectories. Slug derived per Phase 0 rule (first item's feature area, ≤30 chars, lowercase, hyphens).
 
-NO `clarifications.md` when the host has an interactive clarification mechanism. NO Edge Cases / NFR sections **in PM files** (they live in `story-<N>.dev.md` per base rule 3a). NO per-claim visual tags.
+NO `clarifications.md` when the host has an interactive clarification mechanism. NO Edge Cases / NFR sections **in PM files** (they live in `NN-<slug>.dev.md` per base rule 3a). NO per-claim visual tags.
 
 Follow the base Application skeleton in `references/storywright-base.md` exactly; this subsection is the delta only.
 

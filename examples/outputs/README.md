@@ -9,6 +9,6 @@ Each folder is one run. The duo mirrors what every story-producing skill writes 
 
 | Folder | Input | Skill |
 |---|---|---|
-| `google-login/` | `examples/input-prompt.md` ("Permitir login con Google") | `story-generate` |
+| `login-google/` | `examples/input-prompt.md` ("Permitir login con Google") | `story-generate` |
 
 The PM files deliberately contain **no** file paths, imports, commands, edge-case sections, or dependency prose — that separation is enforced by `storywright-base` rule 3 / 3a and checked in `tests/skills-shape.test.mjs`.

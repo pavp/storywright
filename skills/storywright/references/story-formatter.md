@@ -19,6 +19,8 @@ Final step in the generate and refine intents. Always last.
 | `story.standard.md` | PM, stakeholders | ❌ None — no file paths, no imports, no component names, no `npm run X` in DoD |
 | `story.dev.md` | Developer | ✅ Full — file paths, imports, Technical Considerations, technical edge cases, full DoD with commands |
 
+**The epic renders as a duo target too.** The split intent's epic output (`epic.standard.md` + `epic.dev.md`) obeys this SAME audience separation: `epic.standard.md` follows the PM no-technical-detail column (Objective/Hypothesis, Business Outcome(s), In/Out of scope, Core complexity — no file paths, matrices, or component names); `epic.dev.md` follows the dev full-detail column (Why split, Patterns, Cynefin, children table, dependency matrix, build order, V audit, Notes). Documentation note only — the epic is metadata, not a `structured-story` object, so it is composed inline by the split intent (see `SKILL.md` `#### split`), not rendered through this formatter's own render steps below.
+
 **What is "technical":** file paths, import statements, component/hook names, API method names, CLI commands (`npm run test`), null/undefined checks, browser API constraints (HTTPS, permissions), specific library flags.
 
 **ACs in PM files must describe observable behavior only.** "A copy icon appears next to the email field and clicking it copies the value" — not "ContentCopyOutlinedIcon is rendered next to the email Typography block and calls navigator.clipboard.writeText()".

@@ -242,7 +242,7 @@ input (text|image)
 - `skills/storywright/references/storywright-base.md` — the rulebook (hard rules, language 4a, rule D, pre-split test, canonical shape, Application skeleton).
 - `skills/storywright/references/story-formatter.md` — 2-file render + audience table.
 - `tests/skills-shape.test.mjs` — parity + no-leakage golden tests; `tests/validate.test.mjs`.
-- `examples/outputs/google-login/` — committed golden duo. `examples/outputs/story-split-oversized/` — committed split golden (`epic.md` + 2 child duos).
+- `examples/outputs/login-google/` — committed golden duo. `examples/outputs/story-split-oversized/` — committed split golden (epic duo + 2 child duos).
 
 **Pipelines / execution chains.** [FACT] No install pipeline in-repo — distribution is git/skills.sh, out-of-band. Runtime: slash command → skill+components → LLM provider (knowledge layer; outside repo).
 

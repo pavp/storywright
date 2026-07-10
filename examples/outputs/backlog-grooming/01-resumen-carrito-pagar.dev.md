@@ -1,6 +1,6 @@
 # Resumen del carrito antes de pagar — Dev Notes
 
-> Developer supplement to `story-1.standard.md`. Holds all technical detail stripped from the PM-facing files (rule 3a).
+> Developer supplement to `01-resumen-carrito-pagar.standard.md`. Holds all technical detail stripped from the PM-facing files (rule 3a).
 
 ## Technical Considerations
 - El componente de resumen consume el endpoint `GET /cart/{cartId}` y actualiza cantidades vía `PATCH /cart/{cartId}/items/{itemId}`.

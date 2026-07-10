@@ -1,6 +1,6 @@
 # Ver y filtrar el dashboard — Dev Notes
 
-> Developer supplement to `story-1.standard.md`. Holds all technical detail stripped from the PM-facing files (rule 3a).
+> Developer supplement to `01-ver-filtrar-dashboard.standard.md`. Holds all technical detail stripped from the PM-facing files (rule 3a).
 
 ## Technical Considerations
 - La tabla consume el endpoint `GET /dashboard/records?filters=<query>` con paginación server-side (`page`, `pageSize`).

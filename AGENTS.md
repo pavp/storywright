@@ -81,7 +81,7 @@ The 11 reference files under `skills/storywright/references/`, read on demand by
 - **Pure ESM** (`"type": "module"` + `.mjs`). No CommonJS.
 - **No build step.** Scripts are runnable directly via `node`.
 - **No LLM in code.** All AI behavior lives in the Markdown skills.
-- **Dual output mandatory.** Every story-producing intent emits two files per story: `story.standard.md` (PM-facing, no technical detail) + `story.dev.md` (dev-facing, full technical detail). This includes children produced by the split intent (one pair per child; `epic.md` is the single exception — epic metadata, not a story). Core PM sections always; optional PM sections only when populated; technical detail (edge cases, risks, analytics, command-level DoD) lives in `story.dev.md` only.
+- **Dual output mandatory.** Every story-producing intent emits two files per story: `story.standard.md` (PM-facing, no technical detail) + `story.dev.md` (dev-facing, full technical detail). This includes children produced by the split intent (one duo per child, `NN-<slug>.standard.md` + `NN-<slug>.dev.md`). The epic itself is now a PM↔dev duo too (`epic.standard.md` + `epic.dev.md`) — it is no longer a single-file exception. Core PM sections always; optional PM sections only when populated; technical detail (edge cases, risks, analytics, command-level DoD) lives in `story.dev.md` (and `epic.dev.md`) only.
 
 ## Validation
 
@@ -117,4 +117,6 @@ When iterating on the skill, invoke it against fixtures:
 - `tests/fixtures/oversized-story.md` — split target
 - `tests/fixtures/backlog-checkout-grooming.md` — batch target
 
-Committed golden outputs live under `examples/outputs/<slug>/` (the duo: `story.standard.md` + `story.dev.md`; the split golden additionally emits `epic.md` + one duo per child). `tests/skills-shape.test.mjs` asserts the PM file carries no technical leakage. If you change the skill's behavior, also update its golden outputs and the matching slash command body in `commands/<name>.md`.
+Committed golden outputs live under `examples/outputs/<slug>/` (the duo: `story.standard.md` + `story.dev.md`; the split golden emits an epic duo — `epic.standard.md` + `epic.dev.md` — plus one duo per child, children named `NN-<slug>.{standard,dev}.md`). `tests/skills-shape.test.mjs` asserts the PM file carries no technical leakage. If you change the skill's behavior, also update its golden outputs and the matching slash command body in `commands/<name>.md`.
+
+**Golden-folder-naming exemption.** `examples/outputs/` folder names (e.g. `story-split-oversized`, `backlog-grooming`) are stable illustrative identifiers, exempt from the runtime `YYYY-MM-DD-HHmm-<type>-<slug>/` folder-naming rule — the golden folder is not renamed to a date+`-epic-<slug>` form even though its CONTENTS follow the new epic-duo + `NN-<slug>` shape.
