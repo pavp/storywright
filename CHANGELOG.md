@@ -1,3 +1,9 @@
+## [4.0.2](https://github.com/pavp/storywright/compare/v4.0.1...v4.0.2) (2026-07-10)
+
+### 🐛 Bug Fixes
+
+* write story output to project root instead of docs/ ([#41](https://github.com/pavp/storywright/issues/41)) ([a069899](https://github.com/pavp/storywright/commit/a0698995e5883ee59d34e88fc32e0d8add240da0))
+
 ## [4.0.1](https://github.com/pavp/storywright/compare/v4.0.0...v4.0.1) (2026-07-10)
 
 ### 🐛 Bug Fixes
