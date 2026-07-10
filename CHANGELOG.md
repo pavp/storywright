@@ -1,3 +1,9 @@
+## [4.0.1](https://github.com/pavp/storywright/compare/v4.0.0...v4.0.1) (2026-07-10)
+
+### 🐛 Bug Fixes
+
+* resolve split-intent non-determinism ambiguities ([#38](https://github.com/pavp/storywright/issues/38), [#39](https://github.com/pavp/storywright/issues/39)) ([#40](https://github.com/pavp/storywright/issues/40)) ([7e48c4d](https://github.com/pavp/storywright/commit/7e48c4da14a4a110a82b7ae73537460c4845c54d))
+
 ## [4.0.0](https://github.com/pavp/storywright/compare/v3.0.0...v4.0.0) (2026-07-10)
 
 ### ⚠ BREAKING CHANGES
