@@ -1,5 +1,7 @@
 # Epic — New dashboard — Dev Notes
 
+**Summary:** Ships the data-plumbing for a single-page dashboard (fetch, render, filter, search) split into two children — `01-ver-filtrar-dashboard` (table + filters) and `02-buscar-dashboard` (search) — deferring the export/share/permissions capabilities until this core surface is proven.
+
 > Developer supplement to `epic.standard.md`. Holds the mechanical split decision trail (rule 3a — the epic follows the same PM↔dev split as every story).
 
 **Why split:** INVEST failed on **I** (Independent — one story bundles ≥8 unrelated capabilities that cannot ship or be verified separately) and **S** (Small — the raw description names 10 distinct capabilities in a single AC, no single Given/When/Then can cover them; deterministic pre-split count = 8).
