@@ -28,6 +28,8 @@ If you are reading this through the router skill, treat every rule below as non-
 
 3a. **Technical detail lives in `story.dev.md`.** The content rule 3 bans from the PM body is NOT discarded — it is rendered in the dev-facing file. Edge cases, analytics events, risks/dependencies, technical considerations, and the command-level DoD belong in `story.dev.md`, populated by the enrichment components (Application step 8b). The PM↔dev split is the home for this content; rule 3 governs the PM file, `story.dev.md` carries the technical detail. See `references/story-formatter.md` for the audience table.
 
+**The epic is a PM↔dev duo too.** The split intent's epic output follows the same PM↔dev split as every story: `epic.standard.md` (PM-facing — Objective/Hypothesis, Business Outcome(s), In/Out of scope, Core complexity) + `epic.dev.md` (dev-facing — Why split, Patterns, Cynefin, children table, dependency matrix, build order, V audit, Notes). Business Outcome(s) in `epic.standard.md` MUST be marked `⚠️ Assumed:` — it is inferred from the prompt, never a verified figure (hard rule 14 applies to the epic exactly as it applies to every story).
+
 4. **Output language matches the user's chat language**, not the input's. Auto-detect first via rule 4a; only ask via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code) if signals split.
 
 5. **Visual inference confidence — single banner only.** Do NOT tag every visual claim. ONE banner at the top of the Design Reference block declares source type; all claims under it inherit:
@@ -87,7 +89,9 @@ If you are reading this through the router skill, treat every rule below as non-
 
     **ALLOWED:** User Story, Acceptance Criteria, Definition of Done, Contexto, Business Goal, Scope, Out of Scope, Business Rules. (`**Summary:**` is inline text, not a section heading — it is not subject to this list.)
 
-    **BANNED** (move content to `story.dev.md`, never emit in PM files): Edge Cases, Non-Functional Requirements, NFR, Performance, Security, Accessibility, Technical Considerations, Analytics, Risks, Dependencies, Dependencias, Riesgos, Estimate, Story Points — and any section whose name does not appear in the ALLOWED list above.
+    **ALLOWED, scoped to `epic.standard.md` only** (these four do NOT extend `story.standard.md`'s whitelist above): Objective / Hypothesis, Business Outcome(s), In / Out of scope, Core complexity.
+
+    **BANNED** (move content to `story.dev.md`, never emit in PM files): Edge Cases, Non-Functional Requirements, NFR, Performance, Security, Accessibility, Technical Considerations, Analytics, Risks, Dependencies, Dependencias, Riesgos, Estimate, Story Points — and any section whose name does not appear in an ALLOWED list above.
 
     If you find yourself writing a banned section into a PM file, stop. Move its content to `story.dev.md` instead (use `## Technical Considerations` as the target heading for Accessibility, Performance, and Security content). Do not silently drop it.
 
@@ -137,6 +141,27 @@ Which naming pattern do you use for tickets?
 ```
 
 Persist in `naming_pattern`. Use for all sibling slugs in this run AND future intents reading the same context file.
+
+### Rule I. Title slug — shared, named rule (promoted from the single-story render step)
+
+Every storywright output that needs a filesystem-safe slug derived from a title (single-story folder + filename, split epic folder, split child filenames, batch item filenames, batch folder) MUST use this rule. No consumer re-derives its own slug logic or silently inherits an unnamed convention — cite Rule I by name.
+
+**Derivation, in order:**
+1. **Fold diacritics to ASCII.** `Código` → `codigo`, `Iniciar sesión` → `Iniciar sesion`.
+2. **Lowercase and kebab-case.** Replace spaces/punctuation with single hyphens.
+3. **Drop stop-words**, in this enumerated order (no "and equivalents" catch-all — additional languages get their own explicit entry when added):
+   - Articles and prepositions (unchanged from the pre-promotion behavior): EN `a`, `an`, `the`, `of`, `in`, `on`, `for`, `to`, `with`; ES `el`, `la`, `los`, `las`, `un`, `una`, `de`, `en`, `del`, `dentro`, `con`, `antes`, `para`.
+   - **Coordinating conjunctions (NEW):** EN `and`, `or`; ES `y`, `o`, `e`, `u`; ampersand `&` (any language).
+   - **Positional constraint on the conjunction drop (mechanical, not phonetic):** `e`/`u`/`y`/`o`/`and`/`or`/`&` are dropped ONLY when the token is a standalone coordinating token strictly BETWEEN two other retained tokens — i.e. it is neither the first nor the last token of the title, and both immediate neighbors are retained content words. A single-letter token `e` or `u` that is the FIRST or LAST token of the title is NEVER dropped under this rule. This replaces any phonetic condition ("`e` before an /i/-sound word") with a mechanical position check.
+4. **Preserve source word order.** Do not reorder tokens after dropping stop-words.
+5. **Truncate to ≤5 words**, counted AFTER all drops in step 3.
+
+**Cross-path impact.** This rule is cited, not restated, by every consumer:
+- single-story output folder + filenames (Application step 10, below) — previously an inline, single-story-scoped clause; now a citation of Rule I.
+- split epic folder slug (`-epic-<slug>/`, below) and split child filenames (`NN-<slug>`, `SKILL.md` `#### split`).
+- batch item filenames (`NN-<slug>`, `SKILL.md` `#### batch` Phase 3) and batch folder slug (`SKILL.md` `#### batch` Phase 0, unaffected in derivation but cites Rule I for consistency).
+
+Example: "Ver y filtrar el dashboard" → drop conjunction `y` (interior, between `Ver` and `filtrar`) → `ver-filtrar-dashboard`. Example: "Login con Google" → drop preposition `con` → preserve source word order (do not reverse the tokens) → `login-google`.
 
 ### Deterministic pre-split test (used by all intents)
 
@@ -216,6 +241,8 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
 
 6. **Sibling reference check.** If unlinked references found → ask once. If user opts for tentative slugs, apply rule F. Persist via rule 9.
 
+   **Flat folder, no per-child subfolders.** Split and batch output folders stay flat — all `epic.*` files, all `NN-<slug>.*` child/item files, and exactly one `.storywright-context.json` live at the folder root. Per-child subfolders are explicitly rejected: they would break the single-context-file rule (rule 9), sibling links (this step), and split↔batch folder uniformity.
+
 7. **Deterministic pre-split test.** Apply the table above mechanically.
    - Count ≤1 → continue to step 8 (single-story path).
    - Count ≥2 → execute the **host intent's split behavior** (see Source-specific differential in each `#### <intent>` subsection).
@@ -260,7 +287,10 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
     8. If points = 13 → append `> ⚠️ Consider splitting:` advisory (advisory only; never auto-split).
 
 10. **Render** via `references/story-formatter.md`.
-    - Derive the output folder: `docs/storywright/YYYY-MM-DD-HHmm-<title-slug>/` where `YYYY-MM-DD-HHmm` is the current local date+time and `<title-slug>` is the story title in kebab-case (max 5 words, drop articles/prepositions).
+    - Derive the output folder: `docs/storywright/YYYY-MM-DD-HHmm-<title-slug>/` where `YYYY-MM-DD-HHmm` is the current local date+time and `<title-slug>` is the story title slugged per **Rule I** (above).
+    - **Folder-naming grammar (`DATE-<type>-<slug>`):** the type infix is absent for a single story (this step), `batch` for a backlog (`SKILL.md` `#### batch`), and `epic` for a split with children (below). This is the same clock convention (current local date+time) across all three.
+    - **Epic title construction.** The `split` intent MUST author an epic title before deriving the folder. The epic title is the bare feature name the split covers (inferred from the input story's subject — e.g. input "Build the new dashboard" → epic title `New dashboard`); the split renders its `epic.standard.md`/`epic.dev.md` H1 as `# Epic — <name>` by convention. The `<name>` carries NO leading `Epic` token itself — the `Epic —` prefix is added by this render convention, not part of the name.
+    - **Split/epic folder rule.** The `split` intent writes to `docs/storywright/YYYY-MM-DD-HHmm-epic-<slug>/`, where `<slug>` is the epic title (the `<name>` above) slugged per Rule I, **after stripping any leading `Epic —`, `Epic:`, or `Epic ` prefix (case-insensitive) — so the rule is robust whether the caller passes the bare `<name>` or the rendered `# Epic — <name>` H1.** Anti-stutter rationale: the rendered epic H1 reads `# Epic — <name>`; slugging that H1 without stripping the prefix first would produce `<slug> = epic-<name-slug>`, which combined with the `-epic-` infix yields a doubled `…-epic-epic-<name-slug>/` folder name. Strip first (no-op on a bare `<name>`), then slug: `# Epic — New dashboard` → stripped `New dashboard` → Rule I → `new-dashboard` → folder `…-epic-new-dashboard/` (no stutter).
     - Use the `Write` tool to persist both files to that folder (create it if it does not exist):
       - `story.standard.md` — PM-facing CommonMark, no technical detail
       - `story.dev.md` — dev-facing CommonMark, full technical detail (file paths, imports, technical edge cases, full DoD with commands)

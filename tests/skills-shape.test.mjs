@@ -135,7 +135,8 @@ test("every skill declares inputs and outputs", async () => {
 });
 
 // P1.2 — every story-producing top-level skill must declare the standard + dev
-// duo. Children/flows use a `story-<N>.` prefix; epic.md / flow-summary.md /
+// duo. Children/items use an `NN-<slug>.` prefix; the epic (now itself a
+// standard/dev duo, `epic.standard.md` + `epic.dev.md`) / flow-summary.md /
 // context are exempt. Catches output-contract drift (e.g. a skill stuck on
 // 1-file output or regressing to a 3-file trio).
 test("all story-producing skills declare the standard/dev duo", async () => {
@@ -158,7 +159,7 @@ test("all story-producing skills declare the standard/dev duo", async () => {
 // (rule 3): no command-level DoD, no obvious file paths / imports. The dev
 // file is exempt. Guards the PM↔dev separation against future regressions.
 test("golden PM outputs carry no technical leakage", async () => {
-  const dir = join(REPO, "examples/outputs/google-login");
+  const dir = join(REPO, "examples/outputs/login-google");
   for (const pm of ["story.standard.md"]) {
     const text = await readFile(join(dir, pm), "utf8");
     for (const re of LEAK_PM) {
@@ -208,10 +209,61 @@ function assertNoPmLeakage(text, label, { leak = LEAK_PM, banned = BANNED_PM } =
   }
 }
 
+// Pipe-table regex — deliberately NOT folded into the shared LEAK_PM array:
+// backlog-summary.md (a roll-up) legitimately contains pipe tables (Dependency
+// matrix, V audit, Backlog Estimate), so banning them pack-wide would break
+// that golden's own shape. This regex is scoped to epic.standard.md only,
+// where a leaked dependency-matrix table is the #1 stated leak risk (REQ-11.1)
+// and no legitimate pipe table should ever appear in a PM file (rule 3 / the
+// story-formatter "no pipe tables" rule already applies to story.standard.md;
+// this closes the same gap for the epic PM file).
+const PIPE_TABLE_RE = /^\s*\|.*\|/m;
+
+// Positively assert the four REQ-01 epic PM sections exist (closes the
+// vacuous-pass gap: a file with zero required sections and zero banned tokens
+// would otherwise pass assertNoPmLeakage trivially).
+const EPIC_PM_REQUIRED_SECTIONS = [
+  "Objective / Hypothesis",
+  "Business Outcome(s)",
+  "In / Out of scope",
+  "Core complexity",
+];
+
+function assertEpicPmShape(text, label) {
+  assertNoPmLeakage(text, label);
+  assert.ok(
+    !PIPE_TABLE_RE.test(text),
+    `${label} leaks a pipe table (dependency-matrix leak risk, REQ-11.1)`
+  );
+  const sections = extractH2Sections(text);
+  for (const required of EPIC_PM_REQUIRED_SECTIONS) {
+    assert.ok(
+      sections.some((s) => s.toLowerCase() === required.toLowerCase()),
+      `${label} must have the required H2 section "${required}" (REQ-01)`
+    );
+  }
+}
+
+// REQ-11.6 — the only mechanically-testable slice of "lightweight NOT full
+// SAFe" (REQ-01 §2/§5). "Business-language only" / "1-3 sentence hypothesis"
+// stay non-testable design prose, not asserted here.
+const SAFE_APPARATUS_TOKENS = [
+  /WSJF/i,
+  /Portfolio Kanban/i,
+  /Lean Business Case/i,
+  /leading indicator/i,
+  /funding/i,
+  /go\/no-go/i,
+];
+
+// Child-naming pattern shared by split and batch goldens (REQ-05/REQ-11.3/.5).
+const CHILD_NAME_RE = /^\d{2}-[a-z0-9-]+\.(standard|dev)\.md$/;
+const STORY_N_RE = /story-\d/;
+
 // story.standard.md must not contain any section from the Rule H banned list.
 test('story.standard.md contains no banned sections', async () => {
   const content = await readFile(
-    join(REPO, 'examples/outputs/google-login/story.standard.md'), 'utf8'
+    join(REPO, 'examples/outputs/login-google/story.standard.md'), 'utf8'
   );
   const sections = extractH2Sections(content);
   for (const b of BANNED_PM) {
@@ -225,7 +277,7 @@ test('story.standard.md contains no banned sections', async () => {
 // story.standard.md must contain the mandatory **Summary:** inline line.
 test('story.standard.md contains Summary inline', async () => {
   const content = await readFile(
-    join(REPO, 'examples/outputs/google-login/story.standard.md'), 'utf8'
+    join(REPO, 'examples/outputs/login-google/story.standard.md'), 'utf8'
   );
   assert.ok(
     content.includes('**Summary:**'),
@@ -237,7 +289,7 @@ test('story.standard.md contains Summary inline', async () => {
 // variants (CA-01, Criterio 1, Escenario 1). Guards the numbering-drift bug.
 test('story.standard.md uses the AC-N numbering scheme only', async () => {
   const content = await readFile(
-    join(REPO, 'examples/outputs/google-login/story.standard.md'), 'utf8'
+    join(REPO, 'examples/outputs/login-google/story.standard.md'), 'utf8'
   );
   assert.ok(
     /\*\*AC-\d+:/.test(content),
@@ -256,7 +308,7 @@ test('story.standard.md uses the AC-N numbering scheme only', async () => {
 // prefix (Historia 00 —, Story 3:, HU-01 -). Guards the title-prefix bug.
 test('story.standard.md title carries no story-number prefix', async () => {
   const content = await readFile(
-    join(REPO, 'examples/outputs/google-login/story.standard.md'), 'utf8'
+    join(REPO, 'examples/outputs/login-google/story.standard.md'), 'utf8'
   );
   const title = content.match(/^# (.+)$/m)?.[1] ?? '';
   assert.ok(
@@ -267,63 +319,46 @@ test('story.standard.md title carries no story-number prefix', async () => {
 
 // ── story-batch golden fixture tests ─────────────────────────────────────────
 // These tests assert the shape of committed golden outputs for story-batch.
-// The golden lives at examples/outputs/backlog-grooming/ and is delivered in PR2.
-// All assertions here compile and are registered now; assertions that reference
-// the golden directory will be skipped (not fail) when the directory is absent,
-// so the test suite passes in PR1 and enforces shape in PR2+.
-//
-// Known-failing-until-PR2: assertions (a)–(f) below all depend on the golden
-// directory existing. They are skipped (directory-absent guard) until PR2 lands.
+// The golden lives at examples/outputs/backlog-grooming/ and is regenerated to
+// the NN-<slug> convention (epic-first-class) — items are named
+// 01-resumen-carrito-pagar / 02-codigo-descuento-checkout. The golden exists
+// now and the shape is strict — no directory-absent skip guard.
 
 const BATCH_GOLDEN = join(REPO, "examples/outputs/backlog-grooming");
+const BATCH_ITEMS = ["01-resumen-carrito-pagar", "02-codigo-descuento-checkout"];
 
-async function batchGoldenExists() {
-  try {
-    await stat(BATCH_GOLDEN);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-// (a) Duo parity: story-1 and story-2 have both suffixes; story-3 has none.
-test("story-batch: duo parity for items 1–3 in golden", async () => {
-  if (!(await batchGoldenExists())) return; // skip until PR2
+// (a) Duo parity: both batch items have both suffixes; no third pair exists
+// (the "story-3 must not exist" SPLIT-RECOMMENDED intent, generalized to
+// "no 03-* child pair exists" under the new naming).
+test("story-batch: duo parity for items 1–2 in golden, no 03-* pair", async () => {
   const SUFFIXES = ["standard.md", "dev.md"];
-  for (const n of [1, 2]) {
+  for (const item of BATCH_ITEMS) {
     for (const suffix of SUFFIXES) {
-      await stat(join(BATCH_GOLDEN, `story-${n}.${suffix}`));
+      await stat(join(BATCH_GOLDEN, `${item}.${suffix}`));
     }
   }
-  // story-3 is SPLIT RECOMMENDED — no files should exist
-  for (const suffix of SUFFIXES) {
-    let exists = false;
-    try {
-      await stat(join(BATCH_GOLDEN, `story-3.${suffix}`));
-      exists = true;
-    } catch { /* expected */ }
-    assert.ok(!exists, `story-3.${suffix} must not exist (item is SPLIT RECOMMENDED)`);
-  }
+  // Item 3 (payment flow) is SPLIT RECOMMENDED — no 03-* files should exist.
+  const entries = await readdir(BATCH_GOLDEN);
+  assert.ok(
+    !entries.some((e) => /^03-/.test(e)),
+    "no 03-* child pair must exist (item 3 is SPLIT RECOMMENDED)"
+  );
 });
 
-// (b) PM leakage per story: standard.md passes LEAK regex; dev.md matches /npm run /.
+// (b) PM leakage per item: standard.md passes LEAK regex; dev.md matches /npm run /.
 test("story-batch: PM files carry no technical leakage", async () => {
-  if (!(await batchGoldenExists())) return; // skip until PR2
-  for (const n of [1, 2]) {
-    for (const pm of [`story-${n}.standard.md`]) {
-      const text = await readFile(join(BATCH_GOLDEN, pm), "utf8");
-      for (const re of LEAK_PM) {
-        assert.ok(!re.test(text), `${pm} leaks technical detail matching ${re}`);
-      }
+  for (const item of BATCH_ITEMS) {
+    const text = await readFile(join(BATCH_GOLDEN, `${item}.standard.md`), "utf8");
+    for (const re of LEAK_PM) {
+      assert.ok(!re.test(text), `${item}.standard.md leaks technical detail matching ${re}`);
     }
-    const dev = await readFile(join(BATCH_GOLDEN, `story-${n}.dev.md`), "utf8");
-    assert.match(dev, /npm run /, `story-${n}.dev.md should contain command-level DoD`);
+    const dev = await readFile(join(BATCH_GOLDEN, `${item}.dev.md`), "utf8");
+    assert.match(dev, /npm run /, `${item}.dev.md should contain command-level DoD`);
   }
 });
 
 // (c) backlog-summary.md: no LEAK, no BANNED H2, contains **Cohesion:**, contains ## Dependency matrix.
 test("story-batch: backlog-summary.md shape", async () => {
-  if (!(await batchGoldenExists())) return; // skip until PR2
   const text = await readFile(join(BATCH_GOLDEN, "backlog-summary.md"), "utf8");
   // A summary aggregates stories: no per-story Estimate section exists to ban.
   assertNoPmLeakage(text, "backlog-summary.md", {
@@ -341,42 +376,52 @@ test("story-batch: backlog-summary.md shape", async () => {
   );
 });
 
-// (d) AC-N scheme in story-1.standard.md.
-test("story-batch: story-1.standard.md uses AC-N numbering scheme", async () => {
-  if (!(await batchGoldenExists())) return; // skip until PR2
-  const content = await readFile(join(BATCH_GOLDEN, "story-1.standard.md"), "utf8");
+// (d) AC-N scheme in the first batch item.
+test("story-batch: 01-resumen-carrito-pagar.standard.md uses AC-N numbering scheme", async () => {
+  const content = await readFile(join(BATCH_GOLDEN, "01-resumen-carrito-pagar.standard.md"), "utf8");
   assert.ok(
     /\*\*AC-\d+:/.test(content),
-    "story-1.standard.md must label acceptance criteria as **AC-N:**"
+    "01-resumen-carrito-pagar.standard.md must label acceptance criteria as **AC-N:**"
   );
   const FORBIDDEN_AC_LABELS = [/\bCA-\d/, /\bCriterio\s+\d/i, /\bEscenario\s+\d/i];
   for (const re of FORBIDDEN_AC_LABELS) {
     assert.ok(
       !re.test(content),
-      `story-1.standard.md uses a forbidden AC label matching ${re}`
+      `01-resumen-carrito-pagar.standard.md uses a forbidden AC label matching ${re}`
     );
   }
 });
 
-// (e) No story-number title prefix in story-1.standard.md.
-test("story-batch: story-1.standard.md title carries no story-number prefix", async () => {
-  if (!(await batchGoldenExists())) return; // skip until PR2
-  const content = await readFile(join(BATCH_GOLDEN, "story-1.standard.md"), "utf8");
+// (e) No story-number title prefix in the first batch item.
+test("story-batch: 01-resumen-carrito-pagar.standard.md title carries no story-number prefix", async () => {
+  const content = await readFile(join(BATCH_GOLDEN, "01-resumen-carrito-pagar.standard.md"), "utf8");
   const title = content.match(/^# (.+)$/m)?.[1] ?? "";
   assert.ok(
     !/^(historia|story|hu|us)\s*[-–—:]?\s*\d+/i.test(title.trim()),
-    `story-1.standard.md title must not be prefixed with a story number: "${title}"`
+    `01-resumen-carrito-pagar.standard.md title must not be prefixed with a story number: "${title}"`
   );
 });
 
-// (f) **Summary:** inline in story-1.standard.md.
-test("story-batch: story-1.standard.md contains Summary inline", async () => {
-  if (!(await batchGoldenExists())) return; // skip until PR2
-  const content = await readFile(join(BATCH_GOLDEN, "story-1.standard.md"), "utf8");
+// (f) **Summary:** inline in the first batch item.
+test("story-batch: 01-resumen-carrito-pagar.standard.md contains Summary inline", async () => {
+  const content = await readFile(join(BATCH_GOLDEN, "01-resumen-carrito-pagar.standard.md"), "utf8");
   assert.ok(
     content.includes("**Summary:**"),
-    "story-1.standard.md must contain **Summary:** inline line"
+    "01-resumen-carrito-pagar.standard.md must contain **Summary:** inline line"
   );
+});
+
+// (g) Batch-naming parity (REQ-11.5, strict — the batch golden is now
+// regenerated to the NN-<slug> shape, so this assertion matches the split
+// golden's strictness with no existence guard).
+test("story-batch: item filenames match NN-<slug> naming, none match story-\\d", async () => {
+  const entries = await readdir(BATCH_GOLDEN);
+  const childFiles = entries.filter((e) => /\.(standard|dev)\.md$/.test(e));
+  assert.ok(childFiles.length > 0, "batch golden must contain at least one child file");
+  for (const file of childFiles) {
+    assert.match(file, CHILD_NAME_RE, `${file} must match ^\\d{2}-[a-z0-9-]+\\.(standard|dev)\\.md$`);
+    assert.ok(!STORY_N_RE.test(file), `${file} must not match story-\\d`);
+  }
 });
 
 // ── story-refine amendment mode ──────────────────────────────────────────────
@@ -654,45 +699,63 @@ test("AskUserQuestion signal token survives the agnostic-with-example rewording"
 });
 
 // ── story-split golden fixture tests ─────────────────────────────────────────
-// The golden lives at examples/outputs/story-split-oversized/ (epic.md +
-// story-{1,2}.standard.md + story-{1,2}.dev.md). Mirrors the amendment/
-// conflict golden tests above: same PM-leakage guard, same duo-parity check,
-// same AC-numbering scheme. epic.md is metadata, not a story pair, so it only
-// gets the PM-leakage guard (per AGENTS.md convention: "epic.md is the single
-// exception — epic metadata, not a story").
+// The golden lives at examples/outputs/story-split-oversized/ (epic duo —
+// epic.standard.md + epic.dev.md — plus one NN-<slug> duo per child:
+// 01-ver-filtrar-dashboard.{standard,dev}.md, 02-buscar-dashboard.{standard,
+// dev}.md). The epic is retired as a single epic.md file (epic-first-class) —
+// it is now itself a PM↔dev duo like every story, so it gets the SAME
+// no-leakage guard as the children's PM files, not a lesser exemption.
 
 const SPLIT_GOLDEN = join(REPO, "examples/outputs/story-split-oversized");
+const SPLIT_CHILDREN = ["01-ver-filtrar-dashboard", "02-buscar-dashboard"];
 
-test("story-split-oversized golden: epic.md and both PM files carry no technical leakage", async () => {
-  const epic = await readFile(join(SPLIT_GOLDEN, "epic.md"), "utf8");
-  assertNoPmLeakage(epic, "split golden epic.md");
-  for (const n of [1, 2]) {
-    const text = await readFile(join(SPLIT_GOLDEN, `story-${n}.standard.md`), "utf8");
-    assertNoPmLeakage(text, `split golden story-${n}.standard.md`);
+// REQ-11.1 — strengthened: pipe-table regex + positive required-section
+// assertion, closing the vacuous-pass gap where zero-banned-tokens +
+// zero-required-sections would otherwise pass green.
+test("story-split-oversized golden: epic.standard.md and both PM files carry no technical leakage", async () => {
+  const epicStandard = await readFile(join(SPLIT_GOLDEN, "epic.standard.md"), "utf8");
+  assertEpicPmShape(epicStandard, "split golden epic.standard.md");
+  for (const child of SPLIT_CHILDREN) {
+    const text = await readFile(join(SPLIT_GOLDEN, `${child}.standard.md`), "utf8");
+    assertNoPmLeakage(text, `split golden ${child}.standard.md`);
   }
 });
 
-test("story-split-oversized golden: duo parity for story-1 and story-2", async () => {
-  const SUFFIXES = ["standard.md", "dev.md"];
-  for (const n of [1, 2]) {
-    for (const suffix of SUFFIXES) {
-      await stat(join(SPLIT_GOLDEN, `story-${n}.${suffix}`));
-    }
+// REQ-11.2 — epic duo present, no bare epic.md.
+test("story-split-oversized golden: epic duo present, no bare epic.md", async () => {
+  await stat(join(SPLIT_GOLDEN, "epic.standard.md"));
+  await stat(join(SPLIT_GOLDEN, "epic.dev.md"));
+  let bareEpicExists = false;
+  try {
+    await stat(join(SPLIT_GOLDEN, "epic.md"));
+    bareEpicExists = true;
+  } catch { /* expected */ }
+  assert.ok(!bareEpicExists, "epic.md must not exist — replaced by the epic.standard.md/epic.dev.md duo");
+});
+
+// REQ-11.3 — child naming: NN-<slug> pattern, no story-\d.
+test("story-split-oversized golden: child files match NN-<slug> naming, none match story-\\d", async () => {
+  const entries = await readdir(SPLIT_GOLDEN);
+  const childFiles = entries.filter((e) => /\.(standard|dev)\.md$/.test(e) && !e.startsWith("epic."));
+  assert.ok(childFiles.length > 0, "split golden must contain at least one child file");
+  for (const file of childFiles) {
+    assert.match(file, CHILD_NAME_RE, `${file} must match ^\\d{2}-[a-z0-9-]+\\.(standard|dev)\\.md$`);
+    assert.ok(!STORY_N_RE.test(file), `${file} must not match story-\\d`);
   }
 });
 
-test("story-split-oversized golden: story-1 and story-2 use AC-N numbering scheme", async () => {
+test("story-split-oversized golden: children use AC-N numbering scheme", async () => {
   const FORBIDDEN_AC_LABELS = [/\bCA-\d/, /\bCriterio\s+\d/i, /\bEscenario\s+\d/i];
-  for (const n of [1, 2]) {
-    const content = await readFile(join(SPLIT_GOLDEN, `story-${n}.standard.md`), "utf8");
+  for (const child of SPLIT_CHILDREN) {
+    const content = await readFile(join(SPLIT_GOLDEN, `${child}.standard.md`), "utf8");
     assert.ok(
       /\*\*AC-\d+:/.test(content),
-      `story-${n}.standard.md must label acceptance criteria as **AC-N:**`
+      `${child}.standard.md must label acceptance criteria as **AC-N:**`
     );
     for (const re of FORBIDDEN_AC_LABELS) {
       assert.ok(
         !re.test(content),
-        `story-${n}.standard.md uses a forbidden AC label matching ${re}`
+        `${child}.standard.md uses a forbidden AC label matching ${re}`
       );
     }
     const acNumbers = [...content.matchAll(/\*\*AC-(\d+):/g)]
@@ -701,15 +764,63 @@ test("story-split-oversized golden: story-1 and story-2 use AC-N numbering schem
     assert.deepEqual(
       acNumbers,
       [1],
-      `split children carry a single AC-1 each (split narrows scope to one flow per child); story-${n}.standard.md found ${JSON.stringify(acNumbers)}`
+      `split children carry a single AC-1 each (split narrows scope to one flow per child); ${child}.standard.md found ${JSON.stringify(acNumbers)}`
     );
   }
 });
 
-test("story-split-oversized golden: story-1 and story-2 dev files carry technical detail and Estimate", async () => {
-  for (const n of [1, 2]) {
-    const dev = await readFile(join(SPLIT_GOLDEN, `story-${n}.dev.md`), "utf8");
-    assert.match(dev, /npm run /, `story-${n}.dev.md should contain command-level DoD`);
-    assert.match(dev, /## Estimate/, `story-${n}.dev.md should contain ## Estimate`);
+test("story-split-oversized golden: children dev files carry technical detail and Estimate", async () => {
+  for (const child of SPLIT_CHILDREN) {
+    const dev = await readFile(join(SPLIT_GOLDEN, `${child}.dev.md`), "utf8");
+    assert.match(dev, /npm run /, `${child}.dev.md should contain command-level DoD`);
+    assert.match(dev, /## Estimate/, `${child}.dev.md should contain ## Estimate`);
   }
+});
+
+// REQ-11.4 — Assumed-outcome banner, scoped to the Business Outcome(s)
+// section body (not a bare whole-file substring check).
+test("story-split-oversized golden: epic.standard.md Business Outcome(s) section carries the Assumed banner", async () => {
+  const epicStandard = await readFile(join(SPLIT_GOLDEN, "epic.standard.md"), "utf8");
+  const sections = extractH2Sections(epicStandard);
+  const outcomeHeading = sections.find((s) => s.toLowerCase().startsWith("business outcome"));
+  assert.ok(outcomeHeading, "epic.standard.md must have a Business Outcome(s) H2 section");
+  const sectionMatch = epicStandard.match(
+    new RegExp(`^## ${outcomeHeading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\n([\\s\\S]*?)(?=^## |$(?![\\s\\S]))`, "m")
+  );
+  assert.ok(sectionMatch, "Business Outcome(s) section body must be extractable");
+  assert.match(
+    sectionMatch[1],
+    /⚠️ Assumed:/,
+    "Business Outcome(s) section body must contain the ⚠️ Assumed: marker"
+  );
+});
+
+// REQ-11.6 — no full-SAFe vocabulary creep (NEW). The only mechanically
+// testable slice of "lightweight NOT full SAFe" (REQ-01 §2/§5).
+test("story-split-oversized golden: epic.standard.md contains no SAFe-apparatus tokens", async () => {
+  const epicStandard = await readFile(join(SPLIT_GOLDEN, "epic.standard.md"), "utf8");
+  for (const re of SAFE_APPARATUS_TOKENS) {
+    assert.ok(!re.test(epicStandard), `epic.standard.md must not contain a SAFe-apparatus token matching ${re}`);
+  }
+});
+
+// REQ-03 — dev↔value bridge: epic.dev.md references children by NN-<slug>
+// identifier (or stable ordinal), never "Story 1"/"Story 2".
+test("story-split-oversized golden: epic.dev.md references children by NN-<slug>, not Story N", async () => {
+  const epicDev = await readFile(join(SPLIT_GOLDEN, "epic.dev.md"), "utf8");
+  assert.ok(
+    !/\bStory\s+[12]\b/.test(epicDev),
+    "epic.dev.md must not reference children as 'Story 1'/'Story 2' — use NN-<slug> identifiers"
+  );
+  for (const child of SPLIT_CHILDREN) {
+    assert.ok(
+      epicDev.includes(child),
+      `epic.dev.md must reference child "${child}" by its NN-<slug> identifier`
+    );
+  }
+  assert.match(
+    epicDev,
+    /moves Outcome/i,
+    "epic.dev.md dev↔value bridge must reference a Business Outcome by identifier (e.g. 'moves Outcome A')"
+  );
 });

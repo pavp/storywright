@@ -1,6 +1,6 @@
 # Código de descuento en el checkout — Dev Notes
 
-> Developer supplement to `story-2.standard.md`. Holds all technical detail stripped from the PM-facing files (rule 3a).
+> Developer supplement to `02-codigo-descuento-checkout.standard.md`. Holds all technical detail stripped from the PM-facing files (rule 3a).
 
 ## Technical Considerations
 - Validar y aplicar el código vía `POST /cart/{cartId}/discount` con body `{ "code": "PROMO123" }`; respuesta incluye `discountAmount`, `discountType` (`percent` | `fixed`), `newTotal`.
