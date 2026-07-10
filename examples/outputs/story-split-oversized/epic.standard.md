@@ -1,5 +1,7 @@
 # Epic — New dashboard
 
+**Summary:** Give users a single dashboard to view, filter, and search their records in one place, so they find what they need without paging through every record manually.
+
 ## Objective / Hypothesis
 For a user who needs to review their data regularly, a single-page dashboard that lets them view, filter, and search their records delivers faster access to the information they need — without paging through every record manually.
 

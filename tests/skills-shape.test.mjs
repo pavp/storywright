@@ -721,6 +721,29 @@ test("story-split-oversized golden: epic.standard.md and both PM files carry no 
   }
 });
 
+// REQ-04c (split-determinism) — epic.standard.md must contain the mandatory
+// **Summary:** inline line, mirroring the story-Summary assertion above
+// (~L278). Fails if the line is absent, guarding against the golden silently
+// regressing to no Summary (which is what it shipped with before this fix).
+test("story-split-oversized golden: epic.standard.md contains Summary inline", async () => {
+  const content = await readFile(join(SPLIT_GOLDEN, "epic.standard.md"), "utf8");
+  assert.ok(
+    content.includes("**Summary:**"),
+    "epic.standard.md must contain **Summary:** inline line"
+  );
+});
+
+// Permitted companion (REQ-04c) — epic.dev.md carries the same mandate per
+// base step 8's "both output files" wording, now reconciled to cover the
+// epic duo explicitly.
+test("story-split-oversized golden: epic.dev.md contains Summary inline", async () => {
+  const content = await readFile(join(SPLIT_GOLDEN, "epic.dev.md"), "utf8");
+  assert.ok(
+    content.includes("**Summary:**"),
+    "epic.dev.md must contain **Summary:** inline line"
+  );
+});
+
 // REQ-11.2 — epic duo present, no bare epic.md.
 test("story-split-oversized golden: epic duo present, no bare epic.md", async () => {
   await stat(join(SPLIT_GOLDEN, "epic.standard.md"));

@@ -75,6 +75,10 @@ If you are reading this through the router skill, treat every rule below as non-
     - The dependency map IS the union of those text matches. **Do not add deps "you sense" without a Given citation.**
     - Affected child's INVEST `Independent` becomes `PARTIAL · depends on <Ci>`.
     - Parent epic / flow-summary file lists explicit build order (topological sort of the matrix).
+    - **Deterministic tie-break (makes the build order a total order).** The topological sort of the NxN matrix is the PRIMARY key. When two or more children are equally unblocked at the same dependency depth, break the tie with these keys, in order, using ONLY signals already computable from the matrix and the Split Plan (no new signal is introduced):
+      - **Secondary — ascending dependency fan-in.** Count how many other children depend ON each tied child (its fan-in in the matrix). The child with FEWER dependents sorts earlier.
+      - **Tertiary — Split-Plan proposal order.** If fan-in is still tied, sort by the child's row order in the approved Split Plan table (`#### split` step 3) — the stable, author-declared order.
+      - V-audit strength (PASS/WEAK) MUST NOT be used as a tie-break key — it is a qualitative verdict, not an ordering signal.
     - If a dep is real but no Given mentions it, rewrite the child's Given to make it explicit, then re-run the match. Intuition-based deps are forbidden.
 
 11. **Per-child V audit (rule C).** After any split-style output, for each candidate child run a one-line test:
@@ -155,6 +159,8 @@ Every storywright output that needs a filesystem-safe slug derived from a title 
    - **Positional constraint on the conjunction drop (mechanical, not phonetic):** `e`/`u`/`y`/`o`/`and`/`or`/`&` are dropped ONLY when the token is a standalone coordinating token strictly BETWEEN two other retained tokens — i.e. it is neither the first nor the last token of the title, and both immediate neighbors are retained content words. A single-letter token `e` or `u` that is the FIRST or LAST token of the title is NEVER dropped under this rule. This replaces any phonetic condition ("`e` before an /i/-sound word") with a mechanical position check.
 4. **Preserve source word order.** Do not reorder tokens after dropping stop-words.
 5. **Truncate to ≤5 words**, counted AFTER all drops in step 3.
+
+**Enumeration cap-exemption (applies ONLY to step 5, POST-drop, POST-word-order).** When the title is a coordinated enumeration whose listed items ARE the child's actual scope (e.g. "Export to CSV, PDF, and Excel" — the formats named are what the child does), the ≤5-word cap in step 5 MUST NOT silently drop enumerated items. Keep the full enumeration in the slug instead of truncating it away. This exemption modifies step 5's truncation ONLY: it does not re-order tokens (step 4 still holds), does not change the drop-list (step 3's articles/prepositions list is unchanged), and does not touch the positional conjunction-drop rule (`e`/`u`/`y`/`o`/`and`/`or`/`&`, step 3, still fires exactly as specified). Example: "Export to CSV, PDF, and Excel" → drop preposition `to` and conjunction `and` (interior, positional rule intact) → preserve word order → `export-csv-pdf-excel` (4 words after drops, so the cap does not even engage here; for a longer enumeration that WOULD exceed 5 words after drops, keep every enumerated item rather than truncate — do not silently drop trailing items like "Excel").
 
 **Cross-path impact.** This rule is cited, not restated, by every consumer:
 - single-story output folder + filenames (Application step 10, below) — previously an inline, single-story-scoped clause; now a citation of Rule I.
@@ -250,6 +256,8 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
 8. **Fill the canonical block** (Use Case + AC + Design Ref + INVEST). Preserve original wording where it was already good. NEVER invent NFR/edge-case/deps sections **in the PM story body** — rule 3 still holds for `story.standard.md`.
 
    **Summary line (mandatory).** Generate `**Summary:**` immediately after the title — one sentence, value-focused, no heading. This line is MANDATORY in both output files. Format: `**Summary:** <sentence>`. Never omit it.
+
+   **Covers the epic duo too.** "Both output files" means every `.standard`/`.dev` pair this skill emits — including the `split` intent's epic duo (`epic.standard.md` + `epic.dev.md`). The epic follows the same PM↔dev split as every story (rule 3a), so it inherits this Summary mandate on the same consistency grounds: `epic.standard.md` and `epic.dev.md` each carry a `**Summary:**` line immediately after the `# Epic — <name>` title, one sentence, PM-safe (business language, no technical detail) in `epic.standard.md`. Never omit it for the epic just because it is not a single story.
 
    The Summary MUST open with WHAT the deliverable is and WHICH problem it solves, in business language. The rule 3 / rule H ban on technical detail (file paths, imports, component/CLI names) does NOT exempt you from explaining the purpose — "no technical names" means no jargon, NOT "no explanation of what it does." Strip the jargon, keep the purpose.
 

@@ -156,16 +156,22 @@ NO `split-plan.md`. The plan lives inside `epic.dev.md`.
 - **Complex** — produce 1–2 learning stories; let usage teach the rest.
 - **Chaotic** — defer splitting; stabilize first.
 
+**Slicing-granularity heuristic (ties child count to the Cynefin domain signal, so the same input reliably yields the same child count).** This sharpens the calibration above — it does not replace it:
+- **Complicated / Obvious signal:** the variations listed in the meta-pattern step below are individually well-understood and enumerable (each is a known problem — e.g. "export to CSV" is a known integration, not an open question) → enumerate ALL of them, one child per variation, bounded by the existing coherence check (step 10 below) and per-child V audit (rule 11).
+- **Complex signal:** unknowns dominate — the variations can be named but their shape, users' actual need, or the right approach is still genuinely uncertain → draft only the **1–2 simplest complete vertical slice(s)** (learning stories) and defer the remaining named variations to `epic.standard.md`'s In/Out-of-scope section. Let real usage of the learning story(s) teach which of the deferred variations to build next, instead of guessing all of them up front.
+- **Chaotic signal:** unchanged — defer splitting entirely, stabilize the situation first.
+- **Explicitly OUT OF SCOPE — no mechanical/numeric Cynefin scorer.** The domain call (Obvious/Complicated/Complex/Chaotic) stays a qualitative judgment made by reading the variations, not an arithmetic classifier. Building a scoring formula would impose false precision on a genuinely qualitative sense-making call; if full mechanization is ever wanted, that is a separate future issue, not part of this heuristic.
+
 **Meta-pattern (every pattern):**
 1. Name the **core complexity** that makes the story big.
 2. List **all variations** of that complexity.
 3. Pick **one variation** as the simplest complete vertical slice.
-4. Each other variation becomes its own story.
+4. Each other variation becomes its own story — but see the slicing-granularity heuristic above: on a Complex signal, only 1–2 variations get drafted as stories now, the rest are named and deferred, not silently authored into extra children.
 
 **Split-specific Application steps** (follow the base Application skeleton for the front-end behaviors — context load, language, persona, passive-goal, gap-check, siblings; split-specific steps inserted after):
 
 1. **Pre-split gate.** Run `references/invest-checklist.md`. Honor STOP conditions above.
-2. **Pattern selection.** Apply catalog in order. Name first fit + core complexity + Cynefin domain.
+2. **Pattern selection.** Apply catalog in order. Name first fit + core complexity + Cynefin domain. **Author each child's title now, from the meta-pattern's variations — do not slug yet.** Each variation named by the meta-pattern step ("each other variation becomes its own story") gets AUTHORED into a business-language child title (per the canonical title rule — no story-number prefix) BEFORE any slug derivation runs. Slugging (Rule I) happens later, in step 6, against these authored titles — never the other way around. Worked example: meta-pattern variation "searching within the dashboard" → authored title `Buscar dentro del dashboard` (the title that later becomes `02-buscar-dashboard` once Rule I slugs it in step 6).
 3. **Draft split plan** as a terminal table (no file yet):
    ```
    ### Split Plan
@@ -179,7 +185,7 @@ NO `split-plan.md`. The plan lives inside `epic.dev.md`.
    ```
 4. **Strategic check before approval:** does the split reveal low-value work we can deprioritize? Are children roughly equal in size?
 5. **STOP and ask the user to approve via the host's interactive clarification mechanism (e.g. `AskUserQuestion` on Claude Code).**
-6. **For each approved child, write the base canonical block, then render via `references/story-formatter.md` to both files** (`NN-<slug>.standard.md` + `NN-<slug>.dev.md`, `NN` = zero-padded build-order ordinal, `<slug>` = the child title per Rule I). The child's enrichment (edge cases, risks, analytics) populates its `NN-<slug>.dev.md` per base step 8b.
+6. **For each approved child, write the base canonical block, then render via `references/story-formatter.md` to both files** (`NN-<slug>.standard.md` + `NN-<slug>.dev.md`, `NN` = zero-padded build-order ordinal, `<slug>` = the child's AUTHORED title from step 2, slugged via Rule I — the title is authored first, THEN slugged; slugging never runs against an un-authored variation name). The child's enrichment (edge cases, risks, analytics) populates its `NN-<slug>.dev.md` per base step 8b.
 7. **Build dependency matrix mechanically (base rule 10).** Render in `epic.dev.md`.
 8. **V audit per child (base rule 11).** Flag merge-upstream candidates in `epic.dev.md`.
 9. **Recursive re-split check.** For each child, run the base deterministic counter. If count ≥2 → recursive split of that child. Surface the tree in `epic.dev.md`.

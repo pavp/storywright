@@ -63,6 +63,8 @@ For each dimension, mark PASS / FAIL and write one sentence of evidence.
    - **E FAILS due to unknowns → `RUN A SPIKE`**. Recommend a 1–2 day time-boxed investigation before splitting.
    - **I, E (size-driven), or S FAIL → `SPLIT RECOMMENDED`**. Switch to the split intent.
 
+   **T-before-S/E precedence (DECIDED, not an author judgment call).** When **T FAILS simultaneously with S and/or E (size-driven)**, resolve **T FIRST**: refine the untestable ACs in place via the refine intent, THEN re-run this INVEST check and re-evaluate whether a split is still warranted. Rationale: splitting untestable input produces untestable children — making the ACs testable is a precondition for a sound split, not a parallel concern. This precedence is fixed: T always wins the tie against S/E. It does NOT change either verdict's individual target action (T still routes to refine, S/E still routes to split) — it only orders them when both fire at once. The existing hard-stop verdicts outrank this tie-break where they also fire: **V FAILS → `NOT A STORY`** and **N FAILS → `NEEDS REFINEMENT`** are unchanged and still take precedence over T-vs-S/E.
+
 9. Never auto-split here. Output is advisory only.
 
 ## Examples
@@ -79,6 +81,22 @@ For each dimension, mark PASS / FAIL and write one sentence of evidence.
 - T — PASS · Each AC has observable outcomes.
 
 **Verdict:** SPLIT RECOMMENDED
+```
+
+### T-before-S/E precedence (worked example)
+
+```
+### INVEST Check
+- I — PASS · No upstream dependencies.
+- N — PASS · Implementation approach is open.
+- V — PASS · Reduces manual triage time for support agents.
+- E — PASS · Sized within tolerance once scope is fixed.
+- S — FAIL · Story bundles "todo rápido y sin errores" across 4 unrelated flows.
+- T — FAIL · ACs read "todo rápido y sin errores" — no observable outcome, can't test pass/fail.
+
+**Verdict:** NEEDS REFINEMENT (T-before-S/E: resolve T first via the refine
+intent — rewrite ACs with observable outcomes — THEN re-run this check. Only
+after T passes does the S FAIL re-evaluation route to SPLIT RECOMMENDED.)
 ```
 
 ### Bad
