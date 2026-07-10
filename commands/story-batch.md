@@ -14,6 +14,6 @@ Follow the skill's procedure:
 3. Phase 2 — cohesive batch: one shared clarification round (≤4 questions) over the union of items. Disparate batch: per-item clarifications deferred to base step 5.
 4. Phase 3 — per-item pipeline: run base Application steps 3–11 for each confirmed item. Items with pre-split count ≥2 → SPLIT RECOMMENDED (no files, flag in summary, continue). Items with INVEST V = FAIL → NOT A STORY (no files, flag, continue). All other items emit both files `NN-<slug>.{standard,dev}.md` (`NN` = zero-padded 1-based item index, `<slug>` = that item's own title per Rule I).
 5. Phase 4 — cross-item analysis over DRAFTED items only: mechanical NxN dependency matrix, per-story V audit, topological build order.
-6. Phase 5 — emit `backlog-summary.md` (cohesion verdict, INVEST table, dep matrix, V audit, build order, SPLIT RECOMMENDED notes) + `.storywright-context.json`. All files in flat folder `docs/storywright/YYYY-MM-DD-HHmm-batch-<slug>/`.
+6. Phase 5 — emit `backlog-summary.md` (cohesion verdict, INVEST table, dep matrix, V audit, build order, SPLIT RECOMMENDED notes) + `.storywright-context.json`. All files in flat folder `storywright/YYYY-MM-DD-HHmm-batch-<slug>/` (project root).
 
 Output in the input language.

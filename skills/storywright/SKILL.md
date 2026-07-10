@@ -325,7 +325,7 @@ Only items in `DRAFTED` status (step 10 logged) proceed to the Phase 4 matrix.
    - Full justification table stays in `NN-<slug>.dev.md`; only Points + Key Driver appear here.
 
 2. **`.storywright-context.json`** updated per base rule 9 (one file per batch folder). No `clarifications.md` when the host has an interactive clarification mechanism.
-3. **Flat folder structure:** all files in `docs/storywright/YYYY-MM-DD-HHmm-batch-<slug>/` with no subdirectories. Slug derived per Phase 0 rule (first item's feature area, ≤30 chars, lowercase, hyphens).
+3. **Flat folder structure:** all files in `storywright/YYYY-MM-DD-HHmm-batch-<slug>/` (at the project root) with no subdirectories. Slug derived per Phase 0 rule (first item's feature area, ≤30 chars, lowercase, hyphens).
 
 NO `clarifications.md` when the host has an interactive clarification mechanism. NO Edge Cases / NFR sections **in PM files** (they live in `NN-<slug>.dev.md` per base rule 3a). NO per-claim visual tags.
 

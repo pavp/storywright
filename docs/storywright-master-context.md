@@ -171,7 +171,7 @@ input (text|image)
 
 ## 5. User Story Generation System
 
-**How stories are generated.** [FACT] Skill loads → base Application skeleton (§3.8) → canonical Cohn+Gherkin block for PM files → enrichment components populate `story.dev.md` → INVEST verdict → duo rendered to `docs/storywright/YYYY-MM-DD-HHmm-<slug>/`.
+**How stories are generated.** [FACT] Skill loads → base Application skeleton (§3.8) → canonical Cohn+Gherkin block for PM files → enrichment components populate `story.dev.md` → INVEST verdict → duo rendered to `storywright/YYYY-MM-DD-HHmm-<slug>/` (project root).
 
 **Dependencies on repositories/projects.** [FACT] **None.** Verified across all 4 skills (`inputs:` = text/image) and all 11 components (`inputs:` = story-context / domain-hints / etc.; never source-files/workspace/repo).
 
