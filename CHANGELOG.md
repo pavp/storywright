@@ -1,3 +1,24 @@
+## [4.0.0](https://github.com/pavp/storywright/compare/v3.0.0...v4.0.0) (2026-07-10)
+
+### ⚠ BREAKING CHANGES
+
+* split no longer emits epic.md; it emits epic.standard.md +
+epic.dev.md. Split and batch child files are renamed from story-N.* to
+NN-slug.*.
+
+* docs: define epic title construction so the anti-stutter folder rule is self-contained
+
+The split/epic folder rule stripped a leading `Epic —` prefix but never said
+how the epic title is constructed or that it carries no leading Epic token —
+the strip presupposed a title format the rules never defined. Add an explicit
+epic-title-construction step and make the strip robust to both the bare name
+and the rendered `# Epic — <name>` H1. Surfaced by a smoke test of the split
+intent against tests/fixtures/oversized-story.md.
+
+### ✨ Features
+
+* make split epic a PM/dev duo and rename children to NN-slug ([#37](https://github.com/pavp/storywright/issues/37)) ([b08ae38](https://github.com/pavp/storywright/commit/b08ae3839e9d1901e7010497deaf2919d89af4ad))
+
 ## [3.0.0](https://github.com/pavp/storywright/compare/v2.1.3...v3.0.0) (2026-07-09)
 
 ### ⚠ BREAKING CHANGES
