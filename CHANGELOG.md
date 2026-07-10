@@ -1,3 +1,9 @@
+## [4.0.3](https://github.com/pavp/storywright/compare/v4.0.2...v4.0.3) (2026-07-10)
+
+### 📝 Docs
+
+* remove slash-command wrappers, single skill entry point ([#42](https://github.com/pavp/storywright/issues/42)) ([f8e46b9](https://github.com/pavp/storywright/commit/f8e46b96f3d8d449ce736619830d345805679497))
+
 ## [4.0.2](https://github.com/pavp/storywright/compare/v4.0.1...v4.0.2) (2026-07-10)
 
 ### 🐛 Bug Fixes
