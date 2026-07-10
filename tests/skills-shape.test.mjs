@@ -678,14 +678,13 @@ test("story-refine-amendment-conflict golden: Refinement log records conflict ma
 // rewording (portability-level-b, Phase 6) and must retain ≥1 after it.
 // install-unit-shape PR2 (T4.7): the 4 per-skill SKILL.md paths + the
 // _components base path collapse to the single router path + its relocated
-// base reference. commands/story-refine.md and commands/story-generate.md
-// keep their repo filenames unchanged (the storywright- prefix is applied
-// only at install time — AGENTS.md convention 2 / design ADR-5).
+// base reference. The pack ships no slash-command wrappers anymore — intent
+// is auto-detected by the router (and can be pinned inline via an explicit
+// "Intent: X" instruction), so the only sites that must carry the token are
+// the router and its base reference.
 const ASK_USER_QUESTION_SITES = [
   "skills/storywright/SKILL.md",
   "skills/storywright/references/storywright-base.md",
-  "commands/story-refine.md",
-  "commands/story-generate.md",
 ];
 
 test("AskUserQuestion signal token survives the agnostic-with-example rewording", async () => {

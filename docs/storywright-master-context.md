@@ -45,12 +45,14 @@ Terminology is normalized in §12 (Glossary).
 
 **Main workflows / intent surface.** [FACT] One install unit, routed by intent:
 
-| Intent | Trigger condition | Slash command |
-|---|---|---|
-| generate | Ambiguous prompt / screenshot / fresh story request | `/storywright-story-generate` |
-| refine | Existing but incomplete/weak story → audit & fill in place | `/storywright-story-refine` |
-| split | Oversize story failing INVEST on I/E/S → epic + children | `/storywright-story-split` |
-| batch | Multi-item backlog → one story per item in a single pass | `/storywright-story-batch` |
+| Intent | Trigger condition |
+|---|---|
+| generate | Ambiguous prompt / screenshot / fresh story request |
+| refine | Existing but incomplete/weak story → audit & fill in place |
+| split | Oversize story failing INVEST on I/E/S → epic + children |
+| batch | Multi-item backlog → one story per item in a single pass |
+
+The pack ships no slash-command wrappers — the router auto-detects intent from the input, and a caller may pin it with an explicit `Intent: <name>` line in the invoking message.
 
 **Target users.** [INFERENCE] Product managers and PM-adjacent roles who live in Claude Code or claude.ai; secondarily engineers who consume `story.dev.md`. Not a coding-agent audience.
 
@@ -100,7 +102,7 @@ Distribution (getting the repo onto disk) is out-of-band: git clone, or skills.s
 
 ### 3.3 Agent orchestration
 
-[INFERENCE] Orchestration is *prose-driven*, not code-driven. A slash-command Markdown file says "Invoke the `storywright` skill. Intent: `<generate|refine|split|batch>`"; Claude Code resolves the one skill, the router's `### Routing` dispatch table confirms or re-derives the intent, reads the matching `references/*.md` files on demand, fuses with user input, and calls the Anthropic API. There is no router *process*, planner, or state machine in this repo — "router" here means the dispatch table inside `SKILL.md`, itself **instructions**, not code; the step-by-step production logic lives in `storywright-base.md`'s Application skeleton.
+[INFERENCE] Orchestration is *prose-driven*, not code-driven. The user invokes the `storywright` skill in plain language (optionally pinning intent with an `Intent: <generate|refine|split|batch>` line); Claude Code resolves the one skill, the router's `### Routing` dispatch table confirms or re-derives the intent, reads the matching `references/*.md` files on demand, fuses with user input, and calls the Anthropic API. There is no router *process*, planner, or state machine in this repo — "router" here means the dispatch table inside `SKILL.md`, itself **instructions**, not code; the step-by-step production logic lives in `storywright-base.md`'s Application skeleton.
 
 ### 3.4 Skills/tools architecture
 
@@ -155,7 +157,7 @@ input (text|image)
 
 **Memory handling.** [FACT] `.storywright-context.json` is the only memory primitive — decision cache, scoped to one run's output folder.
 
-**Routing systems.** [INFERENCE] "Routing" is conditional prose: the pre-split test routes to single-story vs split; `story-generate` recommends `/story-split` at count ≥2; `story-batch` hands multi-item backlogs off to per-item drafting. No code router.
+**Routing systems.** [INFERENCE] "Routing" is conditional prose: the pre-split test routes to single-story vs split; the generate intent recommends the split intent at count ≥2; the batch intent hands multi-item backlogs off to per-item drafting. No code router.
 
 **Tool execution patterns.** [FACT] Skills use `AskUserQuestion` (clarifications, batched ≤4) and `Write` (render files). [INFERENCE] The runtime *additionally* has Read/Grep/Glob available and receives harness-injected context — the source of the ungoverned nuance (§5).
 
@@ -218,7 +220,7 @@ input (text|image)
 
 ## 7. UX & Product Positioning
 
-**Onboarding.** [FACT] `git clone` (or `npx skills add` / skills.sh) into the agent's skills directory → restart the agent → slash commands available. [INFERENCE] A single clone/install step, no package registry hop. **A restart is required** for skill changes to take effect — installed-on-disk ≠ loaded-in-session.
+**Onboarding.** [FACT] `git clone` (or `npx skills add` / skills.sh) into the agent's skills directory → restart the agent → the `storywright` skill is available. [INFERENCE] A single clone/install step, no package registry hop. **A restart is required** for skill changes to take effect — installed-on-disk ≠ loaded-in-session.
 
 **Friction points.** [INFERENCE]
 - Restart-to-reload is a mild papercut.
@@ -244,7 +246,7 @@ input (text|image)
 - `tests/skills-shape.test.mjs` — parity + no-leakage golden tests; `tests/validate.test.mjs`.
 - `examples/outputs/login-google/` — committed golden duo. `examples/outputs/story-split-oversized/` — committed split golden (epic duo + 2 child duos).
 
-**Pipelines / execution chains.** [FACT] No install pipeline in-repo — distribution is git/skills.sh, out-of-band. Runtime: slash command → skill+components → LLM provider (knowledge layer; outside repo).
+**Pipelines / execution chains.** [FACT] No install pipeline in-repo — distribution is git/skills.sh, out-of-band. Runtime: user invocation → skill + references → LLM provider (knowledge layer; outside repo).
 
 **Services / adapters / APIs.** [FACT] None in repo. Image intake is via the runtime's native vision, not repo code.
 

@@ -3,7 +3,7 @@
 Generated: 2026-06-19 19:40
 Items: 3
 Drafted: 2 (story pairs emitidas)
-Split recommended: 1 (sin archivos — ejecutar /storywright-story-split por ítem)
+Split recommended: 1 (sin archivos — re-ejecutar storywright con `Intent: split` por ítem)
 
 **Cohesion:** COHESIVE (100%, umbral 60%, driver: área compartida — checkout / carrito / pago)
 
@@ -42,4 +42,4 @@ Alcance: solo ítems DRAFTED (Stories 1 y 2).
 
 ## Notes
 
-- Story 3 (flujo completo de pago): SPLIT RECOMMENDED — pre-split count ≥ 5 (tarjeta, PayPal, transferencia, reintentos, reembolsos son flujos independientes). Ejecutar `/storywright-story-split` sobre este ítem antes del próximo sprint de grooming.
+- Story 3 (flujo completo de pago): SPLIT RECOMMENDED — pre-split count ≥ 5 (tarjeta, PayPal, transferencia, reintentos, reembolsos son flujos independientes). Re-ejecutar storywright con `Intent: split` sobre este ítem antes del próximo sprint de grooming.

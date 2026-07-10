@@ -30,7 +30,7 @@ Detect the intent (Routing below), then follow the base Application skeleton in 
 ### Routing (dispatch)
 
 Precedence when signals overlap (highest first):
-1. Explicit command intent instruction (from a `commands/*.md` wrapper) OR a bare slash token in the message (`/story-split`, `/story-refine`, etc.) — both are explicit intent selection; honor as-is, do NOT re-derive intent. A command wrapper and a slash token cannot disagree in practice (the wrapper IS the slash command's body), so they share rank 1.
+1. Explicit intent instruction in the message — an `Intent: <generate|refine|split|batch>` line OR a bare intent token (`/story-split`, `/story-refine`, etc.). Either one is explicit intent selection; honor as-is, do NOT re-derive intent.
 2. Explicit trigger PHRASE in the user message (natural-language phrase, not a slash token — e.g. "refine this story", "split this story").
 3. Structural signal below.
 

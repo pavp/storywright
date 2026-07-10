@@ -32,25 +32,23 @@ git clone https://github.com/pavp/storywright.git ~/.claude/skills/storywright
 ```
 Swap `~/.claude/skills/` for whatever your agent uses — `~/.cursor/skills/`, `~/.codex/skills/`, `~/.copilot/skills/`, or the universal `~/.agents/skills/`.
 
-Restart your agent so the skills and slash commands are picked up.
+Restart your agent so the skill is picked up.
 
 ## Use
 
-Each skill has a slash command (installed as `/storywright-<skill>`), or you can describe the task in plain language and Claude Code routes it.
+Just describe the task in plain language — the `storywright` skill auto-detects the intent (generate / refine / split / batch) from your input and routes it. Ships no slash commands; if you want to force a particular intent, add an `Intent: <name>` line to your message.
 
 ```
-/storywright-story-generate Permitir login con Google
+Permitir login con Google
 ```
 ```
-/storywright-story-refine
 <paste a half-baked story>
 ```
 ```
-/storywright-story-split
 <paste a story that visibly mixes flows>
 ```
 ```
-/storywright-story-batch
+Intent: batch
 1. Show a cart summary before payment
 2. Apply a discount code at checkout
 3. Handle the full payment flow…
@@ -97,7 +95,7 @@ See the full committed examples under [`examples/outputs/`](./examples/outputs/)
 
 ## Skills
 
-One install unit — `storywright` — routed by intent. Each intent is reachable via its own slash command, `/storywright-<name>`:
+One install unit — `storywright` — routed by intent. The router auto-detects the intent from your input (pin it explicitly with an `Intent: <name>` line if you want to override the detection):
 
 | Intent | When to use |
 |---|---|
