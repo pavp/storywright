@@ -22,7 +22,6 @@ storywright/
 │       ├── SKILL.md          ← router: intent dispatch (generate/refine/split/batch)
 │       ├── references/       ← 11 reference files, read on demand (not a picker unit)
 │       └── templates/        ← story.standard.md / story.dev.md render templates
-├── commands/                 ← slash-command entrypoints for ~/.claude/commands/
 ├── scripts/                  ← validate-skills.mjs + shared lib (no installer)
 └── .github/workflows/        ← CI + release pipeline
 ```
@@ -32,8 +31,8 @@ storywright/
 1. **Adding / editing the skill**
    There is one install unit: `skills/storywright/SKILL.md` (the router) plus its `references/<name>.md` files. Keep frontmatter complete: `name`, `description` (≤200 chars), `trigger`, `intent`, `version`, `inputs`, `outputs`. The router has no `composes:` — instead its body links each `references/<name>.md` it depends on. A `references/*.md` file has no frontmatter and is never a separate picker unit; it travels atomically with `SKILL.md` because skills.sh's `copyDirectory` copies the whole `skills/storywright/` folder recursively. Run `npm run validate` before committing.
 
-2. **Adding / editing a slash command**
-   Create or edit `commands/<name>.md` with frontmatter `description` + `argument-hint`, body invoking the single `storywright` skill with an explicit `Intent: generate|refine|split|batch` instruction (the router honors this as the highest-precedence routing signal and does not re-derive intent from the input). Consumers get commands by cloning/pulling the repo (or via skills.sh) directly into their agent's commands directory (e.g. `~/.claude/commands/storywright-<name>.md`); the `storywright-` prefix in the filename avoids collisions with other packs.
+2. **No slash-command wrappers.**
+   The pack ships a single entry point — the `storywright` skill — and no `commands/*.md` wrappers. The router auto-detects intent from the input (its `### Routing` dispatch), so a separate command file per intent is unnecessary. When a caller wants to pin the intent explicitly, they include an `Intent: generate|refine|split|batch` line in the invoking message; the router honors that as the highest-precedence routing signal and does not re-derive intent. Do not reintroduce a `commands/` directory.
 
 3. **Reference-link integrity is enforced.** Validator (`scripts/validate-skills.mjs`) fails if the router body (or any `references/*.md` body) links a `references/<name>.md` that does not exist, **or if any `references/*.md` file is orphaned** (linked by nothing). There is no `composes:`/orphan-component check anymore — the single skill's own reference graph is the whole composition surface. The five enrichment references (`business-rules`, `edge-cases`, `analytics-events`, `risks-and-dependencies`, `definition-of-done`) feed `story.dev.md` per `storywright-base` rule 3 — never the PM body (except Business Rules, an optional PM section). The `estimation` reference runs after INVEST and feeds `## Estimate` into `story.dev.md` only.
 
@@ -49,14 +48,14 @@ storywright/
 
 ## Skills surface
 
-One install unit, `storywright`, routed by intent. The picker shows exactly one entry; each slash command below is a thin wrapper that pins the intent explicitly:
+One install unit, `storywright`, routed by intent. The picker shows exactly one entry; the router auto-detects the intent from the input (a caller may pin it explicitly with an `Intent: <name>` line in the invoking message):
 
-| Intent | When | Slash command |
-|---|---|---|
-| generate | Ambiguous prompt / screenshot → full story | `/storywright-story-generate` |
-| refine | Existing story → audit + fill gaps in place | `/storywright-story-refine` |
-| split | Oversize story → INVEST-driven epic + children | `/storywright-story-split` |
-| batch | Multi-item backlog → one story per item in a single pass | `/storywright-story-batch` |
+| Intent | When |
+|---|---|
+| generate | Ambiguous prompt / screenshot → full story |
+| refine | Existing story → audit + fill gaps in place |
+| split | Oversize story → INVEST-driven epic + children |
+| batch | Multi-item backlog → one story per item in a single pass |
 
 The 11 reference files under `skills/storywright/references/`, read on demand by the router for every intent (progressive disclosure — never separate picker units):
 - `storywright-base` — shared rulebook (hard rules, canonical shape, PM↔dev split, mechanical pre-split/deps, language detect). Every intent reads this.
@@ -117,6 +116,6 @@ When iterating on the skill, invoke it against fixtures:
 - `tests/fixtures/oversized-story.md` — split target
 - `tests/fixtures/backlog-checkout-grooming.md` — batch target
 
-Committed golden outputs live under `examples/outputs/<slug>/` (the duo: `story.standard.md` + `story.dev.md`; the split golden emits an epic duo — `epic.standard.md` + `epic.dev.md` — plus one duo per child, children named `NN-<slug>.{standard,dev}.md`). `tests/skills-shape.test.mjs` asserts the PM file carries no technical leakage. If you change the skill's behavior, also update its golden outputs and the matching slash command body in `commands/<name>.md`.
+Committed golden outputs live under `examples/outputs/<slug>/` (the duo: `story.standard.md` + `story.dev.md`; the split golden emits an epic duo — `epic.standard.md` + `epic.dev.md` — plus one duo per child, children named `NN-<slug>.{standard,dev}.md`). `tests/skills-shape.test.mjs` asserts the PM file carries no technical leakage. If you change the skill's behavior, also update its golden outputs.
 
 **Golden-folder-naming exemption.** `examples/outputs/` folder names (e.g. `story-split-oversized`, `backlog-grooming`) are stable illustrative identifiers, exempt from the runtime `YYYY-MM-DD-HHmm-<type>-<slug>/` folder-naming rule — the golden folder is not renamed to a date+`-epic-<slug>` form even though its CONTENTS follow the new epic-duo + `NN-<slug>` shape.

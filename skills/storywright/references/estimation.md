@@ -78,7 +78,7 @@ No citation means no adjustment. Use the bucket as-is.
 If the final point value is 13, append this advisory after the `## Estimate` section:
 
 ```
-> ⚠️ Consider splitting: a 13-point story signals high complexity. Run `/storywright-story-split` to explore children — approval required before splitting.
+> ⚠️ Consider splitting: a 13-point story signals high complexity. Re-run storywright with `Intent: split` to explore children — approval required before splitting.
 ```
 
 This is advisory only. Never auto-split. Never change the point value.
