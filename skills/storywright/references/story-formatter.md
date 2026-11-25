@@ -40,6 +40,7 @@ Apply silently — no log entry needed for heading-level corrections.
    - Lists: `- item`, `1. item`
    - Callouts: `> ⚠️ **Assumed:** …`
    - Strip all technical detail (see audience table above)
+   - **No log.** Never append the Generation / Refinement / Split log to PM files; it lives in `story.dev.md` only.
    - **No pipe tables.** PM files MUST NOT contain pipe-table Markdown (`| col | col |` rows). Render any tabular content as lists instead — Jira Cloud does not autoformat Markdown tables on paste.
    - **DoD projection:** when rendering the Definition of Done block in `story.standard.md`, strip `[ ]` from each item — emit `- ` plain bullets, not `- [ ]` checkboxes. Jira Cloud does not autoformat task-list syntax into interactive checkboxes; plain bullets paste cleanly. The dev file keeps `- [ ]` unchanged.
 2. Render `story.dev.md` (dev-facing) using CommonMark:
@@ -47,7 +48,7 @@ Apply silently — no log entry needed for heading-level corrections.
    - Technical Considerations section (file paths, imports, API calls)
    - Edge Cases section (null checks, error states, browser constraints)
    - DoD includes CLI commands and file-level criteria; uses `- [ ]` checkboxes
-   - Refinement log includes technical changes
+   - Refinement log includes technical changes (the log is rendered in the dev file only — never in `story.standard.md`)
 3. Section model for PM files = **core + optional (non-technical)**.
 
    **Core (always emit, in this order):**

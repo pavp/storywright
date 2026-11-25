@@ -26,10 +26,3 @@
 1. La búsqueda opera sobre el conjunto de registros ya filtrado en la vista de ver y filtrar el dashboard, no sobre el dataset completo — busca dentro de lo que el usuario ya está viendo.
 
 > ⚠️ **Assumed:** la búsqueda es sobre el contenido visible de las columnas principales, no búsqueda de texto completo dentro de campos no mostrados en la tabla (auto-inferido; confirmar alcance de búsqueda con el equipo de producto).
-
----
-
-*Split log*
-- INVEST Verdict: READY
-- Independence: PARTIAL · depends on ver y filtrar el dashboard (rule 10 — AC-1 asume que el dashboard ya está cargado y filtrado)
-- Split desde "Build the new dashboard" — pre-split count original = 8; este hijo cubre la búsqueda de texto libre.

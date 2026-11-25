@@ -218,7 +218,7 @@ Mechanical counter. Apply the table — do NOT eyeball:
 - [link or path]
 - visual notes: [...]
 
-#### <Generation | Refinement | Split> log (≤3 lines; ≤5 if SPLIT verdict)
+#### <Generation | Refinement | Split> log (≤3 lines; ≤5 if SPLIT verdict; dev file only)
 - INVEST Verdict: <READY | SPLIT RECOMMENDED | NEEDS REFINEMENT | NOT A STORY>
 - [other changes]
 ```
@@ -306,7 +306,7 @@ NOTHING else. No NFR block. No Edge Cases enumeration. No Dependencies prose. No
     - Write `.storywright-context.json` to the same folder.
     - Never ask whether to save — always write both story files and the context JSON.
 
-11. **Log** ≤3 bullets (≤5 if SPLIT) appended at story end. Log type label is host-specific (Generation / Refinement / Split).
+11. **Log** ≤3 bullets (≤5 if SPLIT) appended at the end of the dev file (`story.dev.md` / `NN-<slug>.dev.md`) only — never in the PM file (`*.standard.md`). Log type label is host-specific (Generation / Refinement / Split).
 
 ## What each intent adds on top of this base
 
