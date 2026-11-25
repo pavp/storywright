@@ -257,7 +257,7 @@ If the PM replies with an override, honor it and re-announce the new mode before
 - **DISPARATE batch:** defer clarifications to per-item base step 5. Only infrastructure-level answers (output language, naming conventions, technical stack) are shared across items; content answers (persona, goal, AC specifics) stay per-item.
 
 **Phase 3 — Per-item pipeline.** For each confirmed item (1-based index N):
-1. Run base Application steps 3–11 verbatim (persona, passive-goal check, gap-check, pre-split count, canonical block, rule H audit, dev enrichment, INVEST, render duo, log).
+1. Run base Application steps 3–11 verbatim (persona, passive-goal check, gap-check, pre-split count, canonical block, rule H audit, dev enrichment, INVEST, render duo, log). Step 10 renders into the batch run folder resolved once (base step 10 run-folder rule) — never derive a per-item folder.
 2. **Per-item filename slug (NEW — batch has no per-item slug before this rule).** Derive `<slug>` by applying Rule I to THIS item's own title (not the folder slug from Phase 0, which stays feature-area-only). Use filename prefix `NN-<slug>.` where `NN` is the zero-padded 1-based item index (all items share one flat batch folder).
 3. **Pre-split ≥2:** mark item as `SPLIT RECOMMENDED`, skip drafting the canonical block, emit no files. Continue to the next item.
 4. **INVEST V = FAIL:** mark item as `NOT A STORY`, emit no files. Continue to the next item.
@@ -325,7 +325,7 @@ Only items in `DRAFTED` status (step 10 logged) proceed to the Phase 4 matrix.
    - Full justification table stays in `NN-<slug>.dev.md`; only Points + Key Driver appear here.
 
 2. **`.storywright-context.json`** updated per base rule 9 (one file per batch folder). No `clarifications.md` when the host has an interactive clarification mechanism.
-3. **Flat folder structure:** all files in `storywright/YYYY-MM-DD-HHmm-batch-<slug>/` (at the project root) with no subdirectories. Slug derived per Phase 0 rule (first item's feature area, ≤30 chars, lowercase, hyphens).
+3. **Flat folder structure:** all files in `storywright/YYYY-MM-DD-batch-<slug>/` (at the project root, resolved once per the base step 10 run-folder rule) with no subdirectories. Slug derived per Phase 0 rule (first item's feature area, ≤30 chars, lowercase, hyphens).
 
 NO `clarifications.md` when the host has an interactive clarification mechanism. NO Edge Cases / NFR sections **in PM files** (they live in `NN-<slug>.dev.md` per base rule 3a). NO per-claim visual tags.
 
