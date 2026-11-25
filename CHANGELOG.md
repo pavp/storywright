@@ -1,3 +1,9 @@
+## [4.0.5](https://github.com/pavp/storywright/compare/v4.0.4...v4.0.5) (2026-11-25)
+
+### 🐛 Bug Fixes
+
+* pin one date-only output folder per run ([#44](https://github.com/pavp/storywright/issues/44)) ([098a125](https://github.com/pavp/storywright/commit/098a1259ffc3d59abdc90d946d1d69cb1b957dd0))
+
 ## [4.0.4](https://github.com/pavp/storywright/compare/v4.0.3...v4.0.4) (2026-11-25)
 
 ### 🐛 Bug Fixes
