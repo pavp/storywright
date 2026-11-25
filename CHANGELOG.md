@@ -1,3 +1,9 @@
+## [4.0.4](https://github.com/pavp/storywright/compare/v4.0.3...v4.0.4) (2026-11-25)
+
+### 🐛 Bug Fixes
+
+* keep generation log out of PM story files ([#43](https://github.com/pavp/storywright/issues/43)) ([8537add](https://github.com/pavp/storywright/commit/8537add58fcb6a95f982b40943ecacfeb6973ba5))
+
 ## [4.0.3](https://github.com/pavp/storywright/compare/v4.0.2...v4.0.3) (2026-07-10)
 
 ### 📝 Docs
