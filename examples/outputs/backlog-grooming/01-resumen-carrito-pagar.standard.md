@@ -37,10 +37,3 @@
 2. Si el stock de un artículo cae a cero entre que se añadió al carrito y se abre el checkout, el artículo aparece marcado como no disponible e impide continuar al pago.
 
 > ⚠️ **Assumed:** persona = comprador autenticado o invitado que ya tiene artículos en el carrito (auto-inferido del contexto de checkout; confirmar si aplica también a flujo de guest checkout).
-
----
-
-*Generation log*
-- INVEST Verdict: READY
-- Persona auto-inferida (comprador) — marcada Assumed en PM files.
-- Pre-split count = 1 (un flujo de visualización del carrito) → single-story path.

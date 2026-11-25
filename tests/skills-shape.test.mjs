@@ -172,6 +172,20 @@ test("golden PM outputs carry no technical leakage", async () => {
   assert.match(dev, /## Estimate/, "story.dev.md should contain ## Estimate");
 });
 
+// PM files must not carry the Generation/Refinement/Split log; it lives in the dev file only.
+test("golden PM outputs carry no generation/refinement/split log", async () => {
+  const root = join(REPO, "examples/outputs");
+  const pmFiles = (await readdir(root, { recursive: true })).filter((f) => f.endsWith(".standard.md"));
+  assert.ok(pmFiles.length > 0, "expected at least one .standard.md golden");
+  for (const f of pmFiles) {
+    const text = await readFile(join(root, f), "utf8");
+    assert.ok(
+      !/^\*(Generation|Refinement|Split) log\*/im.test(text),
+      `${f} must not contain a log block (dev file only)`
+    );
+  }
+});
+
 // Helper: extract H2 heading text from markdown content.
 function extractH2Sections(content) {
   return [...content.matchAll(/^## (.+)$/gm)].map((m) => m[1].trim());

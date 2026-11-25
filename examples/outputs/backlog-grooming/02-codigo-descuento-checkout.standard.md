@@ -38,10 +38,3 @@
 3. El descuento se aplica sobre el subtotal de productos; no aplica sobre gastos de envío ni impuestos.
 
 > ⚠️ **Assumed:** persona = comprador autenticado o invitado en el checkout (auto-inferido del contexto de checkout; confirmar si los descuentos aplican también a guest checkout o requieren cuenta registrada).
-
----
-
-*Generation log*
-- INVEST Verdict: READY
-- Persona auto-inferida (comprador) — marcada Assumed en PM files.
-- Pre-split count = 1 (un flujo de aplicación de código) → single-story path.

@@ -27,10 +27,3 @@
 2. Los filtros aplicados se mantienen mientras el usuario permanece en la sesión del dashboard; se reinician al cerrar sesión.
 
 > ⚠️ **Assumed:** persona = usuario ya autenticado con al menos un rol que le da acceso al dashboard (auto-inferido del prompt "dashboard … para gestionar todo en un solo lugar"; confirmar si aplica también a usuarios sin datos previos).
-
----
-
-*Split log*
-- INVEST Verdict: READY
-- Persona auto-inferida (usuario con datos recurrentes) — marcada Assumed en PM files.
-- Split desde "Build the new dashboard" — pre-split count original = 8; este hijo cubre ver + filtrar.
