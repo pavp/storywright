@@ -860,3 +860,19 @@ test("story-split-oversized golden: epic.dev.md references children by NN-<slug>
     "epic.dev.md dev↔value bridge must reference a Business Outcome by identifier (e.g. 'moves Outcome A')"
   );
 });
+
+// One folder per run: a time component in the folder name splits a run across folders when the minute rolls over.
+test("run output folder is date-only and resolved once per invocation", async () => {
+  const skillDir = join(REPO, "skills/storywright");
+  const refs = (await readdir(join(skillDir, "references"))).map((f) => join("references", f));
+  for (const rel of ["SKILL.md", ...refs]) {
+    const text = await readFile(join(skillDir, rel), "utf8");
+    assert.ok(!/YYYY-MM-DD-HHmm/.test(text), `${rel} still names a time component in the output folder`);
+  }
+  const base = await readFile(join(skillDir, "references/storywright-base.md"), "utf8");
+  assert.match(base, /\*\*Run folder \(resolved once\)\.\*\*/, "base must define the run folder rule");
+  assert.match(base, /append `-2`, `-3`/, "base must define the collision suffix");
+  assert.match(base, /\*\*Refine write-back:\*\*/, "base must define refine write-back");
+  const router = await readFile(join(skillDir, "SKILL.md"), "utf8");
+  assert.match(router, /never derive a per-item folder/, "batch Phase 3 must reuse the pinned batch folder");
+});
